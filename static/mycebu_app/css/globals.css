@@ -23,7 +23,6 @@
 
 body {
     margin: 0;
-    background: var(--bg);
     color: var(--text);
     font-family: 'Poppins', Arial, sans-serif;
     font-size: 16px;
@@ -33,6 +32,7 @@ body {
 
 .wrap {
     min-height: 100svh;
+    box-sizing: border-box;
     display: grid;
     place-items: center;
     padding: 24px;
@@ -47,3 +47,4 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
     padding: 28px;
 }
+
