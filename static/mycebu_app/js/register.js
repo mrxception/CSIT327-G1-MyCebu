@@ -1,14 +1,14 @@
 (function () {
-    const form = document.getElementById('login-form');
-    const email = document.getElementById('email');
     const password = document.getElementById('password');
-    const emailErr = document.getElementById('email-error');
-    const passErr = document.getElementById('password-error');
-    const submitBtn = document.getElementById('submitBtn');
-
     const toggleBtn = document.getElementById('togglePassword');
     const eye = document.getElementById('eye');
     const eyeOff = document.getElementById('eyeOff');
+
+    const confirmPassword = document.getElementById('confirmPassword');
+    const toggleConfirmBtn = document.getElementById('toggleConfirmPassword');
+    const eye2 = document.getElementById('eye2');
+    const eyeOff2 = document.getElementById('eyeOff2');
+
     toggleBtn.addEventListener('click', () => {
         const showing = password.type === 'text';
         password.type = showing ? 'password' : 'text';
@@ -16,35 +16,16 @@
         eyeOff.style.display = showing ? 'none' : '';
     });
 
-    function validate() {
-        let ok = true;
-        if (!email.value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-            emailErr.hidden = false; ok = false;
-        } else emailErr.hidden = true;
+    toggleConfirmBtn.addEventListener('click', () => {
+        const showing = confirmPassword.type === 'text';
+        confirmPassword.type = showing ? 'password' : 'text';
+        eye2.style.display = showing ? '' : 'none';
+        eyeOff2.style.display = showing ? 'none' : '';
+    });
 
-
-        if (!password.value) {
-            passErr.hidden = false; ok = false;
-        } else passErr.hidden = true;
-        return ok;
-    }
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!validate()) return;
-        const original = submitBtn.textContent;
-        submitBtn.textContent = 'Signing in...';
-        submitBtn.disabled = true;
-
-
-        try {
-            await new Promise(r => setTimeout(r, 1200));
-            window.location.href = '/dashboard';
-        } catch (err) {
-            alert('Something went wrong.');
-        } finally {
-            submitBtn.textContent = original;
-            submitBtn.disabled = false;
-        }
+    document.getElementById('login-form').addEventListener('submit', function () {
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Signing in...';
     });
 })();
