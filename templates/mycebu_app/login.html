@@ -22,7 +22,8 @@
                 <h4>your guide to the city</h4>
             </header>
 
-            <form id="login-form" class="space-6" novalidate>
+            <form id="login-form" method="post" class="space-6" novalidate>
+                {% csrf_token %}
                 <div class="field">
                     <label for="email" style="font-weight: 600;">Email Address</label>
                     <div class="input-wrap">
@@ -99,6 +100,13 @@
                     <a href="/register">Sign Up</a>
                 </p>
             </form>
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </div>
+            {% endif %}
         </section>
     </main>
 </body>
