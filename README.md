@@ -1,4 +1,4 @@
-My Naga
+My Cebu
 
 A web platform for Cebu City built with Django and Supabase.
 
