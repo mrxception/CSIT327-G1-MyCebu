@@ -1,6 +1,6 @@
 My Naga
 
-A web platform for Naga City, Cebu built with Django and Supabase.
+A web platform for Cebu City built with Django and Supabase.
 
 Setup
 1. Clone repo and enter folder
