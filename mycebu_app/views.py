@@ -169,7 +169,7 @@ def chat_view(request):
         return JsonResponse({'error': f'Failed to process request: {str(e)}'}, status=500)
 
 def chatbot_page(request):
-    session = supabase.auth.get_session()
-    if not session or not session.user or not session.user.id:
-        return redirect("login")
+    # session = supabase.auth.get_session()
+    # if not session or not session.user or not session.user.id:
+    #     return redirect("login")
     return render(request, 'mycebu_app/test.html')
