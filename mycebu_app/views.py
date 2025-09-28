@@ -1,11 +1,18 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+import json
+import requests
+import re
 from supabase import create_client
 from django.conf import settings
-import time
-import re
+import logging
 
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 def login_view(request):
     if request.method == "POST":
@@ -16,7 +23,6 @@ def login_view(request):
             if not all([email, password]):
                 messages.error(request, "All fields are required.")
                 return redirect("login")
-
 
             if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
                 messages.error(request, "Invalid email format.")
@@ -29,7 +35,7 @@ def login_view(request):
 
             if getattr(response, "user", None) and response.user.id:
                 messages.success(request, "Welcome back, you are now logged in.")
-                return redirect("/")
+                return redirect("/test")
             else:
                 messages.error(request, "Invalid email or password, or email not verified.")
                 return redirect("login")
@@ -76,20 +82,6 @@ def register_view(request):
                 messages.error(request, "Password must contain at least one special character.")
                 return redirect("register")
 
-            existing_email = supabase.table("users").select("id").eq("email", email).execute()
-            if existing_email.data:
-                messages.error(request, "Email already taken.")
-                return redirect("register")
-
-            existing_username = supabase.table("users").select("id").eq("username", username).execute()
-            if existing_username.data:
-                messages.error(request, "Username already taken.")
-                return redirect("register")
-
-            if password != confirm_password:
-                messages.error(request, "Passwords do not match.")
-                return redirect("register")
-
             response = supabase.auth.sign_up({
                 "email": email,
                 "password": password
@@ -97,22 +89,6 @@ def register_view(request):
 
             if not response.user or not response.user.id:
                 messages.error(request, "Failed to create account. Email may already be registered.")
-                return redirect("register")
-
-            user_id = response.user.id
-
-            time.sleep(1)
-
-            user_data = {
-                "id": str(user_id),
-                "email": email,
-                "username": username,
-                "password": password  
-            }
-            insert_result = supabase.table("users").insert(user_data).execute()
-
-            if not insert_result.data:
-                messages.error(request, "Failed to create profile. Please try again.")
                 return redirect("register")
 
             messages.success(request, "Account created successfully. Please check your email to verify.")
@@ -123,3 +99,77 @@ def register_view(request):
             return redirect("register")
 
     return render(request, "mycebu_app/register.html")
+
+@csrf_exempt
+def chat_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    session = supabase.auth.get_session()
+    if not session or not session.user or not session.user.id:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        prompt = data.get('prompt', '').strip()
+
+        if not prompt:
+            return JsonResponse({'error': 'Prompt is required'}, status=400)
+
+        api_url = "https://router.huggingface.co/novita/v3/openai/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "messages": [{"role": "user", "content": prompt}],
+            "model": "deepseek/deepseek-v3-0324",
+            "stream": False
+        }
+
+        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        api_response = response.json()
+
+        bot_message = api_response.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+        success = bool(bot_message)
+
+        if not success or not bot_message:
+            logger.error(f"API failed - HTTP: {response.status_code}, Response: {response.text[:200]}")
+            lower_prompt = prompt.lower()
+            if 'hello' in lower_prompt or 'hi' in lower_prompt:
+                bot_message = "Hello! How can I help you today?"
+            elif 'how are you' in lower_prompt:
+                bot_message = "I'm doing well, thank you for asking! How are you doing?"
+            elif re.search(r'(\d+)\s*\+\s*(\d+)', prompt, re.IGNORECASE):
+                match = re.search(r'(\d+)\s*\+\s*(\d+)', prompt)
+                result = int(match.group(1)) + int(match.group(2))
+                bot_message = f"The answer to {match.group(1)} + {match.group(2)} is {result}."
+            elif re.search(r'(\d+)\s*\-\s*(\d+)', prompt, re.IGNORECASE):
+                match = re.search(r'(\d+)\s*\-\s*(\d+)', prompt)
+                result = int(match.group(1)) - int(match.group(2))
+                bot_message = f"The answer to {match.group(1)} - {match.group(2)} is {result}."
+            elif re.search(r'(\d+)\s*[\*x]\s*(\d+)', prompt, re.IGNORECASE):
+                match = re.search(r'(\d+)\s*[\*x]\s*(\d+)', prompt)
+                result = int(match.group(1)) * int(match.group(2))
+                bot_message = f"The answer to {match.group(1)} × {match.group(2)} is {result}."
+            else:
+                bot_message = "I'm having trouble connecting to my AI brain right now. Can you try asking again?"
+
+        return JsonResponse({
+            'success': True,
+            'message': bot_message
+        })
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API Request Error: {str(e)}")
+        return JsonResponse({'error': f'Failed to process request: {str(e)}'}, status=500)
+    except Exception as e:
+        logger.error(f"General Error: {str(e)}")
+        return JsonResponse({'error': f'Failed to process request: {str(e)}'}, status=500)
+
+def chatbot_page(request):
+    session = supabase.auth.get_session()
+    if not session or not session.user or not session.user.id:
+        return redirect("login")
+    return render(request, 'mycebu_app/test.html')

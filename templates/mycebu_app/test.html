@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f3f4f6; 
+            z-index: -1;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+    <main class="max-w-md mx-auto p-4">
+        <header class="text-center mb-6">
+            <h2 class="text-xl font-medium">Test</h2>
+        </header>
+
+        <div id="chat-container" class="bg-white rounded-lg shadow p-3 h-80 overflow-y-auto mb-4">
+            <div id="chat-messages" class="space-y-2">
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <input
+                type="text"
+                id="user-input"
+                placeholder="Input"
+                class="w-full bg-gray-100 text-gray-800 rounded-lg px-3 py-2 outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+            <button
+                id="send-btn"
+                class="w-full bg-gray-600 text-white font-medium py-2 rounded-lg hover:bg-gray-500 transition-colors duration-200 disabled:opacity-50"
+            >
+                :3
+            </button>
+        </div>
+    </main>
+
+    <script>
+        const chatContainer = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            const userMessage = document.createElement('div');
+            userMessage.className = 'flex justify-end';
+            userMessage.innerHTML = `<div class="bg-indigo-100 text-gray-800 rounded-lg p-2 max-w-[70%]">${message}</div>`;
+            chatContainer.appendChild(userMessage);
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ prompt: message })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'flex justify-start';
+                    errorMessage.innerHTML = `<div class="bg-red-100 text-red-600 rounded-lg p-2 max-w-[70%]">Error: ${data.error}</div>`;
+                    chatContainer.appendChild(errorMessage);
+                    if (data.error === 'Authentication required') {
+                        window.location.href = '/login/';
+                    }
+                } else {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'flex justify-start';
+                    botMessage.innerHTML = `<div class="bg-gray-100 text-gray-800 rounded-lg p-2 max-w-[70%]">${data.message}</div>`;
+                    chatContainer.appendChild(botMessage);
+                }
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            } catch (error) {
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'flex justify-start';
+                errorMessage.innerHTML = `<div class="bg-red-100 text-red-600 rounded-lg p-2 max-w-[70%]">Error: ${error.message}</div>`;
+                chatContainer.appendChild(errorMessage);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

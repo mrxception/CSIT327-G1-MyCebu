@@ -16,6 +16,8 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 # ...existing code...
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
