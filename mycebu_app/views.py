@@ -136,25 +136,7 @@ def chat_view(request):
 
         if not success or not bot_message:
             logger.error(f"API failed - HTTP: {response.status_code}, Response: {response.text[:200]}")
-            lower_prompt = prompt.lower()
-            if 'hello' in lower_prompt or 'hi' in lower_prompt:
-                bot_message = "Hello! How can I help you today?"
-            elif 'how are you' in lower_prompt:
-                bot_message = "I'm doing well, thank you for asking! How are you doing?"
-            elif re.search(r'(\d+)\s*\+\s*(\d+)', prompt, re.IGNORECASE):
-                match = re.search(r'(\d+)\s*\+\s*(\d+)', prompt)
-                result = int(match.group(1)) + int(match.group(2))
-                bot_message = f"The answer to {match.group(1)} + {match.group(2)} is {result}."
-            elif re.search(r'(\d+)\s*\-\s*(\d+)', prompt, re.IGNORECASE):
-                match = re.search(r'(\d+)\s*\-\s*(\d+)', prompt)
-                result = int(match.group(1)) - int(match.group(2))
-                bot_message = f"The answer to {match.group(1)} - {match.group(2)} is {result}."
-            elif re.search(r'(\d+)\s*[\*x]\s*(\d+)', prompt, re.IGNORECASE):
-                match = re.search(r'(\d+)\s*[\*x]\s*(\d+)', prompt)
-                result = int(match.group(1)) * int(match.group(2))
-                bot_message = f"The answer to {match.group(1)} × {match.group(2)} is {result}."
-            else:
-                bot_message = "I'm having trouble connecting to my AI brain right now. Can you try asking again?"
+            bot_message = "I'm having trouble connecting to my AI brain right now. Can you try asking again?"
 
         return JsonResponse({
             'success': True,
