@@ -157,4 +157,4 @@ def chatbot_page(request):
     return render(request, 'mycebu_app/test.html')
 
 def landing_view(request):
-    
+    return render(request, 'mycebu_app/landing.html')
