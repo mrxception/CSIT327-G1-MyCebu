@@ -155,3 +155,6 @@ def chatbot_page(request):
     if not session or not session.user or not session.user.id:
         return redirect("login")
     return render(request, 'mycebu_app/test.html')
+
+def landing_view(request):
+    
