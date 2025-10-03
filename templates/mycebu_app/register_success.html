@@ -1,0 +1,30 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MyCebu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}?">
+    <link rel="stylesheet" href="{% static 'mycebu_app/css/login.css' %}?v=1.6">
+</head>
+
+<body>
+    <main class="wrap">
+        <section class="card">
+            <header>
+                <img src="{% static 'mycebu_app/images/logo.png' %}?v=1.1" alt="MyCebu Logo">
+                <h2 class="title">Email Successfully<span>Verified!</span></h2>
+            </header>
+
+            <div class="space-6" style="text-align: center;">
+                <p class="message">Thank you for veryfying! You can now log in using your credentials.</p>
+            </div>
+                <button id="submitBtn" class="btn" type="submit">Continue to Login</button>
+        </section>
+    </main>
+</body>
+</html>

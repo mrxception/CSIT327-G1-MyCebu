@@ -1,11 +1,9 @@
-/* changed: use min-height and reset margin for proper layout growth */
 body {
     position: relative;
     min-height: 100vh;
     margin: 0;
 }
 
-/* changed: make background fixed and use inset to cover tall pages smoothly */
 body::before {
     content: '';
     position: fixed;
@@ -25,7 +23,6 @@ header {
     text-align: center;
 }
 
-/* changed: fluid font-size so it scales without media queries */
 header h2 span {
     background-image: linear-gradient(120deg, var(--secondary), var(--primary));
     background-clip: text;
@@ -35,14 +32,12 @@ header h2 span {
     margin-left: 8px;
 }
 
-/* changed: use clamp for vertical rhythm */
 header h4 {
     margin-top: clamp(-20px, -2vh, -12px);
     margin-bottom: clamp(28px, 6vh, 50px);
     font-weight: 500;
 }
 
-/* changed: fluid logo size */
 header img {
     width: clamp(40px, 6vw, 56px);
     height: clamp(40px, 6vw, 56px);
@@ -50,15 +45,13 @@ header img {
     margin-bottom: -12px;
 }
 
-/* changed: removed pseudo overlay block on the image to avoid stacking issues */
 header img::before {
     content: none;
 }
 
 .subtitle {
-    margin: 0 0 20px;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .field {
@@ -156,8 +149,8 @@ input[type="text"]:hover {
 }
 
 .checkbox {
-    width: 12px;
-    height: 12px;
+    width: 18px;
+    height: 18px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--bg);
@@ -211,7 +204,6 @@ a:hover {
     background: linear-gradient(120deg, var(--secondary), var(--secondary-600));
     color: white;
     font-weight: 600;
-    font-size: 1.02em;
     cursor: pointer;
     border: 0;
     box-shadow: 0 4px 14px rgba(205, 214, 207, 0.39);
@@ -245,6 +237,24 @@ a:hover {
     margin: 0;
 }
 
+.title {
+    font-size: 1.5rem;
+}
+
+.title span {
+    background-image: linear-gradient(120deg, var(--secondary), var(--primary));
+    background-clip: text;
+    color: transparent;
+    -webkit-background-clip: text;
+    font-size: 1.5rem;
+    margin-left: 4px;
+}
+
+.message {
+    margin-bottom: 30px;
+    font-size: 0.9em;
+}
+
 @media (max-width: 480px) {
     .row {
         align-items: stretch;
@@ -266,6 +276,14 @@ a:hover {
         width: 18px;
         height: 18px;
         font-size: 0.8rem;
+    }
+
+    .title{
+        font-size: 1.25rem;
+    }
+
+    .title span {
+        font-size: 1.25rem;
     }
 }
 
