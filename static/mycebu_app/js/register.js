@@ -4,8 +4,8 @@
     const eye = document.getElementById('eye');
     const eyeOff = document.getElementById('eyeOff');
 
-    const confirmPassword = document.getElementById('confirmPassword');
-    const toggleConfirmBtn = document.getElementById('toggleConfirmPassword');
+    const confirmPassword = document.getElementById('confirm-password');
+    const toggleConfirmBtn = document.getElementById('toggle-confirm-password');
     const eye2 = document.getElementById('eye2');
     const eyeOff2 = document.getElementById('eyeOff2');
 
