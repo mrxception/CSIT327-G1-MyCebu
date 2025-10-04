@@ -158,3 +158,21 @@ def chatbot_page(request):
 
 def landing_view(request):
     return render(request, 'mycebu_app/landing.html')
+
+def register_success_view(request):
+    return render(request, 'mycebu_app/register_success.html')
+
+def password_reset_email_view(request):
+    if request.method == "POST":
+        return redirect("/password-reset-new-password")
+    return render(request, 'mycebu_app/password_reset/email_form.html')
+
+def password_reset_new_password_view(request):
+    if request.method == "POST":
+        return redirect("/password-reset-success")
+    return render(request, 'mycebu_app/password_reset/new_password.html')
+
+def password_reset_success_view(request):
+    if request.method == "POST":
+        return redirect("/login")
+    return render(request, 'mycebu_app/password_reset/reset_success.html')
