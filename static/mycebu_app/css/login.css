@@ -78,6 +78,7 @@ label {
     color: var(--muted);
 }
 
+/*
 input[type="email"],
 input[type="password"],
 input[type="text"] {
@@ -92,11 +93,77 @@ input[type="text"] {
     outline: none;
     transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+*/
+
+input[type="number"],
+input[type="date"] {
+    width: 100%;
+    appearance: none;
+    background: #ebebeb;
+    color: var(--text);
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 12px 12px 40px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}   
+
+.input-info {
+    width: 100%;
+    appearance: none;
+    background: #ebebeb;
+    color: var(--text);
+    border: 0px;
+    border-radius: 10px;
+    padding: 12px 40px 12px 40px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.name {
+    width: 100%;
+    appearance: none;
+    background: #ebebeb;
+    color: var(--text);
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 12px 12px 40px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 input::placeholder {
     color: #6b7280;
     opacity: 0.6;
     font-family: 'Poppins', sans-serif;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #6b7280;
+  opacity: 0.6;
+  font-family: 'Poppins', sans-serif;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.8;
+}
+
+input[type="date"].filled::-webkit-datetime-edit,
+input[type="date"].filled::-webkit-datetime-edit-text,
+input[type="date"].filled::-webkit-datetime-edit-month-field,
+input[type="date"].filled::-webkit-datetime-edit-day-field,
+input[type="date"].filled::-webkit-datetime-edit-year-field {
+  color: #6b7280;
+  opacity: 1;
 }
 
 input[type="email"]:focus,
@@ -107,9 +174,19 @@ input[type="password"]:active,
 input[type="password"]:hover,
 input[type="text"]:focus,
 input[type="text"]:active,
-input[type="text"]:hover {
+input[type="text"]:hover,
+input[type="number"]:focus,
+input[type="number"]:hover,
+input[type="date"]:focus,
+input[type="date"]:hover {
     border-color: var(--border-600);
     box-shadow: 0 0 0 2px var(--secondary);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .toggle {
@@ -176,7 +253,7 @@ input[type="text"]:hover {
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.checkbox input:checked + svg {
+.checkbox input:checked+svg {
     opacity: 1;
 }
 
@@ -255,6 +332,35 @@ a:hover {
     font-size: 0.9em;
 }
 
+/* layout helpers for inline rows that match existing design */
+.grid {
+    display: grid;
+    align-items: center;
+}
+
+.gap-12 {
+    gap: 12px;
+}
+
+.cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 480px) {
+    .cols-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .cols-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 @media (max-width: 480px) {
     .row {
         align-items: stretch;
@@ -278,7 +384,7 @@ a:hover {
         font-size: 0.8rem;
     }
 
-    .title{
+    .title {
         font-size: 1.25rem;
     }
 
