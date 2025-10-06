@@ -50,12 +50,16 @@ def register_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        username = request.POST.get("username")
         confirm_password = request.POST.get("confirm-password")
+        first_name = request.POST.get("first_name")
+        middle_name = request.POST.get("middle_name")
+        last_name = request.POST.get("last_name")
+        age = request.POST.get("age")
+        birthdate = request.POST.get("birthdate")
 
         try:
-            if not all([email, password, username, confirm_password]):
-                messages.error(request, "All fields are required.")
+            if not all([email, password, confirm_password, first_name, last_name]):
+                messages.error(request, "Email, username, password, first name, and last name are required.")
                 return redirect("register")
 
             if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
@@ -82,6 +86,20 @@ def register_view(request):
                 messages.error(request, "Password must contain at least one special character.")
                 return redirect("register")
 
+            if password != confirm_password:
+                messages.error(request, "Passwords do not match.")
+                return redirect("register")
+
+            if age:
+                try:
+                    age = int(age)
+                    if age < 0 or age > 120:
+                        messages.error(request, "Age must be between 0 and 120.")
+                        return redirect("register")
+                except ValueError:
+                    messages.error(request, "Age must be a valid number.")
+                    return redirect("register")
+
             response = supabase.auth.sign_up({
                 "email": email,
                 "password": password
@@ -89,6 +107,25 @@ def register_view(request):
 
             if not response.user or not response.user.id:
                 messages.error(request, "Failed to create account. Email may already be registered.")
+                return redirect("register")
+
+            user_data = {
+                "id": response.user.id,
+                "email": email,
+                "password": password, 
+                "first_name": first_name,
+                "middle_name": middle_name or None,
+                "last_name": last_name,
+                "age": age or None,
+                "birthdate": birthdate or None
+            }
+
+            # Insert into users table
+            result = supabase.table("users").insert(user_data).execute()
+
+            if not result.data:
+                supabase.auth.admin.delete_user(response.user.id)
+                messages.error(request, "Failed to save user data. Please try again.")
                 return redirect("register")
 
             messages.success(request, "Account created successfully. Please check your email to verify.")
