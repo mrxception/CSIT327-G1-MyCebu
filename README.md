@@ -92,7 +92,7 @@ Then open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser ð
 
 | Name                              | Role               | CIT-U Email                            |
 | :-------------------------------- | :-----------------:| --------------------------------------:|
-| Edralyn Rose Bibera               | Product Owner      | edralynrose.bibera                     |
+| Edralyn Rose Bibera               | Product Owner      | edralynrose.bibera@cit.edu                     |
 | Rod Gabrielle Canete              | Business Analyst   | rodgabrielle.canete@cit.edu            |
 | Ronel Atillo                      | Scrum Master       | ronel.atillo@cit.edu                   |
 | Jay Yan Tiongzon                  | Lead Developer     | jayyan.tiongzon@cit.edu                |
