@@ -18,21 +18,6 @@ The MyCebu is a project that aims to develop a centralized, citizen-focused digi
 
 ## Setup & Run
 
-Here’s a cleaner, developer-friendly replacement for your **Setup & Run** section. You can paste this over the old one in your README.
-
----
-
-Perfect — that’s the right approach ✅
-
-You should **never** paste your actual Supabase credentials into the `README.md`.
-Instead, your `.env` section should just show placeholders **and explain how other developers can get their own keys**.
-
-Here’s how your **final, clean, professional version** of the `.env` and setup part should look inside your `README.md`:
-
----
-
-## Setup & Run
-
 ### 1) Clone the repo
 
 ```bash
@@ -84,8 +69,6 @@ SUPABASE_KEY=your-supabase-anon-key-here
    * **anon public key** (under *Project API keys*) → paste into `SUPABASE_KEY`
 5. Save the `.env` file — do **not** commit it to Git.
 
----
-
 ### 5) Apply migrations and run
 
 ```bash
@@ -95,8 +78,6 @@ python manage.py runserver
 
 Then open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser 🎉
 
----
-
 ### Deployment checklist (quick)
 
 * Set `DEBUG=False`
@@ -105,6 +86,7 @@ Then open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser �
 * Set a production `DATABASE_URL` (e.g., Supabase)
 * Configure static files (e.g., `collectstatic`) according to your hosting provider’s guide
 
+---
 
 ## Team Members
 
@@ -116,6 +98,8 @@ Then open **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)** in your browser �
 | Jay Yan Tiongzon                  | Lead Developer     | jayyan.tiongzon@cit.edu                |
 | Franz Raven Sanchez               | Frontend Developer | franzraven.sanchez@cit.edu             |
 | James Michael Siton               | Frontend Developer | jamesmichael.siton@cit.edu             |
+
+---
 
 ## Deployed Link
 
