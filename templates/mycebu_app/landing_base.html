@@ -1,0 +1,66 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyCebu - Government Services</title>
+  <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}">
+  <link rel="stylesheet" href="{% static 'mycebu_app/css/landing2.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="topnav">
+    <div class="nav-container">
+      <div class="logo" style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+
+        <img src="{% static 'mycebu_app/icons/my-cebu-ico.png' %}" alt="Logo" style="width:40px;height:auto;">
+        <div>
+          <h3>MyCebu</h3>
+          <span>Government Services</span>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a class="{% if current_tab == 'home' %}active{% endif %}" href="{% url 'landing_tab' tab='home' %}">Home</a>
+        <a class="{% if current_tab == 'services' %}active{% endif %}" href="{% url 'landing_tab' tab='services' %}">Services</a>
+        <a class="{% if current_tab == 'ordinances' %}active{% endif %}" href="{% url 'landing_tab' tab='ordinances' %}">Ordinances</a>
+        <a class="{% if current_tab == 'directory' %}active{% endif %}" href="{% url 'landing_tab' tab='directory' %}">Directory</a>
+        <a class="{% if current_tab == 'about' %}active{% endif %}" href="{% url 'landing_tab' tab='about' %}">About</a>
+
+        <span class="highlight"></span>
+      </div>
+
+      <div>
+        <a href="{% url 'login' %}" class="sign-in">Sign in</a>
+        <a href="#dashboard" class="dashboard">Dashboard</a>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <a class="{% if current_tab == 'home' %}active{% endif %}" href="{% url 'landing_tab' tab='home' %}">Home</a>
+      <a class="{% if current_tab == 'services' %}active{% endif %}" href="{% url 'landing_tab' tab='services' %}">Services</a>
+      <a class="{% if current_tab == 'ordinances' %}active{% endif %}" href="{% url 'landing_tab' tab='ordinances' %}">Ordinances</a>
+      <a class="{% if current_tab == 'directory' %}active{% endif %}" href="{% url 'landing_tab' tab='directory' %}">Directory</a>
+      <a class="{% if current_tab == 'about' %}active{% endif %}" href="{% url 'landing_tab' tab='about' %}">About</a>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock content %}
+  </main>
+
+  <footer>
+    <p>© 2023 MyCebu Government Services. All rights reserved.</p>
+  </footer>
+
+  <script src="{% static 'mycebu_app/js/header.js' %}" defer></script>
+</body>
+</html>

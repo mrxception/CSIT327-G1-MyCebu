@@ -156,8 +156,18 @@ def chatbot_page(request):
         return redirect("login")
     return render(request, 'mycebu_app/test.html')
 
-def landing_view(request):
-    return render(request, 'mycebu_app/landing.html')
+def landing_view(request, tab='home'):
+    context = {
+        'current_tab': tab,
+        # Placeholder data for other tabs will go here later
+        'services_data': None, 
+    }
+    
+    # We will try to include a template named after the tab (e.g., 'home.html', 'services.html')
+    return render(request, 'mycebu_app/landing.html', context)
+
+#def landing_view(request):
+    #return render(request, 'mycebu_app/landing.html')
 
 def register_success_view(request):
     return render(request, 'mycebu_app/register_success.html')
