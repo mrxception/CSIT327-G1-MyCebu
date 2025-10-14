@@ -1,66 +1,98 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MyCebu - Government Services</title>
   <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}">
-  <link rel="stylesheet" href="{% static 'mycebu_app/css/landing2.css' %}">
+  <link rel="stylesheet" href="{% static 'mycebu_app/css/header.css' %}">
+  {% if current_tab == "home" %}
+  <link rel="stylesheet" href="{% static 'mycebu_app/css/home.css' %}">
+  {% endif %}
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
   <nav class="topnav">
     <div class="nav-container">
       <div class="logo" style="display:flex;align-items:center;gap:10px;">
-        <button class="hamburger" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="mobile-drawer" aria-expanded="false">
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
         </button>
-
         <img src="{% static 'mycebu_app/icons/my-cebu-ico.png' %}" alt="Logo" style="width:40px;height:auto;">
         <div>
           <h3>MyCebu</h3>
           <span>Government Services</span>
         </div>
       </div>
-
       <div class="nav-links">
         <a class="{% if current_tab == 'home' %}active{% endif %}" href="{% url 'landing_tab' tab='home' %}">Home</a>
         <a class="{% if current_tab == 'services' %}active{% endif %}" href="{% url 'landing_tab' tab='services' %}">Services</a>
         <a class="{% if current_tab == 'ordinances' %}active{% endif %}" href="{% url 'landing_tab' tab='ordinances' %}">Ordinances</a>
         <a class="{% if current_tab == 'directory' %}active{% endif %}" href="{% url 'landing_tab' tab='directory' %}">Directory</a>
         <a class="{% if current_tab == 'about' %}active{% endif %}" href="{% url 'landing_tab' tab='about' %}">About</a>
-
         <span class="highlight"></span>
       </div>
-
       <div>
         <a href="{% url 'login' %}" class="sign-in">Sign in</a>
         <a href="#dashboard" class="dashboard">Dashboard</a>
       </div>
     </div>
-
-    <div id="mobile-menu" class="mobile-menu" hidden>
-      <a class="{% if current_tab == 'home' %}active{% endif %}" href="{% url 'landing_tab' tab='home' %}">Home</a>
-      <a class="{% if current_tab == 'services' %}active{% endif %}" href="{% url 'landing_tab' tab='services' %}">Services</a>
-      <a class="{% if current_tab == 'ordinances' %}active{% endif %}" href="{% url 'landing_tab' tab='ordinances' %}">Ordinances</a>
-      <a class="{% if current_tab == 'directory' %}active{% endif %}" href="{% url 'landing_tab' tab='directory' %}">Directory</a>
-      <a class="{% if current_tab == 'about' %}active{% endif %}" href="{% url 'landing_tab' tab='about' %}">About</a>
-    </div>
   </nav>
+
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <aside class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <img class="avatar" src="{% static 'mycebu_app/icons/my-cebu-ico.png' %}" alt="Profile">
+      <div class="who">
+        <strong>Jane Anderson</strong>
+        <span>jane.anderson@email.com</span>
+      </div>
+      <button class="drawer-close" id="drawer-close" aria-label="Close menu">×</button>
+    </div>
+    <nav class="drawer-nav">
+      <a class="item {% if current_tab == 'home' %}active{% endif %}" href="{% url 'landing_tab' tab='home' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+        <span>Home</span>
+      </a>
+      <a class="item {% if current_tab == 'services' %}active{% endif %}" href="{% url 'landing_tab' tab='services' %}">
+        <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+        <span>Services</span>
+      </a>
+      <a class="item {% if current_tab == 'ordinances' %}active{% endif %}" href="{% url 'landing_tab' tab='ordinances' %}">
+        <svg viewBox="0 0 24 24"><path d="M6 2h9l3 3v17a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 4h3l-3-3v3zM7 8h10M7 12h10M7 16h7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Ordinances</span>
+      </a>
+      <a class="item {% if current_tab == 'directory' %}active{% endif %}" href="{% url 'landing_tab' tab='directory' %}">
+        <svg viewBox="0 0 24 24"><path d="M3 5h14a2 2 0 0 1 2 2v11H5a2 2 0 0 1-2-2z"/><path d="M19 5v13a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>
+        <span>Directory</span>
+      </a>
+      <a class="item {% if current_tab == 'about' %}active{% endif %}" href="{% url 'landing_tab' tab='about' %}">
+        <svg viewBox="0 0 24 24"><path d="M12 12v6M12 6h.01" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>About</span>
+      </a>
+    </nav>
+    <div class="drawer-footer">
+      <a class="item" href="#">
+        <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a7.49 7.49 0 0 1-14.8 0"/></svg>
+        <span>Settings</span>
+      </a>
+    </div>
+  </aside>
 
   <main>
     {% block content %}{% endblock content %}
   </main>
-
   <footer>
     <p>© 2023 MyCebu Government Services. All rights reserved.</p>
   </footer>
 
+  <script>
+    
+  </script>
   <script src="{% static 'mycebu_app/js/header.js' %}" defer></script>
 </body>
 </html>
