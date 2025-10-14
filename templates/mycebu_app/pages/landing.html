@@ -1,0 +1,280 @@
+{# templates/mycebu_app/pages/landing.html #}
+{% extends 'mycebu_app/landing_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero" data-loading="true" data-skel="hero">
+  <div class="hero-bg" data-bg="{% static 'mycebu_app/images/hero-bg.jpg' %}"></div>
+
+  <!-- SKELETON -->
+  <div class="section-skeleton">
+    <div class="hero-container">
+      <div class="hero-left">
+        <div class="sk-badge skeleton" style="margin-top:70px;"></div>
+        <div class="sk-title skeleton" style="height:42px;width:48%;"></div>
+        <div class="sk-title skeleton" style="height:52px;width:56%;"></div>
+        <div class="sk-col" style="margin-top:10px;max-width:560px;">
+          <div class="sk-line skeleton" style="width:100%;"></div>
+          <div class="sk-line skeleton" style="width:90%;"></div>
+          <div class="sk-line skeleton" style="width:75%;"></div>
+        </div>
+        <div class="sk-row" style="margin-top:16px;">
+          <div class="sk-chip skeleton"></div>
+          <div class="sk-chip skeleton" style="width:170px;"></div>
+        </div>
+        <div class="sk-row stats" style="margin-top:22px; gap:26px;">
+          <div class="sk-card skeleton" style="width:140px;height:80px;"></div>
+          <div class="sk-card skeleton" style="width:140px;height:80px;"></div>
+          <div class="sk-card skeleton" style="width:140px;height:80px;"></div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="features">
+          <div class="sk-card skeleton" style="display:flex;gap:12px;align-items:flex-start;">
+            <div class="sk-square skeleton"></div>
+            <div class="sk-col" style="flex:1;">
+              <div class="sk-title skeleton" style="width:60%;height:18px;"></div>
+              <div class="sk-line skeleton" style="width:90%;"></div>
+              <div class="sk-line skeleton" style="width:70%;"></div>
+            </div>
+          </div>
+          <div class="sk-card skeleton" style="display:flex;gap:12px;align-items:flex-start;">
+            <div class="sk-square skeleton"></div>
+            <div class="sk-col" style="flex:1;">
+              <div class="sk-title skeleton" style="width:55%;height:18px;"></div>
+              <div class="sk-line skeleton" style="width:88%;"></div>
+              <div class="sk-line skeleton" style="width:66%;"></div>
+            </div>
+          </div>
+          <div class="sk-card skeleton" style="display:flex;gap:12px;align-items:flex-start;">
+            <div class="sk-square skeleton"></div>
+            <div class="sk-col" style="flex:1;">
+              <div class="sk-title skeleton" style="width:62%;height:18px;"></div>
+              <div class="sk-line skeleton" style="width:92%;"></div>
+              <div class="sk-line skeleton" style="width:68%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL CONTENT -->
+  <div class="section-content">
+    <div class="hero-container">
+      <div class="hero-left">
+        <h4 style="margin-top:70px; margin-bottom:-3px;display:inline-block; background:linear-gradient(90deg, #3d92d7, #60b4f9); color:white;padding:8px 16px;border-radius:100px;">
+          Digital Government Services
+        </h4>
+        <h1 style="font-size: 3.3vw;">Your Gateway to</h1>
+        <h1 style="font-size: 3rem; font-weight: bold; background: linear-gradient(90deg, #3d92d7, #63b4f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-top: -15px;">
+          Cebu City Services
+        </h1>
+        <p>Access government services, ordinances, and directories with AI-powered assistance. Available 24/7 for Cebu City residents and businesses.</p>
+
+        <div class="buttons">
+          <button class="btn-primary">Explore Services</button>
+          <button class="btn-secondary">View Ordinances</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <h3>100+</h3>
+            <span>Services Available</span>
+          </div>
+          <div class="stat-item">
+            <h3>24/7</h3>
+            <span>AI Assistance</span>
+          </div>
+          <div class="stat-item">
+            <h3>1M+</h3>
+            <span>Citizens Served</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="features">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <img src="{% static 'mycebu_app/icons/landing-clock-ico.png' %}" alt="24/7 Icon">
+            </div>
+            <div class="feature-content">
+              <h3>24/7 Service Access</h3>
+              <p>Access government services anytime, designed for night shift workers and busy professionals.</p>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <img src="{% static 'mycebu_app/icons/landing-people-ico.png' %}" alt="AI Icon">
+            </div>
+            <div class="feature-content">
+              <h3>AI-Powered Guidance</h3>
+              <p>Get personalized assistance for permits, taxes, and applications with our smart AI assistants.</p>
+            </div>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Centralized Icon">
+            </div>
+            <div class="feature-content">
+              <h3>Centralized Information</h3>
+              <p>All ordinances, policies, and government updates in one accessible platform.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services-section" data-loading="true" data-skel="services">
+  <!-- SKELETON -->
+  <div class="section-skeleton">
+    <div class="services-container">
+      <div class="services-header">
+        <div class="sk-title skeleton" style="height:30px;width:260px;margin:0 auto 8px;"></div>
+        <div class="sk-line skeleton" style="width:60%;margin:0 auto;"></div>
+      </div>
+
+      <div class="services-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
+        {% for _ in "12345678" %}
+        <div class="sk-card skeleton" style="min-height:160px;display:flex;gap:12px;">
+          <div class="sk-square skeleton" style="width:48px;height:48px;margin-top:4px;"></div>
+          <div class="sk-col" style="flex:1;">
+            <div class="sk-title skeleton" style="height:18px;width:70%;"></div>
+            <div class="sk-line skeleton" style="width:95%;"></div>
+            <div class="sk-chip skeleton" style="width:140px;margin-top:8px;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="ai-assistant-section" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:16px;">
+        <div class="sk-col" style="flex:1;">
+          <div class="sk-title skeleton" style="height:20px;width:280px;"></div>
+          <div class="sk-line skeleton" style="width:70%;"></div>
+          <div class="sk-chip skeleton" style="width:180px;margin-top:8px;"></div>
+        </div>
+        <div class="sk-square skeleton" style="width:64px;height:64px;border-radius:16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL CONTENT -->
+  <div class="section-content">
+    <div class="services-container">
+      <div class="services-header">
+        <h2>Government Services</h2>
+        <p>Access all Cebu City government services in one place. Get help from our AI assistant to navigate any process.</p>
+      </div>
+
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Business Permits">
+          </div>
+          <div class="service-content">
+            <h3>Business Permits</h3>
+            <p>Apply for business licenses, permits, and renewals online</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Tax Services">
+          </div>
+          <div class="service-content">
+            <h3>Tax Services</h3>
+            <p>Pay real property tax, business tax, and other city fees</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Building Permits">
+          </div>
+          <div class="service-content">
+            <h3>Building Permits</h3>
+            <p>Construction permits, occupancy certificates, and inspections</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Education Services">
+          </div>
+          <div class="service-content">
+            <h3>Education Services</h3>
+            <p>School enrollment, scholarships, and educational programs</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Health Services">
+          </div>
+          <div class="service-content">
+            <h3>Health Services</h3>
+            <p>Health certificates, medical assistance, and clinic schedules</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Transportation">
+          </div>
+          <div class="service-content">
+            <h3>Transportation</h3>
+            <p>Vehicle registration, parking permits, and traffic violations</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Social Services">
+          </div>
+          <div class="service-content">
+            <h3>Social Services</h3>
+            <p>Senior citizen ID, PWD services, and social programs</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">
+            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Land Services">
+          </div>
+          <div class="service-content">
+            <h3>Land Services</h3>
+            <p>Land titles, surveys, and property documentation</p>
+          </div>
+          <button class="service-btn">Access Service</button>
+        </div>
+      </div>
+
+      <div class="ai-assistant-section">
+        <div class="ai-content">
+          <h3>Need Help Finding a Service?</h3>
+          <p>Our AI assistant can guide you to the right department and requirements.</p>
+          <button class="ai-assistant-btn">Ask AI Assistant</button>
+        </div>
+        <div class="ai-icon">
+          <img src="{% static 'mycebu_app/icons/my-cebu-ico.png' %}" alt="AI Assistant">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}

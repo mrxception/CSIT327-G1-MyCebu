@@ -8,6 +8,7 @@ import re
 from supabase import create_client
 from django.conf import settings
 import logging
+from django.template import TemplateDoesNotExist
 
 supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
@@ -193,18 +194,13 @@ def chatbot_page(request):
         return redirect("login")
     return render(request, 'mycebu_app/test.html')
 
-def landing_view(request, tab='home'):
-    context = {
-        'current_tab': tab,
-        # Placeholder data for other tabs will go here later
-        'services_data': None, 
-    }
-    
-    # We will try to include a template named after the tab (e.g., 'home.html', 'services.html')
-    return render(request, 'mycebu_app/landing.html', context)
-
-#def landing_view(request):
-    #return render(request, 'mycebu_app/landing.html')
+def landing_view(request, tab='landing'):
+    context = {'current_tab': tab, 'services_data': None}
+    template = f"mycebu_app/pages/{tab}.html"
+    try:
+        return render(request, template, context)
+    except TemplateDoesNotExist:
+        return render(request, "mycebu_app/pages/coming_soon.html", context)
 
 def register_success_view(request):
     return render(request, 'mycebu_app/register_success.html')
