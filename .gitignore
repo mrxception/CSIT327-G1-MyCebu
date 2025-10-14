@@ -63,3 +63,5 @@ dmypy.json
 .ipynb_checkpoints
 # Local settings
 local_settings.py
+# Ignore main Django settings
+mycebu_project/settings.py
