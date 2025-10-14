@@ -11,6 +11,31 @@
     <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}?v=1.2">
     <link rel="stylesheet" href="{% static 'mycebu_app/css/login.css' %}?v=1.5">
     <script defer src="{% static 'mycebu_app/js/login.js' %}"></script>
+    <style>
+        .messages {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .message.error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        .message.success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+    </style>
 </head>
 
 <body>
@@ -27,47 +52,37 @@
                 <div class="field">
                     <label for="email" style="font-weight: 600;">Email Address</label>
                     <div class="input-wrap">
-                        <!-- Mail icon -->
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
                             <polyline points="22,6 12,13 2,6" />
                         </svg>
-                        <input class="input-info" id="email" name="email" type="email" placeholder="Enter your email" required />
+                        <input class="input-info" id="email" name="email" type="email" placeholder="Enter your email" value="{{ saved_email }}" required />
                     </div>
                     <p id="email-error" class="error" hidden>Enter a valid email.</p>
                 </div>
 
-
                 <div class="field">
                     <label for="password" style="font-weight: 600;">Password</label>
                     <div class="input-wrap">
-                        <!-- Lock icon -->
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
-
-
                         <input class="input-info" id="password" name="password" type="password" placeholder="Enter your password"
-                            required />
-
-
+                            value="{{ saved_password }}" required />
                         <button type="button" id="togglePassword" class="toggle"
                             aria-label="Toggle password visibility">
-                            <!-- Eye (default) -->
                             <svg id="eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
-                            <!-- Eye off (hidden by JS when not used) -->
                             <svg id="eyeOff" width="18" height="18" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 style="display:none" aria-hidden="true">
-                                <path
-                                    d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-7.94" />
+                                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-7.94" />
                                 <path d="M10.58 10.58a2 2 0 1 0 2.83 2.83" />
                                 <path d="M13.41 6.59a5 5 0 0 1 3.76 3.76" />
                                 <line x1="1" y1="1" x2="23" y2="23" />
@@ -77,11 +92,10 @@
                     <p id="password-error" class="error" hidden>Password is required.</p>
                 </div>
 
-
                 <div class="row">
                     <div class="row-left">
                         <label class="checkbox" aria-label="Remember me">
-                            <input id="remember" name="remember" type="checkbox" />
+                            <input id="remember" name="remember" type="checkbox" {{ remember_checked }} />
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="20 6 9 17 4 12" />
@@ -92,9 +106,7 @@
                     <a href="/password-reset-email">Forgot password?</a>
                 </div>
 
-
                 <button id="submitBtn" class="btn" type="submit">Sign In</button>
-
 
                 <p class="help"><span>Don't have an account?</span>
                     <a href="/register">Sign Up</a>
@@ -103,12 +115,33 @@
             {% if messages %}
             <div class="messages">
                 {% for message in messages %}
-                <li class="message {{ message.tags }}">{{ message }}</li>
+                <div class="message {{ message.tags }}">{{ message }}</div>
                 {% endfor %}
             </div>
             {% endif %}
         </section>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('login-form');
+            const submitBtn = document.getElementById('submitBtn');
+            const rememberCheckbox = document.getElementById('remember');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            rememberCheckbox.addEventListener('change', () => {
+                if (!rememberCheckbox.checked) {
+                    emailInput.value = '';
+                    passwordInput.value = '';
+                }
+            });
+
+            form.addEventListener('submit', () => {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing in...';
+            });
+        });
+    </script>
 </body>
 
 </html>

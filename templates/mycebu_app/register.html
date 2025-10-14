@@ -6,11 +6,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MyCebu</title>
+    <title>Register - MyCebu</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}">
     <link rel="stylesheet" href="{% static 'mycebu_app/css/login.css' %}">
-    <script defer src="{% static 'mycebu_app/js/register.js' %}"></script>
 </head>
 
 <body>
@@ -22,7 +21,11 @@
                 <h4>your guide to the city</h4>
             </header>
 
-            <form id="login-form" method="post" class="space-6" novalidate>
+            {% if errors.general %}
+                <p class="error" style="color: red; text-align: center;">{{ errors.general }}</p>
+            {% endif %}
+
+            <form id="register-form" method="post" class="space-6" novalidate>
                 {% csrf_token %}
                 <div class="field">
                     <label for="email" style="font-weight: 600;">Email Address</label>
@@ -32,9 +35,11 @@
                             <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
                             <polyline points="22,6 12,13 2,6" />
                         </svg>
-                        <input class="input-info" id="email" name="email" type="email" placeholder="Enter your email" required />
+                        <input class="input-info" id="email" name="email" type="email" placeholder="Enter your email" value="{{ request.POST.email }}" required />
                     </div>
-                    <p id="email-error" class="error" hidden>Enter a valid email.</p>
+                    {% if errors.email %}
+                        <p class="error" style="color: red;">{{ errors.email }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="field">
@@ -47,7 +52,7 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input class="name" id="first_name" name="first_name" type="text" placeholder="First name" required />
+                            <input class="name" id="first_name" name="first_name" type="text" placeholder="First name" value="{{ request.POST.first_name }}" required />
                         </div>
 
                         <div class="input-wrap">
@@ -56,7 +61,7 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input class="name" id="middle_name" name="middle_name" type="text" placeholder="Middle name" />
+                            <input class="name" id="middle_name" name="middle_name" type="text" placeholder="Middle name" value="{{ request.POST.middle_name }}" />
                         </div>
 
                         <div class="input-wrap">
@@ -65,11 +70,13 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input class="name" id="last_name" name="last_name" type="text" placeholder="Last name" required />
+                            <input class="name" id="last_name" name="last_name" type="text" placeholder="Last name" value="{{ request.POST.last_name }}" required />
                         </div>
                     </div>
 
-                    <p id="name-error" class="error" hidden>Please enter your name.</p>
+                    {% if errors.name %}
+                        <p class="error" style="color: red;">{{ errors.name }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="field">
@@ -84,7 +91,7 @@
                                 <line x1="8" y1="14" x2="12" y2="14"></line>
                             </svg>
                             <input id="age" name="age" type="number" inputmode="numeric" min="0" max="120"
-                                placeholder="Enter age" />
+                                placeholder="Enter age" value="{{ request.POST.age }}" />
                         </div>
 
                         <div class="input-wrap">
@@ -95,35 +102,31 @@
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
-                            <input id="birthdate" name="birthdate" type="date" placeholder="Birthdate" />
+                            <input id="birthdate" name="birthdate" type="date" placeholder="Birthdate" value="{{ request.POST.birthdate }}" />
                         </div>
                     </div>
+                    {% if errors.age %}
+                        <p class="error" style="color: red;">{{ errors.age }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="field">
                     <label for="password" style="font-weight: 600;">Password</label>
                     <div class="input-wrap">
-                        <!-- Lock icon -->
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
-
-
                         <input class="input-info" id="password" name="password" type="password" placeholder="Enter your password"
                             required />
-
-
                         <button type="button" id="togglePassword" class="toggle"
                             aria-label="Toggle password visibility">
-                            <!-- Eye (default) -->
                             <svg id="eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
-                            <!-- Eye off (hidden by JS when not used) -->
                             <svg id="eyeOff" width="18" height="18" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 style="display:none" aria-hidden="true">
@@ -135,33 +138,38 @@
                             </svg>
                         </button>
                     </div>
-                    <p id="password-error" class="error" hidden>Password is required.</p>
+                    <div id="password-strength" class="progress-bar" style="height: 4px; background: #ddd; margin-top: 8px; border-radius: 2px; overflow: hidden; display: none;">
+                        <div id="strength-bar" style="height: 100%; width: 0%; background: #f00; transition: width 0.3s, background 0.3s;"></div>
+                    </div>
+                    <ul id="password-requirements" style="margin-top: 8px; font-size: 0.875rem; color: #666; display: none;">
+                        <li id="req-length" style="color: #f00;">At least 8 characters</li>
+                        <li id="req-upper" style="color: #f00;">One uppercase letter</li>
+                        <li id="req-lower" style="color: #f00;">One lowercase letter</li>
+                        <li id="req-number" style="color: #f00;">One number</li>
+                        <li id="req-special" style="color: #f00;">One special character</li>
+                    </ul>
+                    {% if errors.password %}
+                        <p class="error" style="color: red;">{{ errors.password }}</p>
+                    {% endif %}
                 </div>
 
                 <div class="field">
                     <label for="confirm-password" style="font-weight: 600;">Confirm Password</label>
                     <div class="input-wrap">
-                        <!-- Lock icon -->
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
-
-
                         <input class="input-info" id="confirm-password" name="confirm-password" type="password"
                             placeholder="Confirm your password" required />
-
-
                         <button type="button" id="toggle-confirm-password" class="toggle"
                             aria-label="Toggle password visibility">
-                            <!-- Eye (default) -->
                             <svg id="eye2" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                                 <circle cx="12" cy="12" r="3" />
                             </svg>
-                            <!-- Eye off (hidden by JS when not used) -->
                             <svg id="eyeOff2" width="18" height="18" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                                 style="display:none" aria-hidden="true">
@@ -173,25 +181,98 @@
                             </svg>
                         </button>
                     </div>
-                    <p id="password-error" class="error" hidden>Password is required.</p>
+                    {% if errors.confirm %}
+                        <p class="error" style="color: red;">{{ errors.confirm }}</p>
+                    {% endif %}
                 </div>
 
                 <button id="submitBtn" class="btn" type="submit">Sign Up</button>
-
 
                 <p class="help"><span>Already have an account?</span>
                     <a href="/login">Sign In</a>
                 </p>
             </form>
-            {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                <li class="message {{ message.tags }}">{{ message }}</li>
-                {% endfor %}
-            </div>
-            {% endif %}
         </section>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('register-form');
+            const submitBtn = document.getElementById('submitBtn');
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirm-password');
+            const strengthContainer = document.getElementById('password-strength');
+            const strengthBar = document.getElementById('strength-bar');
+            const requirementsList = document.getElementById('password-requirements');
+            const reqLength = document.getElementById('req-length');
+            const reqUpper = document.getElementById('req-upper');
+            const reqLower = document.getElementById('req-lower');
+            const reqNumber = document.getElementById('req-number');
+            const reqSpecial = document.getElementById('req-special');
+
+            const togglePassword = document.getElementById('togglePassword');
+            const eye = document.getElementById('eye');
+            const eyeOff = document.getElementById('eyeOff');
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                eye.style.display = type === 'password' ? 'block' : 'none';
+                eyeOff.style.display = type === 'password' ? 'none' : 'block';
+            });
+
+            const toggleConfirm = document.getElementById('toggle-confirm-password');
+            const eye2 = document.getElementById('eye2');
+            const eyeOff2 = document.getElementById('eyeOff2');
+            toggleConfirm.addEventListener('click', () => {
+                const type = confirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmInput.setAttribute('type', type);
+                eye2.style.display = type === 'password' ? 'block' : 'none';
+                eyeOff2.style.display = type === 'password' ? 'none' : 'block';
+            });
+
+            const checkPasswordStrength = (pwd) => {
+                if (pwd.length === 0) {
+                    strengthContainer.style.display = 'none';
+                    requirementsList.style.display = 'none';
+                    return;
+                }
+                strengthContainer.style.display = 'block';
+                requirementsList.style.display = 'block';
+
+                let strength = 0;
+
+                if (pwd.length >= 8) strength++;
+                reqLength.style.color = pwd.length >= 8 ? 'green' : 'red';
+
+                if (/[A-Z]/.test(pwd)) strength++;
+                reqUpper.style.color = /[A-Z]/.test(pwd) ? 'green' : 'red';
+
+                if (/[a-z]/.test(pwd)) strength++;
+                reqLower.style.color = /[a-z]/.test(pwd) ? 'green' : 'red';
+
+                if (/[0-9]/.test(pwd)) strength++;
+                reqNumber.style.color = /[0-9]/.test(pwd) ? 'green' : 'red';
+
+                if (/[!@#$%^&*(),.?\":{}|<>]/.test(pwd)) strength++;
+                reqSpecial.style.color = /[!@#$%^&*(),.?\":{}|<>]/.test(pwd) ? 'green' : 'red';
+
+                const width = (strength / 5) * 100 + '%';
+                let color = '#f00';
+                if (strength <= 2) color = '#f00';
+                else if (strength <= 4) color = '#ff0';
+                else color = '#0f0';
+                strengthBar.style.width = width;
+                strengthBar.style.background = color;
+            };
+
+            passwordInput.addEventListener('input', () => checkPasswordStrength(passwordInput.value));
+
+            const originalText = submitBtn.textContent;
+            form.addEventListener('submit', () => {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Signing up...';
+            });
+        });
+    </script>
 </body>
 
 </html>
