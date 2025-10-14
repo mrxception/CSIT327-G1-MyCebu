@@ -13,6 +13,7 @@ urlpatterns = [
     path('password-reset-new-password/', views.password_reset_new_password_view, name='password_reset_new_password'),
     path('password-reset-success/', views.password_reset_success_view, name='password_reset_success'),
 
+    path('dashboard/', views.dashboard_view, name='dashboard'),
     path('', views.landing_view, {'tab': 'landing'}, name='landing_default'),
     path('<str:tab>/', views.landing_view, name='landing_tab'), 
     # path('logout/', LogoutView.as_view(), name='logout'),

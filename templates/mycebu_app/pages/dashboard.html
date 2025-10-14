@@ -1,0 +1,134 @@
+{# templates/mycebu_app/pages/dashboard.html #}
+{% extends 'mycebu_app/landing_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="dashboard-hero">
+    <div class="dashboard-hero-content">
+        <h4>WELCOME to MyCebu</h4>
+        <h2>{{ user.first_name }} {{ user.last_name }}Raven!</h2>
+    </div>
+</section>
+
+<nav class="dashboard-tabs">
+    <a href="#" class="active">Government Services</a>
+    <a href="#">Announcements</a>
+</nav>
+
+<main class="dashboard-content">
+    <div class="section-content">
+        <div class="services-container">
+        <div class="services-header">
+            <h2>Government Services</h2>
+            <p>Access all Cebu City government services in one place. Get help from our AI assistant to navigate any process.</p>
+        </div>
+
+        <div class="services-grid">
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Business Permits">
+            </div>
+            <div class="service-content">
+                <h3>Business Permits</h3>
+                <p>Apply for business licenses, permits, and renewals online</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Tax Services">
+            </div>
+            <div class="service-content">
+                <h3>Tax Services</h3>
+                <p>Pay real property tax, business tax, and other city fees</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Building Permits">
+            </div>
+            <div class="service-content">
+                <h3>Building Permits</h3>
+                <p>Construction permits, occupancy certificates, and inspections</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Education Services">
+            </div>
+            <div class="service-content">
+                <h3>Education Services</h3>
+                <p>School enrollment, scholarships, and educational programs</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Health Services">
+            </div>
+            <div class="service-content">
+                <h3>Health Services</h3>
+                <p>Health certificates, medical assistance, and clinic schedules</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Transportation">
+            </div>
+            <div class="service-content">
+                <h3>Transportation</h3>
+                <p>Vehicle registration, parking permits, and traffic violations</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Social Services">
+            </div>
+            <div class="service-content">
+                <h3>Social Services</h3>
+                <p>Senior citizen ID, PWD services, and social programs</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+
+            <div class="service-card">
+            <div class="service-icon">
+                <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Land Services">
+            </div>
+            <div class="service-content">
+                <h3>Land Services</h3>
+                <p>Land titles, surveys, and property documentation</p>
+            </div>
+            <button class="service-btn">Access Service</button>
+            </div>
+        </div>
+
+        <div class="ai-assistant-section">
+            <div class="ai-content">
+            <h3>Need Help Finding a Service?</h3>
+            <p>Our AI assistant can guide you to the right department and requirements.</p>
+            <button class="ai-assistant-btn">Ask AI Assistant</button>
+            </div>
+            <div class="ai-icon">
+            <img src="{% static 'mycebu_app/icons/my-cebu-ico.png' %}" alt="AI Assistant">
+            </div>
+        </div>
+        </div>
+    </div>
+    </section>
+</main>
+
+<button class="fab-ai">ai</button>
+
+{% endblock content %}
