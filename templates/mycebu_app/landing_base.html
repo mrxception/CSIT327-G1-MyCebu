@@ -58,6 +58,14 @@
             src="{% if authed_user and authed_user.avatar_url %}{{ authed_user.avatar_url }}{% else %}{% static 'mycebu_app/icons/blank.png' %}{% endif %}"
             alt="Profile">
         </a>
+        <!-- Logout form -->
+        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn"
+            style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem; margin-top: 0.5rem; padding: 0;">
+            Logout
+          </button>
+        </form>
         {% else %}
         <a href="{% url 'login' %}" class="sign-in">Sign in</a>
         <a href="{% url 'register' %}" class="dashboard">Sign Up</a>
