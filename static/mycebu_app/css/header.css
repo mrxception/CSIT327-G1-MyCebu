@@ -18,6 +18,7 @@
   display: flex;
   flex-direction: column;
   line-height: 1.1;
+  text-align: right;
 }
 .topnav .account .who strong { font-weight: 600; font-size: 14px; }
 .topnav .account .who span { color: var(--muted); font-size: 12px; }
@@ -229,6 +230,7 @@ body.menu-open .hamburger .bar { width: 24px; }
     gap: .75rem;
   }
   .topnav .account .who { display: none; }
+  .topnav .account .avatar-link{ display: none; }
   .nav-links { display: none !important; }
   .hamburger { display: inline-flex !important; }
   .logo { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
