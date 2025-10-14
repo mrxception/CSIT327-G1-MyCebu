@@ -1,0 +1,20 @@
+      body {
+          font-family: 'Inter', sans-serif;
+      }
+      .tab-content {
+          display: none;
+      }
+      .tab-content.active {
+          display: block;
+      }
+      /* Styles for view/edit mode fields */
+      .profile-view-field {
+          min-height: 42px; /* Match input height */
+          padding: 0.5rem 1rem;
+          display: flex;
+          align-items: center;
+          color: #1f2937; /* gray-800 */
+          background-color: #f9fafb; /* gray-50 */
+          border: 1px solid #d1d5db; /* gray-300 */
+          border-radius: 0.5rem;
+      }

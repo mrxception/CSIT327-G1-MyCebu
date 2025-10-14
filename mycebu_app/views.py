@@ -249,3 +249,7 @@ def dashboard_view(request):
     # This context variable is what your template needs
     context = {'current_tab': 'dashboard'}
     return render(request, 'mycebu_app/pages/dashboard.html', context)
+
+def profile_view(request):
+    return render(request, 'mycebu_app/pages/profile.html')
+
