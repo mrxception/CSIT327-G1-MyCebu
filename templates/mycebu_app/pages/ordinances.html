@@ -1,0 +1,72 @@
+{# templates/mycebu_app/pages/ordinances.html #}
+{% extends 'mycebu_app/landing_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="tab-content-section" style="padding: 50px 0; min-height: 70vh;" data-loading="true" data-skel="ordinances">
+  <!-- SKELETON -->
+  <div class="section-skeleton">
+    <div class="ordinances-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+      <div class="ordinances-header" style="text-align: center; margin-bottom: 40px;">
+        <div class="sk-title skeleton" style="height: 36px; width: 360px; margin: 0 auto 10px;"></div>
+        <div class="sk-line skeleton" style="width: 60%; height: 14px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="ordinance-search" style="margin-bottom: 30px; text-align: center;">
+        <div style="display:inline-flex; gap:10px; width:70%; max-width:680px; justify-content:center;">
+          <div class="skeleton" style="height: 44px; flex:1; border-radius: 6px;"></div>
+          <div class="skeleton" style="height: 44px; width: 140px; border-radius: 6px;"></div>
+        </div>
+      </div>
+
+      <ul class="ordinance-list" style="list-style: none; padding: 0;">
+        {% for _ in "123456" %}
+        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
+          <div class="sk-title skeleton" style="height: 20px; width: 60%;"></div>
+          <div class="sk-line skeleton" style="height: 12px; width: 30%; margin-top: 6px;"></div>
+          <div class="sk-line skeleton" style="height: 12px; width: 90%; margin-top: 8px;"></div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- REAL CONTENT -->
+  <div class="section-content">
+    <div class="ordinances-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+      <div class="ordinances-header" style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.5rem; color: #3d92d7;">Cebu City Ordinances</h1>
+        <p style="color: #666;">Official and consolidated list of city laws, resolutions, and local legislation.</p>
+      </div>
+
+      <div class="ordinance-search" style="margin-bottom: 30px; text-align: center;">
+        <form action="{% url 'landing_tab' tab='ordinances' %}" method="get" style="display:inline-flex; gap:10px; width:70%; max-width:680px;">
+          <input type="text" name="q" placeholder="Search by topic or number..." 
+                style="padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 5px;">
+          <button type="submit" style="padding: 10px 20px; background-color: #3d92d7; color: white; border: none; border-radius: 5px; cursor: pointer;">Search</button>
+        </form>
+      </div>
+
+      <ul class="ordinance-list" style="list-style: none; padding: 0;">
+        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
+          <h3 style="margin-top: 0; font-size: 1.2rem;">Ordinance No. 2345 (Traffic and Mobility)</h3>
+          <p style="color: #888; font-size: 0.9rem;">**Enacted:** January 15, 2023</p>
+          <p>Regulating the speed and flow of vehicles within the city proper to alleviate traffic congestion.</p>
+        </li>
+        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
+          <h3 style="margin-top: 0; font-size: 1.2rem;">Ordinance No. 2346 (Waste Management)</h3>
+          <p style="color: #888; font-size: 0.9rem;">**Enacted:** March 1, 2023</p>
+          <p>Implementing mandatory waste segregation at the source and penalizing non-compliance.</p>
+        </li>
+        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
+          <h3 style="margin-top: 0; font-size: 1.2rem;">Ordinance No. 2347 (Digital Citizen ID)</h3>
+          <p style="color: #888; font-size: 0.9rem;">**Enacted:** May 20, 2023</p>
+          <p>Establishing the electronic MyCebu Citizen ID for streamlined government transactions.</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}

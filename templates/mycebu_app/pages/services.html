@@ -1,0 +1,74 @@
+{# templates/mycebu_app/pages/services.html #}
+{% extends 'mycebu_app/landing_base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="tab-content-section" style="padding: 50px 0;" data-loading="true" data-skel="services-all">
+  <!-- SKELETON -->
+  <div class="section-skeleton">
+    <div class="services-container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+      <div class="services-header" style="text-align: center; margin-bottom: 40px;">
+        <div class="sk-title skeleton" style="height: 36px; width: 380px; margin: 0 auto 10px;"></div>
+        <div class="sk-line skeleton" style="width: 70%; height: 14px; margin: 0 auto;"></div>
+      </div>
+
+      <div class="service-filters" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 40px;">
+        <div class="sk-chip skeleton" style="width: 130px; height: 40px;"></div>
+        <div class="sk-chip skeleton" style="width: 160px; height: 40px;"></div>
+        <div class="sk-chip skeleton" style="width: 120px; height: 40px;"></div>
+        <div class="sk-chip skeleton" style="width: 110px; height: 40px;"></div>
+      </div>
+
+      <div class="service-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        {% for _ in "123456" %}
+        <div class="sk-card skeleton" style="min-height: 160px;">
+          <div class="sk-title skeleton" style="height: 20px; width: 60%;"></div>
+          <div class="sk-line skeleton" style="height: 14px; width: 95%; margin-top: 10px;"></div>
+          <div class="sk-line skeleton" style="height: 14px; width: 70%; margin-top: 6px;"></div>
+          <div class="sk-chip skeleton" style="height: 32px; width: 150px; margin-top: 12px;"></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL CONTENT -->
+  <div class="section-content">
+    <div class="services-container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+      <div class="services-header" style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 2.5rem; color: #3d92d7;">All Government Services</h1>
+        <p style="color: #666;">A comprehensive directory of all services offered by the Cebu City Government. Use the links below to navigate.</p>
+      </div>
+
+      <div class="service-filters" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 40px;">
+        <button style="padding: 10px 20px; border: 1px solid #ccc; background-color: #f0f0f0; border-radius: 5px;">Business</button>
+        <button style="padding: 10px 20px; border: 1px solid #ccc; background-color: #f0f0f0; border-radius: 5px;">Health & Social</button>
+        <button style="padding: 10px 20px; border: 1px solid #ccc; background-color: #f0f0f0; border-radius: 5px;">Permits</button>
+        <button style="padding: 10px 20px; border: 1px solid #ccc; background-color: #f0f0f0; border-radius: 5px;">Taxes</button>
+      </div>
+
+      <div class="service-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <div class="service-list-card" style="border: 1px solid #eee; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h3>Business Permit Application</h3>
+          <p>Start, renew, or update your business registration documents.</p>
+          <a href="#" style="color: #3d92d7; text-decoration: none;">View Details →</a>
+        </div>
+        <div class="service-list-card" style="border: 1px solid #eee; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h3>Real Property Tax Payment</h3>
+          <p>Access your tax records and pay city taxes online.</p>
+          <a href="#" style="color: #3d92d7; text-decoration: none;">View Details →</a>
+        </div>
+        <div class="service-list-card" style="border: 1px solid #eee; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h3>Civil Registry Documents</h3>
+          <p>Request birth, marriage, and death certificates.</p>
+          <a href="#" style="color: #3d92d7; text-decoration: none;">View Details →</a>
+        </div>
+
+        {# {% endif %} #}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock content %}
