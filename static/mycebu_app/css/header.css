@@ -3,6 +3,24 @@
   border-bottom: 1px solid var(--border);
   padding: 0.5rem 0;
 }
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topnav .account .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.topnav .account .who {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.topnav .account .who strong { font-weight: 600; font-size: 14px; }
+.topnav .account .who span { color: var(--muted); font-size: 12px; }
 .nav-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -210,6 +228,7 @@ body.menu-open .hamburger .bar { width: 24px; }
     flex-wrap: nowrap;
     gap: .75rem;
   }
+  .topnav .account .who { display: none; }
   .nav-links { display: none !important; }
   .hamburger { display: inline-flex !important; }
   .logo { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }

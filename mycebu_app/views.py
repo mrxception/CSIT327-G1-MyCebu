@@ -15,6 +15,31 @@ supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
+def get_authed_user():
+    try:
+        session = supabase.auth.get_session()
+        user = getattr(session, "user", None)
+        if not user or not getattr(user, "id", None):
+            return None
+
+        meta = getattr(user, "user_metadata", {}) or {}
+        email = getattr(user, "email", None) or meta.get("email")
+        display_name = (
+            meta.get("full_name")
+            or meta.get("name")
+            or (email.split("@")[0] if email else "User")
+        )
+        avatar_url = meta.get("avatar_url")
+
+        return {
+            "id": user.id,
+            "email": email,
+            "display_name": display_name,
+            "avatar_url": avatar_url,
+        }
+    except Exception:
+        return None
+    
 def login_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -195,7 +220,7 @@ def chatbot_page(request):
     return render(request, 'mycebu_app/test.html')
 
 def landing_view(request, tab='landing'):
-    context = {'current_tab': tab, 'services_data': None}
+    context = {'current_tab': tab, 'services_data': None, 'authed_user': get_authed_user()}
     template = f"mycebu_app/pages/{tab}.html"
     try:
         return render(request, template, context)
