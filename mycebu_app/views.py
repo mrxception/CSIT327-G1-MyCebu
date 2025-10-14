@@ -314,3 +314,10 @@ def logout_view(request):
         return response
     
     return redirect('login')
+def dashboard_view(request):
+    context = {'current_tab': 'dashboard'}
+    return render(request, 'mycebu_app/pages/dashboard.html', context)
+
+def profile_view(request):
+    return render(request, 'mycebu_app/pages/profile.html')
+
