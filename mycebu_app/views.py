@@ -219,3 +219,8 @@ def password_reset_success_view(request):
     if request.method == "POST":
         return redirect("/login")
     return render(request, 'mycebu_app/password_reset/reset_success.html')
+
+def dashboard_view(request):
+    # This context variable is what your template needs
+    context = {'current_tab': 'dashboard'}
+    return render(request, 'mycebu_app/pages/dashboard.html', context)
