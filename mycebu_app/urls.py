@@ -12,6 +12,7 @@ urlpatterns = [
     path('password-reset-email/', views.password_reset_email_view, name='password_reset_email'),
     path('password-reset-new-password/', views.password_reset_new_password_view, name='password_reset_new_password'),
     path('password-reset-success/', views.password_reset_success_view, name='password_reset_success'),
+    path('profile/', views.profile_view, name='user_profile'),
 
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('', views.landing_view, {'tab': 'landing'}, name='landing_default'),
