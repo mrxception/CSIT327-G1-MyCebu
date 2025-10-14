@@ -1,81 +1,73 @@
 document.addEventListener("DOMContentLoaded", () => {
   const nav = document.querySelector(".topnav .nav-links");
-  if (!nav) return;
-
-  const highlight = nav.querySelector(".highlight");
-  const links = Array.from(nav.querySelectorAll("a"));
-  if (!highlight || links.length === 0) return;
-
-  const getActive = () => nav.querySelector("a.active") || links[0];
-
-  const moveTo = (el, { animate = true } = {}) => {
-    const navBox = nav.getBoundingClientRect();
-    const linkBox = el.getBoundingClientRect();
-    const x = Math.round(linkBox.left - navBox.left);
-    const w = Math.round(linkBox.width);
-
-    if (!animate) {
-      const prev = highlight.style.transition;
-      highlight.style.transition = "none";
-      highlight.style.width = `${w}px`;
-      highlight.style.transform = `translateX(${x}px)`;
-      void highlight.offsetHeight;
-      highlight.style.transition = prev || "";
-    } else {
-      highlight.style.width = `${w}px`;
-      highlight.style.transform = `translateX(${x}px)`;
+  if (nav) {
+    const highlight = nav.querySelector(".highlight");
+    const links = Array.from(nav.querySelectorAll("a"));
+    if (highlight && links.length > 0) {
+      const getActive = () => nav.querySelector("a.active") || links[0];
+      const moveTo = (el, { animate = true } = {}) => {
+        const navBox = nav.getBoundingClientRect();
+        const linkBox = el.getBoundingClientRect();
+        const x = Math.round(linkBox.left - navBox.left);
+        const w = Math.round(linkBox.width);
+        if (!animate) {
+          const prev = highlight.style.transition;
+          highlight.style.transition = "none";
+          highlight.style.width = `${w}px`;
+          highlight.style.transform = `translateX(${x}px)`;
+          void highlight.offsetHeight;
+          highlight.style.transition = prev || "";
+        } else {
+          highlight.style.width = `${w}px`;
+          highlight.style.transform = `translateX(${x}px)`;
+        }
+        highlight.style.opacity = "1";
+      };
+      moveTo(getActive(), { animate: false });
+      links.forEach((link) => {
+        link.addEventListener("mouseenter", () => moveTo(link));
+        link.addEventListener("focus", () => moveTo(link));
+        link.addEventListener("mouseleave", () => moveTo(getActive()));
+        link.addEventListener("blur", () => moveTo(getActive()));
+        link.addEventListener("click", () => moveTo(link));
+      });
+      window.addEventListener("resize", () => moveTo(getActive(), { animate: false }));
     }
-    highlight.style.opacity = "1";
-  };
+  }
 
-  moveTo(getActive(), { animate: false });
+  const body = document.body;
+  const btn = document.getElementById("hamburger");
+  const drawer = document.getElementById("mobile-drawer");
+  const overlay = document.getElementById("mobile-overlay");
+  const closeBtn = document.getElementById("drawer-close");
 
-  links.forEach((link) => {
-    link.addEventListener("mouseenter", () => moveTo(link));
-    link.addEventListener("focus", () => moveTo(link));
-    link.addEventListener("mouseleave", () => moveTo(getActive()));
-    link.addEventListener("blur", () => moveTo(getActive()));
-    link.addEventListener("click", () => moveTo(link));
-  });
+  if (btn && drawer && overlay && closeBtn) {
+    const open = () => {
+      body.classList.add("menu-open");
+      btn.setAttribute("aria-expanded", "true");
+      drawer.setAttribute("aria-hidden", "false");
+    };
+    const close = () => {
+      body.classList.remove("menu-open");
+      btn.setAttribute("aria-expanded", "false");
+      drawer.setAttribute("aria-hidden", "true");
+    };
 
-  window.addEventListener("resize", () => moveTo(getActive(), { animate: false }));
-});
+    btn.addEventListener("click", () =>
+      body.classList.contains("menu-open") ? close() : open()
+    );
+    overlay.addEventListener("click", close);
+    closeBtn.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
 
-// ===== Minimal hamburger toggle (added) =====
-document.addEventListener("DOMContentLoaded", () => {
-  const topnav = document.querySelector(".topnav");
-  const hamburger = document.querySelector(".hamburger");
-  const mobileMenu = document.getElementById("mobile-menu");
+    drawer.querySelectorAll("a").forEach((a) => {
+      a.addEventListener("click", close);
+    });
 
-  if (!topnav || !hamburger || !mobileMenu) return;
-
-  const closeMenu = () => {
-    topnav.classList.remove("mobile-open");
-    hamburger.setAttribute("aria-expanded", "false");
-    mobileMenu.setAttribute("hidden", "");
-  };
-
-  hamburger.addEventListener("click", () => {
-    const nowOpen = !topnav.classList.contains("mobile-open");
-    if (nowOpen) {
-      topnav.classList.add("mobile-open");
-      hamburger.setAttribute("aria-expanded", "true");
-      mobileMenu.removeAttribute("hidden");
-    } else {
-      closeMenu();
-    }
-  });
-
-  mobileMenu.querySelectorAll("a").forEach((a) => {
-    a.addEventListener("click", closeMenu);
-  });
-
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 768) closeMenu();
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!topnav.classList.contains("mobile-open")) return;
-    if (!topnav.contains(e.target)) closeMenu();
-  });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 768) close();
+    });
+  }
 });
