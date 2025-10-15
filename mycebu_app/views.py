@@ -106,8 +106,9 @@ def profile_view(request):
 
     if request.method == "POST":
         try:
-            first_name = request.POST.get("first_name")
-            last_name = request.POST.get("last_name")
+            first_name = request.POST.get("first_name", "").strip()
+            middle_name = request.POST.get("middle_name", "").strip()
+            last_name = request.POST.get("last_name", "").strip()
             email = request.POST.get("email")
             contact_number = request.POST.get("contact_number")
             birthdate = request.POST.get("birthdate")
@@ -115,13 +116,39 @@ def profile_view(request):
             gender = request.POST.get("gender")
             marital_status = request.POST.get("marital_status")
             religion = request.POST.get("religion")
-            birthplace = request.POST.get("birthplace")
+            birthplace = request.POST.get("birthplace", "").strip()
             purok = request.POST.get("purok")
-            city = request.POST.get("city")
+            city = request.POST.get("city", "").strip()
 
             errors = {}
             if not first_name or not last_name:
                 errors["name"] = "First name and last name are required."
+            
+            if first_name:
+                name_error = validate_name_field(first_name, "First name")
+                if name_error:
+                    errors["first_name"] = name_error
+            
+            if middle_name:
+                name_error = validate_name_field(middle_name, "Middle name")
+                if name_error:
+                    errors["middle_name"] = name_error
+            
+            if last_name:
+                name_error = validate_name_field(last_name, "Last name")
+                if name_error:
+                    errors["last_name"] = name_error
+            
+            if birthplace:
+                name_error = validate_name_field(birthplace, "Birthplace")
+                if name_error:
+                    errors["birthplace"] = name_error
+            
+            if city:
+                name_error = validate_name_field(city, "City")
+                if name_error:
+                    errors["city"] = name_error
+            
             if email and not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
                 errors["email"] = "Invalid email format."
             if age:
@@ -149,6 +176,7 @@ def profile_view(request):
 
             user_data = {
                 "first_name": first_name,
+                "middle_name": middle_name if middle_name else None,
                 "last_name": last_name,
                 "email": email,
                 "contact_number": contact_number or None,
@@ -157,9 +185,9 @@ def profile_view(request):
                 "gender": gender or None,
                 "marital_status": marital_status or None,
                 "religion": religion or None,
-                "birthplace": birthplace or None,
+                "birthplace": birthplace if birthplace else None,
                 "purok": purok or None,
-                "city": city or None,
+                "city": city if city else None,
                 "avatar_url": avatar_url,
             }
 
@@ -306,16 +334,39 @@ def register_view(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm-password")
-        first_name = request.POST.get("first_name")
-        middle_name = request.POST.get("middle_name")
-        last_name = request.POST.get("last_name")
+        first_name = request.POST.get("first_name", "").strip()
+        middle_name = request.POST.get("middle_name", "").strip()
+        last_name = request.POST.get("last_name", "").strip()
         age = request.POST.get("age")
         birthdate = request.POST.get("birthdate")
 
         errors = {}
 
-        if not all([email, password, confirm_password, first_name, last_name]):
-            errors["name"] = "Email, password, first name, and last name are required."
+        if not email:
+            errors["email"] = "Email is required."
+        if not password:
+            errors["password"] = "Password is required."
+        if not confirm_password:
+            errors["confirm"] = "Please confirm your password."
+        if not first_name:
+            errors["first_name"] = "First name is required."
+        if not last_name:
+            errors["last_name"] = "Last name is required."
+
+        if first_name:
+            name_error = validate_name_field(first_name, "First name")
+            if name_error:
+                errors["first_name"] = name_error
+        
+        if middle_name:
+            name_error = validate_name_field(middle_name, "Middle name")
+            if name_error:
+                errors["middle_name"] = name_error
+        
+        if last_name:
+            name_error = validate_name_field(last_name, "Last name")
+            if name_error:
+                errors["last_name"] = name_error
 
         if email and not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
             errors["email"] = "Invalid email format."
@@ -386,7 +437,7 @@ def register_view(request):
                     "id": response.user.id,
                     "email": email,
                     "first_name": first_name,
-                    "middle_name": middle_name or None,
+                    "middle_name": middle_name if middle_name else None,
                     "last_name": last_name,
                     "age": int(age) if age else None,
                     "birthdate": birthdate or None,
@@ -621,3 +672,11 @@ def dashboard_view(request):
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
     return response
+
+def validate_name_field(name, field_label):
+    """Validate that a name field contains only letters, spaces, hyphens, and apostrophes"""
+    if not name:
+        return None
+    if not re.match(r"^[a-zA-Z\s'-]+$", name):
+        return f"{field_label} should only contain letters, spaces, hyphens, and apostrophes."
+    return None
