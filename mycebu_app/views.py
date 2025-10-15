@@ -573,16 +573,24 @@ def landing_view(request, tab='landing'):
         response['Expires'] = '0'
         return response
 
-def dashboard_view(request):
+def landing_view(request, tab='landing'):
+    if request.session.pop('just_logged_in', False):
+        messages.success(request, "Welcome back, you are now logged in.")
+    
     user = get_authed_user(request)
-    if not user:
-        return redirect("login")
-    ctx = {"user": user, "authed_user": user, "current_tab": "dashboard"}
-    response = render(request, "mycebu_app/pages/dashboard.html", ctx)
-    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response['Pragma'] = 'no-cache'
-    response['Expires'] = '0'
-    return response
+    context = {'current_tab': tab, 'services_data': None, 'authed_user': user, 'user': user}  # Added 'user' to context
+    try:
+        response = render(request, f"mycebu_app/pages/{tab}.html", context)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+    except TemplateDoesNotExist:
+        response = render(request, "mycebu_app/pages/coming_soon.html", context)
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
 
 def register_success_view(request):
     response = render(request, 'mycebu_app/register_success.html')
@@ -659,19 +667,6 @@ def logout_view(request):
     
     logger.debug("logout_view: Non-POST request, redirecting to login")
     return redirect('login')
-
-def dashboard_view(request):
-    user = get_authed_user(request)
-    logger.debug(f"dashboard_view: User: {user}")
-    if not user:
-        logger.debug("dashboard_view: Redirecting to login, no authenticated user")
-        return redirect("login")
-    
-    response = render(request, "mycebu_app/pages/dashboard.html", {"user": user})
-    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response['Pragma'] = 'no-cache'
-    response['Expires'] = '0'
-    return response
 
 def validate_name_field(name, field_label):
     """Validate that a name field contains only letters, spaces, hyphens, and apostrophes"""
