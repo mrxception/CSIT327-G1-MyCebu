@@ -13,12 +13,14 @@
   height: 36px;
   border-radius: 12px;
   object-fit: cover;
+  margin-bottom: -10px;
 }
 .topnav .account .who {
   display: flex;
   flex-direction: column;
   line-height: 1.1;
   text-align: right;
+  margin-bottom: -2px;
 }
 .topnav .account .who strong { font-weight: 600; font-size: 14px; }
 .topnav .account .who span { color: var(--muted); font-size: 12px; }
