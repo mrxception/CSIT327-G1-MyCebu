@@ -16,6 +16,8 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+SITE_URL = "http://127.0.0.1:8000"
 
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
 # ...existing code...
@@ -31,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-msi*uku2c9+vw)-(h^=ulif=d1689@^(=qlds*#dl@o@wc=b^e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
