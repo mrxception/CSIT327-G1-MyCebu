@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Element selections
+    
     const backButton = document.getElementById('back-button');
-    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabLinks = document.querySelectorAll('.tab-link:not(.logout-btn)');
     const tabContents = document.querySelectorAll('.tab-content');
     const profileForm = document.getElementById('profile-form');
     const toast = document.getElementById('toast');
     
-    // Avatars and sidebar info
+    
     const sidebarAvatar = document.getElementById('sidebar-avatar');
     const mainAvatar = document.getElementById('main-avatar');
     const avatarUpload = document.getElementById('avatar-upload');
@@ -14,16 +14,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarName = document.getElementById('sidebar-name');
     const sidebarEmail = document.getElementById('sidebar-email');
 
-    // Buttons
+    
     const editButton = document.getElementById('edit-button');
     const saveButton = document.getElementById('save-button');
     const cancelButton = document.getElementById('cancel-button');
+    const logoutButton = document.querySelector('.logout-btn');
     
-    // Profile fields
+    
     const viewFields = document.querySelectorAll('.profile-view-field');
     const editFields = document.querySelectorAll('.profile-edit-field');
 
-    // --- FUNCTIONS ---
+    
+    let originalValues = {};
+
+    
 
     function toggleEditMode(isEditing) {
         viewFields.forEach(field => field.classList.toggle('hidden', isEditing));
@@ -36,49 +40,113 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function enterEditMode() {
+        
+        originalValues = {};
+        
         editFields.forEach(input => {
-            const correspondingViewField = document.querySelector(`[data-value][id="${input.id}"]`) || input.previousElementSibling;
-            if(correspondingViewField) {
-                input.value = correspondingViewField.dataset.value;
+            const fieldName = input.name || input.id;
+            
+            
+            const label = input.previousElementSibling;
+            let viewField = null;
+            
+            if (label && label.tagName === 'LABEL') {
+                
+                viewField = label.nextElementSibling;
+                if (viewField && viewField.classList.contains('profile-view-field')) {
+                    
+                    if (input.tagName === 'SELECT') {
+                        const currentText = viewField.textContent.trim();
+                        if (currentText !== 'Not set') {
+                            
+                            for (let option of input.options) {
+                                if (option.text === currentText || option.value === currentText) {
+                                    input.value = option.value;
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        
+                        const value = viewField.dataset.value || viewField.textContent.trim();
+                        if (value !== 'Not set') {
+                            input.value = value;
+                        }
+                    }
+                    originalValues[fieldName] = input.value;
+                }
             }
         });
+        
         toggleEditMode(true);
     }
 
     function exitEditMode(saveChanges) {
         if (saveChanges) {
+            
             editFields.forEach(input => {
-                  const correspondingViewField = document.querySelector(`[data-value][id="${input.id}"]`) || input.previousElementSibling;
-                  if(correspondingViewField) {
-                    correspondingViewField.textContent = input.value;
-                    correspondingViewField.dataset.value = input.value;
-                  }
+                const label = input.previousElementSibling;
+                
+                if (label && label.tagName === 'LABEL') {
+                    const viewField = label.nextElementSibling;
+                    
+                    if (viewField && viewField.classList.contains('profile-view-field')) {
+                        let displayValue = input.value;
+                        
+                        
+                        if (input.tagName === 'SELECT') {
+                            const selectedOption = input.options[input.selectedIndex];
+                            displayValue = selectedOption ? selectedOption.text : input.value;
+                        }
+                        
+                        
+                        viewField.textContent = displayValue || 'Not set';
+                        viewField.dataset.value = input.value;
+                    }
+                }
             });
             
-            // Update sidebar info
-            sidebarName.textContent = document.getElementById('full_name').value;
-            sidebarEmail.textContent = document.getElementById('email').value;
+            
+            const fullNameInput = document.querySelector('input[name="first_name"]');
+            const lastNameInput = document.querySelector('input[name="last_name"]');
+            const emailInput = document.querySelector('input[name="email"]');
+            
+            if (fullNameInput && lastNameInput) {
+                sidebarName.textContent = `${fullNameInput.value} ${lastNameInput.value}`.trim();
+            }
+            if (emailInput) {
+                sidebarEmail.textContent = emailInput.value;
+            }
 
-            // Show toast
+            
             toast.classList.remove('opacity-0', 'translate-y-10');
             toast.classList.add('opacity-100', 'translate-y-0');
             setTimeout(() => {
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', 'translate-y-10');
             }, 3000);
+        } else {
+            
+            editFields.forEach(input => {
+                const fieldName = input.name || input.id;
+                if (originalValues.hasOwnProperty(fieldName)) {
+                    input.value = originalValues[fieldName];
+                }
+            });
         }
+        
         toggleEditMode(false);
     }
     
-    // --- EVENT LISTENERS ---
+    
 
-    // Back button listener
+    
     backButton.addEventListener('click', function (e) {
         e.preventDefault();
         window.history.back();
     });
 
-    // Tab switching
+    
     tabLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
@@ -95,15 +163,31 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Button clicks
+    
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function(e) {
+            console.log('Logout button clicked, submitting form');
+            const form = logoutButton.closest('form');
+            if (form) {
+                form.submit();
+            } else {
+                console.error('Logout form not found');
+            }
+        });
+    }
+
+    
     editButton.addEventListener('click', enterEditMode);
     cancelButton.addEventListener('click', () => exitEditMode(false));
-    profileForm.addEventListener('submit', function(e) {
+    
+    
+    saveButton.addEventListener('click', function(e) {
         e.preventDefault();
-        exitEditMode(true);
+        
+        profileForm.submit();
     });
 
-    // Avatar upload
+    
     avatarUpload.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
@@ -113,18 +197,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 sidebarAvatar.src = imageUrl;
                 mainAvatar.src = imageUrl;
             };
-            reader.readAsURL(file);
+            reader.readAsDataURL(file);
         }
     });
     
-      // Initial setup to make sure data-value is set on all view fields
     viewFields.forEach(field => {
         if (!field.dataset.value) {
-            field.dataset.value = field.textContent;
+            const text = field.textContent.trim();
+            field.dataset.value = text !== 'Not set' ? text : '';
         }
     });
 
-    // Custom style for the theme toggle
     const style = document.createElement('style');
     style.innerHTML = `
         .toggle-checkbox:checked { right: 0; border-color: #0D9488; }
