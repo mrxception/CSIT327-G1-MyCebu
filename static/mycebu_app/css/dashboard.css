@@ -276,7 +276,7 @@
         margin-right: auto; /* Automatically calculate right margin */
     }
     .dashboard-hero-content {flex-direction: column; line-height: 1; align-items: center;}
-    .dashboard-hero-content h2 {margin-top: -0.5rem;}
+    .dashboard-hero-content h2 {margin-top: -0.5rem;align-items: center; text-align: center; padding-bottom: 0.5rem;}
     .dashboard-hero-content h4 {align-items: center; text-align: center;}
 }
 
