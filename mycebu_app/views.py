@@ -15,6 +15,7 @@ from django.core.files.base import ContentFile
 import os
 import uuid
 import time
+from django.views.decorators.http import require_GET
 
 supabase_admin = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
@@ -86,6 +87,13 @@ def get_authed_user(request):
         logger.error(f"get_authed_user: Error validating token: {str(e)}")
         return None
 
+@require_GET
+def root_router_view(request):
+    user = get_authed_user(request)
+    if user:
+        return redirect("landing_tab", tab="dashboard")
+    return redirect("landing_tab", tab="landing")
+                    
 def profile_view(request):
     user = get_authed_user(request)
     logger.debug(f"profile_view: User: {user}")
@@ -245,7 +253,7 @@ def login_view(request):
                 storage.used = True
 
                 request.session['just_logged_in'] = True
-                response = redirect("landing_tab", tab="landing")
+                response = redirect("home")
 
                 response.set_cookie('sb-access-token', access_token, max_age=max_age, httponly=True, secure=False, samesite='Lax', path='/')
                 response.set_cookie('sb-refresh-token', refresh_token, max_age=60*60*24*30, httponly=True, secure=False, samesite='Lax', path='/')
@@ -495,7 +503,7 @@ def chatbot_page(request):
     response['Pragma'] = 'no-cache'
     response['Expires'] = '0'
     return response
-
+                    
 def landing_view(request, tab='landing'):
     if request.session.pop('just_logged_in', False):
         messages.success(request, "Welcome back, you are now logged in.")
@@ -513,6 +521,17 @@ def landing_view(request, tab='landing'):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
+
+def dashboard_view(request):
+    user = get_authed_user(request)
+    if not user:
+        return redirect("login")
+    ctx = {"user": user, "authed_user": user, "current_tab": "dashboard"}
+    response = render(request, "mycebu_app/pages/dashboard.html", ctx)
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response['Pragma'] = 'no-cache'
+    response['Expires'] = '0'
+    return response
 
 def register_success_view(request):
     response = render(request, 'mycebu_app/register_success.html')
