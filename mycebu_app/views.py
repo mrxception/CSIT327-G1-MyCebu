@@ -116,7 +116,6 @@ def profile_view(request):
             if not first_name or not last_name:
                 errors["name"] = "First name and last name are required."
             
-            # Validate name fields
             if first_name:
                 name_error = validate_name_field(first_name, "First name")
                 if name_error:
@@ -335,10 +334,17 @@ def register_view(request):
 
         errors = {}
 
-        if not all([email, password, confirm_password, first_name, last_name]):
-            errors["name"] = "Email, password, first name, and last name are required."
+        if not email:
+            errors["email"] = "Email is required."
+        if not password:
+            errors["password"] = "Password is required."
+        if not confirm_password:
+            errors["confirm"] = "Please confirm your password."
+        if not first_name:
+            errors["first_name"] = "First name is required."
+        if not last_name:
+            errors["last_name"] = "Last name is required."
 
-        # Validate name fields
         if first_name:
             name_error = validate_name_field(first_name, "First name")
             if name_error:
