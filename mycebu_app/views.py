@@ -556,29 +556,15 @@ def chatbot_page(request):
     return response
                     
 def landing_view(request, tab='landing'):
-    if request.session.pop('just_logged_in', False):
-        messages.success(request, "Welcome back, you are now logged in.")
-    
-    context = {'current_tab': tab, 'services_data': None, 'authed_user': get_authed_user(request)}
-    try:
-        response = render(request, f"mycebu_app/pages/{tab}.html", context)
-        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response['Pragma'] = 'no-cache'
-        response['Expires'] = '0'
-        return response
-    except TemplateDoesNotExist:
-        response = render(request, "mycebu_app/pages/coming_soon.html", context)
-        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response['Pragma'] = 'no-cache'
-        response['Expires'] = '0'
-        return response
-
-def landing_view(request, tab='landing'):
-    if request.session.pop('just_logged_in', False):
-        messages.success(request, "Welcome back, you are now logged in.")
-    
     user = get_authed_user(request)
-    context = {'current_tab': tab, 'services_data': None, 'authed_user': user, 'user': user}  # Added 'user' to context
+    if tab == 'dashboard' and not user:
+        logger.debug("landing_view: Redirecting to login, no authenticated user for dashboard")
+        return redirect("login")
+    
+    if request.session.pop('just_logged_in', False):
+        messages.success(request, "Welcome back, you are now logged in.")
+    
+    context = {'current_tab': tab, 'services_data': None, 'authed_user': user, 'user': user}
     try:
         response = render(request, f"mycebu_app/pages/{tab}.html", context)
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
