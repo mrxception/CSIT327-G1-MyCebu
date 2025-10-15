@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.root_router_view, name='home'),
     path('register/', views.register_view, name="register"),
     path('login/', views.login_view, name="login"),
     path('test/', views.chatbot_page, name='chatbot_page'),
@@ -14,10 +15,7 @@ urlpatterns = [
 
     path('logout/', views.logout_view, name='logout'),
 
-    # Root landing
-    path('dashboard/', views.dashboard_view, name='dashboard'),
-    path('', views.landing_view, {'tab': 'landing'}, name='landing_default'),
-    
-    # Catch-all for tabs (logout won't reach here now)
-    path('<str:tab>/', views.landing_view, name='landing_tab'), 
+    path('dashboard/', views.landing_view, {'tab': 'dashboard'}, name='dashboard'),
+    path('landing/', views.landing_view, {'tab': 'landing'}, name='landing_default'),
+    path('<str:tab>/', views.landing_view, name='landing_tab'),
 ]
