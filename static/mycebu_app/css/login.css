@@ -95,21 +95,6 @@ input[type="text"] {
 }
 */
 
-input[type="number"],
-input[type="date"] {
-    width: 100%;
-    appearance: none;
-    background: #ebebeb;
-    color: var(--text);
-    border: 0;
-    border-radius: 10px;
-    padding: 12px 12px 12px 40px;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}   
-
 .input-info {
     width: 100%;
     appearance: none;
@@ -143,18 +128,55 @@ input::placeholder {
     font-family: 'Poppins', sans-serif;
 }
 
+.input-wrap .icon {
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 2;
+  outline: none;
+}
+
+.input-wrap .icon:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+input[type="number"],
+input[type="date"] {
+    width: 100%;
+    appearance: none;
+    background: #ebebeb;
+    color: var(--text);
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 12px 12px 40px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}   
+
+input[type="date"] { position: relative; }
+
 input[type="date"]::-webkit-datetime-edit,
 input[type="date"]::-webkit-datetime-edit-text,
 input[type="date"]::-webkit-datetime-edit-month-field,
 input[type="date"]::-webkit-datetime-edit-day-field,
 input[type="date"]::-webkit-datetime-edit-year-field {
-  color: #6b7280;
-  opacity: 0.6;
   font-family: 'Poppins', sans-serif;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.8;
+  opacity: 0;
+  pointer-events: none;
+}
+
+input[type="date"]:not(.filled)::-webkit-datetime-edit,
+input[type="date"]:not(.filled)::-webkit-datetime-edit-text,
+input[type="date"]:not(.filled)::-webkit-datetime-edit-month-field,
+input[type="date"]:not(.filled)::-webkit-datetime-edit-day-field,
+input[type="date"]:not(.filled)::-webkit-datetime-edit-year-field {
+  color: #6b7280;
+  opacity: 0.6;
 }
 
 input[type="date"].filled::-webkit-datetime-edit,
@@ -162,7 +184,7 @@ input[type="date"].filled::-webkit-datetime-edit-text,
 input[type="date"].filled::-webkit-datetime-edit-month-field,
 input[type="date"].filled::-webkit-datetime-edit-day-field,
 input[type="date"].filled::-webkit-datetime-edit-year-field {
-  color: #6b7280;
+  color: var(--text);
   opacity: 1;
 }
 
