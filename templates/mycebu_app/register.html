@@ -22,7 +22,7 @@
             </header>
 
             {% if errors.general %}
-                <p class="error" style="color: red; text-align: center;">{{ errors.general }}</p>
+            <p class="error" style="color: red; text-align: center;">{{ errors.general }}</p>
             {% endif %}
 
             <form id="register-form" method="post" class="space-6" novalidate>
@@ -35,10 +35,11 @@
                             <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
                             <polyline points="22,6 12,13 2,6" />
                         </svg>
-                        <input class="input-info" id="email" name="email" type="email" placeholder="Enter your email" value="{{ request.POST.email }}" required />
+                        <input class="input-info" id="email" name="email" type="email" placeholder="Enter your email"
+                            value="{{ request.POST.email }}" required />
                     </div>
                     {% if errors.email %}
-                        <p class="error" style="color: red;">{{ errors.email }}</p>
+                    <p class="error" style="color: red;">{{ errors.email }}</p>
                     {% endif %}
                 </div>
 
@@ -52,7 +53,8 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input class="name name-input" id="first_name" name="first_name" type="text" placeholder="First name" value="{{ request.POST.first_name }}" required />
+                            <input class="name name-input" id="first_name" name="first_name" type="text"
+                                placeholder="First name" value="{{ request.POST.first_name }}" required />
                         </div>
 
                         <div class="input-wrap">
@@ -61,7 +63,8 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input class="name name-input" id="middle_name" name="middle_name" type="text" placeholder="Middle name" value="{{ request.POST.middle_name }}" />
+                            <input class="name name-input" id="middle_name" name="middle_name" type="text"
+                                placeholder="Middle name" value="{{ request.POST.middle_name }}" />
                         </div>
 
                         <div class="input-wrap">
@@ -70,21 +73,22 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <input class="name name-input" id="last_name" name="last_name" type="text" placeholder="Last name" value="{{ request.POST.last_name }}" required />
+                            <input class="name name-input" id="last_name" name="last_name" type="text"
+                                placeholder="Last name" value="{{ request.POST.last_name }}" required />
                         </div>
                     </div>
 
                     {% if errors.name %}
-                        <p class="error" style="color: red;">{{ errors.name }}</p>
+                    <p class="error" style="color: red;">{{ errors.name }}</p>
                     {% endif %}
                     {% if errors.first_name %}
-                        <p class="error" style="color: red;">{{ errors.first_name }}</p>
+                    <p class="error" style="color: red;">{{ errors.first_name }}</p>
                     {% endif %}
                     {% if errors.middle_name %}
-                        <p class="error" style="color: red;">{{ errors.middle_name }}</p>
+                    <p class="error" style="color: red;">{{ errors.middle_name }}</p>
                     {% endif %}
                     {% if errors.last_name %}
-                        <p class="error" style="color: red;">{{ errors.last_name }}</p>
+                    <p class="error" style="color: red;">{{ errors.last_name }}</p>
                     {% endif %}
                 </div>
 
@@ -111,11 +115,12 @@
                                 <line x1="8" y1="2" x2="8" y2="6"></line>
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
-                            <input id="birthdate" name="birthdate" type="date" placeholder="Birthdate" value="{{ request.POST.birthdate }}" />
+                            <input id="birthdate" name="birthdate" type="date" placeholder="Birthdate"
+                                value="{{ request.POST.birthdate }}" />
                         </div>
                     </div>
                     {% if errors.age %}
-                        <p class="error" style="color: red;">{{ errors.age }}</p>
+                    <p class="error" style="color: red;">{{ errors.age }}</p>
                     {% endif %}
                 </div>
 
@@ -127,8 +132,8 @@
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                         </svg>
-                        <input class="input-info" id="password" name="password" type="password" placeholder="Enter your password"
-                            required />
+                        <input class="input-info" id="password" name="password" type="password"
+                            placeholder="Enter your password" required />
                         <button type="button" id="togglePassword" class="toggle"
                             aria-label="Toggle password visibility">
                             <svg id="eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -147,10 +152,14 @@
                             </svg>
                         </button>
                     </div>
-                    <div id="password-strength" class="progress-bar" style="height: 4px; background: #ddd; margin-top: 8px; border-radius: 2px; overflow: hidden; display: none;">
-                        <div id="strength-bar" style="height: 100%; width: 0%; background: #f00; transition: width 0.3s, background 0.3s;"></div>
+                    <div id="password-strength" class="progress-bar"
+                        style="height: 4px; background: #ddd; margin-top: 8px; border-radius: 2px; overflow: hidden; display: none;">
+                        <div id="strength-bar"
+                            style="height: 100%; width: 0%; background: #f00; transition: width 0.3s, background 0.3s;">
+                        </div>
                     </div>
-                    <ul id="password-requirements" style="margin-top: 8px; font-size: 0.875rem; color: #666; display: none;">
+                    <ul id="password-requirements"
+                        style="margin-top: 8px; font-size: 0.875rem; color: #666; display: none;">
                         <li id="req-length" style="color: #f00;">At least 8 characters</li>
                         <li id="req-upper" style="color: #f00;">One uppercase letter</li>
                         <li id="req-lower" style="color: #f00;">One lowercase letter</li>
@@ -158,7 +167,7 @@
                         <li id="req-special" style="color: #f00;">One special character</li>
                     </ul>
                     {% if errors.password %}
-                        <p class="error" style="color: red;">{{ errors.password }}</p>
+                    <p class="error" style="color: red;">{{ errors.password }}</p>
                     {% endif %}
                 </div>
 
@@ -191,7 +200,7 @@
                         </button>
                     </div>
                     {% if errors.confirm %}
-                        <p class="error" style="color: red;">{{ errors.confirm }}</p>
+                    <p class="error" style="color: red;">{{ errors.confirm }}</p>
                     {% endif %}
                 </div>
 
@@ -225,7 +234,7 @@
                     const cursorPos = e.target.selectionStart;
                     const oldValue = e.target.value;
                     const newValue = oldValue.replace(/[^a-zA-Z\s'-]/g, '');
-                    
+
                     if (oldValue !== newValue) {
                         e.target.value = newValue;
                         e.target.setSelectionRange(cursorPos - 1, cursorPos - 1);
@@ -304,6 +313,48 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[type="date"]').forEach(el => {
+                const set = () => {
+                    const hasValue = el.value !== '';
+                    const isFocused = document.activeElement === el;
+                    el.classList.toggle('filled', hasValue || isFocused);
+                };
+                set();
+                el.addEventListener('focus', set);
+                el.addEventListener('blur', set);
+                el.addEventListener('input', set);
+                el.addEventListener('change', set);
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.input-wrap').forEach(wrap => {
+                const input = wrap.querySelector('input[type="date"]');
+                const icon = wrap.querySelector('.icon');
+                if (!input || !icon) return;
+
+                const openPicker = () => {
+                    if (typeof input.showPicker === 'function') {
+                        input.showPicker();        
+                    } else {
+                        input.focus();              
+                    }
+                };
+
+                icon.addEventListener('click', openPicker);
+                icon.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openPicker();
+                    }
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>
