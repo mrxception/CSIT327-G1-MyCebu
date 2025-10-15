@@ -88,7 +88,7 @@
     </div>
 
     <nav class="drawer-nav">
-      <a class="{% if current_tab == 'landing' or current_tab == 'dashboard' %}active{% endif %}"
+      <a class="item {% if current_tab == 'landing' or current_tab == 'dashboard' %}active{% endif %}"
         href="{% if authed_user %}{% url 'landing_tab' tab='dashboard' %}{% else %}{% url 'landing_tab' tab='landing' %}{% endif %}">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />
