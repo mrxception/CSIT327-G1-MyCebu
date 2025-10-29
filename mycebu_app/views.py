@@ -35,6 +35,16 @@ def _load_services_data():
         return payload.get("services", [])
     except Exception:
         return []
+
+def _load_directory_data():
+    data_path = Path(settings.BASE_DIR) / "static" / "mycebu_app" / "data" / "directory.json"
+    if not data_path.exists():
+        return {"officials": [], "positions": [], "districts": [], "emergencyContacts": []}
+    try:
+        with open(data_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"officials": [], "positions": [], "districts": [], "emergencyContacts": []}
     
 def get_authed_user(request):
     access_token = request.COOKIES.get('sb-access-token')
@@ -577,9 +587,15 @@ def landing_view(request, tab='landing'):
     
     if request.session.pop('just_logged_in', False):
         messages.success(request, "Welcome back, you are now logged in.")
-    
-    services_data = None
-    service_selected = None
+
+    context = {
+        'current_tab': tab,
+        'authed_user': user,
+        'user': user,
+        'services_data': None,
+        'service_selected': None,
+    }
+
     if tab == 'services':
         services_list = _load_services_data()
         for service in services_list:
@@ -590,18 +606,58 @@ def landing_view(request, tab='landing'):
                 detail = step_details[i] if i < len(step_details) else f"Additional information about step {i + 1} will appear here."
                 combined_steps.append({"step": step, "detail": detail})
             service["combined_steps"] = combined_steps
-        services_data = services_list
+
+            forms = service.get("forms", [])
+            downloads = service.get("formsDownload", [])
+            pairs = []
+            for i, name in enumerate(forms):
+                link = downloads[i] if i < len(downloads) and downloads[i] else None
+                pairs.append({"name": name, "link": link})
+            service["forms_with_links"] = pairs
+            
         selected_id = request.GET.get("id")
+        service_selected = None
         if selected_id:
             service_selected = next((s for s in services_list if s.get("id") == selected_id), None)
 
-    context = {
-        'current_tab': tab, 
-        'services_data': services_data, 
-        'service_selected': service_selected, 
-        'authed_user': user, 
-        'user': user}
-    
+        context.update({
+            'services_data': services_list,
+            'service_selected': service_selected,
+        })
+
+    if tab == 'directory':
+        payload = _load_directory_data()
+        officials_all = payload.get("officials", [])
+        positions = payload.get("positions", [])
+        districts = payload.get("districts", [])
+        emergency_contacts = payload.get("emergencyContacts", [])
+
+        q = (request.GET.get("q", "") or "").lower()
+        position = request.GET.get("position", "all")
+        district = request.GET.get("district", "all")
+
+        def match(o):
+            name_pos = f"{o.get('name','')} {o.get('position','')}".lower()
+            if q and q not in name_pos:
+                return False
+            if position != "all" and o.get("position") != position:
+                return False
+            if district != "all" and o.get("district") != district:
+                return False
+            return True
+
+        officials = [o for o in officials_all if match(o)]
+
+        context.update({
+            "officials": officials,
+            "positions": positions,
+            "districts": districts,
+            "emergency_contacts": emergency_contacts,
+            "q": q,
+            "position": position,
+            "district": district,
+        })
+
     try:
         response = render(request, f"mycebu_app/pages/{tab}.html", context)
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -614,6 +670,7 @@ def landing_view(request, tab='landing'):
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
         return response
+
 
 def register_success_view(request):
     response = render(request, 'mycebu_app/register_success.html')
