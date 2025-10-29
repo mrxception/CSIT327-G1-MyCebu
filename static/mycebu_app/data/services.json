@@ -1,0 +1,133 @@
+{
+  "services": [
+    {
+      "id": "building-permit",
+      "icon": "building",
+      "title": "Building Permit",
+      "description": "Apply for comprehensive building permits including architectural, structural, and electrical permits.",
+      "color": "secondary",
+      "requirements": [
+        "Unified Application Form for Building Permit (properly filled out and notarized)",
+        "Architectural Permit",
+        "Civil/Structural Permit",
+        "Electrical Permit",
+        "Plumbing Permit",
+        "Sanitary Permit",
+        "Mechanical Permit",
+        "Electronics Permit (for commercial buildings only)",
+        "Fencing Permit",
+        "Required documents (1 original and 2 photocopies, collated in a folder color-coded by the month of application)"
+      ],
+      "steps": [
+        "Secure and fill out the Unified Application Form and ancillary permit forms.",
+        "Prepare required attachments (1 original and 2 photocopies).",
+        "Submit completed documents to the Office of the Building Official (OBO) at Cebu City Hall.",
+        "Pay assessed fees at the City Treasurer's Office.",
+        "Processing and approval by technical personnel.",
+        "Claim your Building Permit at the OBO once notified."
+      ],
+      "forms": [
+        "Unified Application Form for Building Permit",
+        "Architectural Permit Form (NBC Form No. A-01)",
+        "Civil/Structural Permit Form (NBC Form No. A-02)",
+        "Electrical Permit Form (NBC Form No. A-03)",
+        "Mechanical Permit Form (NBC Form No. A-04)",
+        "Sanitary Permit Form (NBC Form No. A-05)",
+        "Plumbing Permit Form (NBC Form No. A-06)",
+        "Electronics Permit Form (NBC Form No. A-07)",
+        "Fencing Permit Form (NBC Form No. B-03)",
+        "Building Completion Form",
+        "Electrical Completion Form",
+        "Electronics Completion Form",
+        "Mechanical Completion Form",
+        "Sanitary or Plumbing Completion Form",
+        "Unified Appication for Certificate of Occupancy"
+      ]
+    },
+    {
+      "id": "business-permit",
+      "icon": "file",
+      "title": "Business Permit",
+      "description": "Obtain your Mayor's Permit for legal business operation in Cebu City.",
+      "color": "primary",
+      "requirements": [
+        "DTI Certificate (for Sole Proprietorship) or SEC/CDA Registration",
+        "Original Barangay Clearance",
+        "Community Tax Certificate (CTC or Cedula)",
+        "Contract of Lease (if renting) or Tax Clearance/Transfer Certificate of Title",
+        "Locational/Zoning Clearance",
+        "Sanitary Permit from the City Health Department",
+        "Fire Safety Inspection Certificate (FSIC) from the BFP",
+        "Environmental Clearance (CCENRO Certificate)",
+        "Occupancy Permit (if required)"
+      ],
+      "steps": [
+        "Secure application form from the Business Permit and Licensing Office (BPLO).",
+        "Submit initial requirements to BPLO.",
+        "Assessment and payment at the City Treasurer's Office.",
+        "Secure ancillary clearances from respective offices.",
+        "Final submission to BPLO for verification and permit issuance."
+      ],
+      "forms": [
+        "Business Permit Application Form (BPLO's Copy)",
+        "Business Permit Application Form (Owner's Copy)",
+        "Business Permit Application Form (CTO's Copy)"
+      ]
+    },
+    {
+      "id": "barangay-clearance",
+      "icon": "shield",
+      "title": "Barangay Clearance",
+      "description": "Get certification of residency and good moral character from your local barangay.",
+      "color": "accent",
+      "requirements": [
+        "Completed Barangay Clearance Application Form",
+        "Valid Government-issued ID",
+        "Proof of Residency",
+        "Community Tax Certificate (Cedula)",
+        "Passport-sized photo (if required)",
+        "Clearance fee (typically PHP 20–100)"
+      ],
+      "steps": [
+        "Visit your Barangay Hall during office hours.",
+        "Fill out the application form with purpose of clearance.",
+        "Submit documents: ID and proof of residency.",
+        "Verification by staff.",
+        "Pay the fee and keep the receipt.",
+        "Receive the signed Barangay Clearance."
+      ],
+      "forms": [
+        "Barangay Clearance Application Form"
+      ]
+    },
+    {
+      "id": "property-tax",
+      "icon": "receipt",
+      "title": "Property Tax",
+      "description": "Pay your annual Real Property Tax (RPT).",
+      "color": "warning",
+      "requirements": [
+        "Previous Official Receipt of RPT",
+        "Property Title",
+        "Tax Declaration Number",
+        "For first-time: copy of property title and tax declaration"
+      ],
+      "steps": [
+        "Determine amount due with City Treasurer's Office.",
+        "Assessment at Assessor Office.",
+        "Pay at City Treasurer's Office or authorized online channels.",
+        "Obtain official receipt.",
+        "Avail discounts for early full payment."
+      ],
+      "forms": [],
+      "additionalInfo": {
+        "title": "Payment Schedule & Penalties",
+        "content": [
+          "Full Payment Discount: On or before March 31 (up to 10% discount).",
+          "Quarterly Installments: Mar 31, Jun 30, Sep 30, Dec 31.",
+          "Penalty for Delinquency: 2% per month."
+        ]
+      }
+    }
+  ]
+}
