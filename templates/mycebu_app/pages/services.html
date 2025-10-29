@@ -140,23 +140,29 @@
         </h2>
         <div class="det-card p-0">
           <div class="form-row">
-            {% for form in service_selected.forms %}
+            {% for item in service_selected.forms_with_links %}
             <div class="form-item">
               <div class="form-item__name">
                 <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M14 2v6h6M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none"
                     stroke="currentColor" stroke-width="2" />
                 </svg>
-                {{ form }}
+                {{ item.name }}
               </div>
-              <a class="btn btn--outline" href="#" download>
-                <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+
+              {% if item.link %}
+              <a class="btn btn--outline" href="{{ item.link }}" target="_blank" rel="noopener" download>
+                <svg class="i" style="width:16px;height:16px" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" fill="none" stroke="currentColor" stroke-width="2" />
                 </svg>
                 Download
               </a>
+              {% else %}
+              <button class="btn btn--outline" disabled>Not available</button>
+              {% endif %}
             </div>
             {% endfor %}
+
           </div>
         </div>
       </div>
