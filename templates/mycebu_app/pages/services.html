@@ -89,13 +89,22 @@
         </h2>
         <div class="det-card p-16">
           <ol class="steps">
-            {% for step in service_selected.steps %}
-            <li>
+            {% for step in service_selected.combined_steps %}
+            <li class="step-item" data-step="{{ forloop.counter }}">
               <div class="step-num">{{ forloop.counter }}</div>
-              <div class="step-text">{{ step }}</div>
+              <div class="step-text">
+                {{ step.step }}
+                <span class="step-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" class="chevron">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </div>
+              <div class="step-extra">
+                <p>{{ step.detail|safe }}</p>
+              </div>
             </li>
-            {% empty %}
-            <li>No steps provided.</li>
             {% endfor %}
           </ol>
         </div>

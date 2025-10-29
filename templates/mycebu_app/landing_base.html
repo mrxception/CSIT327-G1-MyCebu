@@ -160,6 +160,9 @@
   <script></script>
   <script src="{% static 'mycebu_app/js/header.js' %}" defer></script>
   <script src="{% static 'mycebu_app/js/section-skeleton.js' %}" defer></script>
+  {% if current_tab == 'services' %}
+  <script src="{% static 'mycebu_app/js/services.js' %}" defer></script>
+  {% endif %}
 </body>
 
 </html>

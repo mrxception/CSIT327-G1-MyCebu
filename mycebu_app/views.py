@@ -582,6 +582,14 @@ def landing_view(request, tab='landing'):
     service_selected = None
     if tab == 'services':
         services_list = _load_services_data()
+        for service in services_list:
+            steps = service.get("steps", [])
+            step_details = service.get("stepDetails", [])
+            combined_steps = []
+            for i, step in enumerate(steps):
+                detail = step_details[i] if i < len(step_details) else f"Additional information about step {i + 1} will appear here."
+                combined_steps.append({"step": step, "detail": detail})
+            service["combined_steps"] = combined_steps
         services_data = services_list
         selected_id = request.GET.get("id")
         if selected_id:
