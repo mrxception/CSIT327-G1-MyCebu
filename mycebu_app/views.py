@@ -16,12 +16,26 @@ import os
 import uuid
 import time
 from django.views.decorators.http import require_GET
+from pathlib import Path
+from django.conf import settings
+import json
 
 supabase_admin = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+def _load_services_data():
+    data_path = Path(settings.BASE_DIR) / "static" / "mycebu_app" / "data" / "services.json"
+    if not data_path.exists():
+        return []
+    try:
+        with open(data_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+        return payload.get("services", [])
+    except Exception:
+        return []
+    
 def get_authed_user(request):
     access_token = request.COOKIES.get('sb-access-token')
     logger.debug(f"get_authed_user: sb-access-token={'present' if access_token else 'missing'}")
@@ -564,7 +578,22 @@ def landing_view(request, tab='landing'):
     if request.session.pop('just_logged_in', False):
         messages.success(request, "Welcome back, you are now logged in.")
     
-    context = {'current_tab': tab, 'services_data': None, 'authed_user': user, 'user': user}
+    services_data = None
+    service_selected = None
+    if tab == 'services':
+        services_list = _load_services_data()
+        services_data = services_list
+        selected_id = request.GET.get("id")
+        if selected_id:
+            service_selected = next((s for s in services_list if s.get("id") == selected_id), None)
+
+    context = {
+        'current_tab': tab, 
+        'services_data': services_data, 
+        'service_selected': service_selected, 
+        'authed_user': user, 
+        'user': user}
+    
     try:
         response = render(request, f"mycebu_app/pages/{tab}.html", context)
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
