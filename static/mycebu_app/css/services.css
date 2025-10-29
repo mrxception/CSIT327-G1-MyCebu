@@ -57,8 +57,85 @@
 .steps{list-style:none;margin:0;padding:0;display:grid;gap:14px}
 .steps li{display:grid;grid-template-columns:36px 1fr;gap:10px;align-items:start}
 .step-num{width:30px;height:30px;border-radius:999px;display:grid;place-items:center;background:var(--secondary-600);color:#fff;font-weight:800;font-size:.95rem}
-.step-text{color:var(--text);margin-top:2px;margin-left:-6px;}
-.step-text:hover{color:var(--secondary-600);cursor: pointer;}
+.step-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text);
+  margin-top: 2px;
+  margin-left: -6px;
+  transition: color 0.3s ease;
+}
+
+.step-item:hover .step-text {
+  color: var(--secondary-600);
+}
+
+.step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--secondary-100) 50%, white);
+  color: var(--secondary-600);
+  transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.step-item.active .step-icon {
+  transform: rotate(180deg);
+  background: color-mix(in srgb, var(--secondary-200) 70%, white);
+  color: var(--secondary-700);
+}
+
+.step-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+
+.step-item:hover .step-icon {
+  background: color-mix(in srgb, var(--secondary-100) 70%, white);
+}
+.step-item {position: relative;transition: all 0.3s ease;cursor: pointer;}
+.step-extra {white-space: normal !important;
+  word-wrap: break-word;
+  display: block;grid-column: 2 / span 1;max-height: 0;overflow: hidden;opacity: 0;transform: translateY(-5px);transition: all 0.3s ease;color: var(--text);font-size: 0.95rem;line-height: 1.5;}
+.step-item.active .step-extra {max-height: none;opacity: 1;transform: translateY(0);margin-top: 8px;overflow: visible;}
+.step-extra p,
+.step-extra ul,
+.step-extra li {
+  white-space: normal;
+  display: block;
+  line-height: 1.6;
+  margin: 0.4em 0;
+}
+
+.step-extra ul {
+  list-style-type: disc !important;
+  list-style-position: inside !important;
+  padding-left: 1.5rem !important;
+  margin-left: 0 !important;
+  display: block !important;
+}
+
+.step-extra li {
+  display: list-item !important;
+  list-style-type: disc !important;
+  margin-left: 1rem;
+  margin-bottom: 4px;
+}
+.step-icon {
+  font-size: 0.9em;
+  transition: transform 0.3s ease;
+  opacity: 0.6;
+}
+
+.step-item.active .step-icon {
+  transform: rotate(180deg);
+  opacity: 1;
+}
 
 .form-row{display:grid;gap:12px;padding:12px}
 .form-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--card);border-radius:12px;background:var(--card)}
