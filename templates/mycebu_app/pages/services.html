@@ -95,8 +95,8 @@
               <div class="step-text">
                 {{ step.step }}
                 <span class="step-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" class="chevron">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
+                    stroke-linejoin="round" style="width:24px; height:24px">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
                 </span>
@@ -120,6 +120,7 @@
           {{ service_selected.additionalInfo.title }}
         </h2>
         <div class="det-card p-16 warn">
+          <p class="muted" style="margin-top: -15px; padding-top:0;">{{ service_selected.additionalInfo.subtitle|safe }}</p>
           <ul class="bullet-list">
             {% for line in service_selected.additionalInfo.content %}
             <li>{{ line }}</li>
