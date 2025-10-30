@@ -34,6 +34,18 @@
         "<div style='white-space: normal;'><p>After payment, your application will go through:</p><ul style='list-style-type: disc; padding-left: 20px;'><li>Evaluation and review by technical personnel (Architectural, Structural, Electrical, etc.)</li><li>Approval by the Building Official</li></ul><p>This process may take several days or weeks depending on the complexity of your project.</p></div>",
         "<div style='white-space: normal;'><p>Once approved, you’ll be notified to claim your Building Permit at the OBO.</p><p>This document officially allows you to begin construction in accordance with your approved plans and specifications.</p></div>"
       ],
+      "additionalInfo": {
+        "title": "Occupancy Permit (After Construction)",
+        "subtitle": "<div style='white-space: normal;'><p>Once construction is completed, you must apply for a <b>Certificate of Occupancy</b> before using the building.</p><p><b>Required Forms:</b></p></div>",
+        "content": [
+          "Building Completion Form",
+          "Electrical Completion Form",
+          "Electronics Completion Form",
+          "Mechanical Completion Form",
+          "Sanitary or Plumbing Completion Form",
+          "unified Completion of Certicate of Occupancy"
+        ]
+      },
       "forms": [
         "Unified Application Form for Building Permit",
         "Architectural Permit Form (NBC Form No. A-01)",
@@ -87,16 +99,38 @@
         "Occupancy Permit (if required)"
       ],
       "steps": [
-        "Secure application form from the Business Permit and Licensing Office (BPLO).",
-        "Submit initial requirements to BPLO.",
-        "Assessment and payment at the City Treasurer's Office.",
-        "Secure ancillary clearances from respective offices.",
-        "Final submission to BPLO for verification and permit issuance."
+        "Secure and fill out the application form.",
+        "Submit initial requirements and clearances.",
+        "Undergo evaluation, assessment, and ancillary permits.",
+        "Pay business taxes and regulatory fees.",
+        "Claim and display your Business Permit (Mayor’s Permit)."
       ],
+      "stepDetails": [
+        "<div style='white-space: normal;'><p>Visit the <b>Business Permit and Licensing Office (BPLO)</b> at Cebu City Hall or the designated Business One-Stop Shop (BOSS).</p><p>Obtain the official Business Permit Application Form and fill out all required fields such as <b>business name, address, type of ownership, business activity, and capitalization.</b></p><p>Ensure that the form is signed by the business owner or authorized representative. Forms are usually available in triplicate (Owner’s Copy, BPLO’s Copy, City Treasurer’s Office Copy).</p></div>",
+        "<div style='white-space: normal;'><p>Prepare all documentary requirements and submit them to the BPLO or the Business One-Stop Shop. The essential documents typically include:</p><ul style='list-style-type: disc; padding-left: 20px;'><li>DTI Certificate (for Sole Proprietorship) or SEC/CDA Registration (for Corporation or Cooperative)</li><li>Barangay Clearance from the barangay where your business operates</li><li>Community Tax Certificate (Cedula)</li><li>Contract of Lease (if rented) or Tax Declaration/Transfer Certificate of Title (if owned)</li><li>Locational/Zoning Clearance from the City Planning Office</li><li>Sanitary Permit from the City Health Department (for food, beauty, or health-related businesses)</li></ul><p>Upon submission, the BPLO will check for completeness and may issue an acknowledgment slip or reference number for tracking.</p></div>",
+        "<div style='white-space: normal;'><p>The BPLO will evaluate your documents and compute your business tax and regulatory fees based on your declared capital, type of business, and other parameters. During this stage, you may be required to secure additional clearances depending on your business nature, such as:</p><ul style='list-style-type: disc; padding-left: 20px;'><li>Fire Safety Inspection Certificate (FSIC) from the Bureau of Fire Protection</li><li>Environmental Clearance from the Cebu City Environment and Natural Resources Office (CCENRO)</li><li>Health and Sanitation Clearance from the City Health Department</li><li>Occupancy Permit (if applicable, for newly occupied buildings)</li></ul><p>After evaluation, BPLO will issue an <b>Order of Payment</b> or Tax Order detailing the amount due.</p></div>",
+        "<div style='white-space: normal;'><p>Proceed to the <b>City Treasurer’s Office</b> to pay the corresponding business tax and permit fees indicated in your Order of Payment. Keep all official receipts as proof of payment. Once payment is complete, return to the BPLO to submit the receipts and complete your application process. Some LGUs may allow online payment through accredited payment channels or kiosks during the renewal period.</p></div>",
+        "<div style='white-space: normal;'><p>After verification and approval, the <b>Mayor’s Permit</b> or Business Permit will be released by the BPLO. You will be notified when your permit is ready for pick-up. Claim the document at the releasing section and ensure that it is posted visibly within your business premises as required by local ordinance. The Business Permit is valid for one year and must be renewed annually—typically on or before January 20—to avoid penalties or surcharges.</p></div>"
+      ],
+      "additionalInfo": {
+        "title": "Additional Requirements and Joint Inspection",
+        "subtitle": "<div style='white-space: normal;'><p>Some businesses may be required to submit <b>additional documents or undergo a joint inspection</b> before the Mayor’s Permit can be issued. These requirements vary depending on the <b>nature, location, and risk level</b> of your business activity.</p><p><b>Possible additional clearances include:</b></p></div>",
+        "content": [
+          "Fire Safety Inspection Certificate (FSIC) from the Bureau of Fire Protection (BFP)",
+          "Environmental Compliance or CCENRO Clearance (for environmentally critical or waste-producing businesses)",
+          "Sanitary Permit or Health Certificate (for food, wellness, or healthcare-related establishments)",
+          "Police Clearance (for security-sensitive or entertainment establishments)",
+          "Market Clearance (for public market vendors or stalls)",
+          "Occupancy Permit (for newly constructed or renovated commercial spaces)",
+          "Zoning or Locational Clearance from the City Planning and Development Office (CPDO)",
+          "Electrical Inspection Certificate (for establishments using heavy machinery or high electrical load)"
+        ]
+      },
       "forms": [
-        "Business Permit Application Form (BPLO's Copy)",
-        "Business Permit Application Form (Owner's Copy)",
-        "Business Permit Application Form (CTO's Copy)"
+        "Business Permit Application Form"
+      ],
+      "formsDownload": [
+        "https://drive.google.com/uc?export=download&id=11dkXM4bAkgOrMGNh7lzQ2HxCXvqbC94j"
       ]
     },
     {
@@ -120,39 +154,117 @@
         "Verification by staff.",
         "Pay the fee and keep the receipt.",
         "Receive the signed Barangay Clearance."
-      ],
-      "forms": [
-        "Barangay Clearance Application Form"
       ]
     },
     {
       "id": "property-tax",
       "icon": "receipt",
-      "title": "Property Tax",
-      "description": "Pay your annual Real Property Tax (RPT).",
+      "title": "Local Real Property Tax (RPT) - Cebu City",
+      "description": "Pay your annual Real Property Tax (RPT), which includes the Basic Tax and the Special Education Fund (SEF) Tax, to the Cebu City Government.",
       "color": "warning",
       "requirements": [
-        "Previous Official Receipt of RPT",
-        "Property Title",
-        "Tax Declaration Number",
-        "For first-time: copy of property title and tax declaration"
+        "Previous Official Receipt of RPT (if renewing payment)",
+        "Tax Declaration Number / Property Index Number",
+        "Valid Government-issued ID",
+        "For first-time or transfer payments: Copy of Transfer Certificate of Title (TCT) or Tax Declaration and relevant transfer documents."
       ],
       "steps": [
-        "Determine amount due with City Treasurer's Office.",
-        "Assessment at Assessor Office.",
-        "Pay at City Treasurer's Office or authorized online channels.",
-        "Obtain official receipt.",
-        "Avail discounts for early full payment."
+        "Secure an assessment and/or Statement of Account.",
+        "Present requirements at the City Treasurer's Office.",
+        "Pay the assessed amount at the City Treasurer's Office or authorized channels.",
+        "Obtain the Official Receipt (OR) as proof of payment.",
+        "Ensure all taxes (Basic RPT and SEF) are paid."
+      ],
+      "stepDetails": [
+        "<div style='white-space: normal;'><p>For new or updated property declarations, proceed to the <b>Office of the City Assessor</b> (located at Cebu City Hall) for assessment and to receive the <b>Tax Declaration</b>.</p><p>For regular payments, proceed directly to the <b>City Treasurer's Office</b> (CTO) or check if an <b>online payment portal</b> is available and registered with the Cebu City LGU.</p></div>",
+        "<div style='white-space: normal;'><p>At the <b>City Treasurer's Office (CTO)</b>, present your previous <b>Official Receipt (OR)</b> or <b>Tax Declaration Number</b> to the billing staff to generate your Statement of Account.</p><p>This statement will show the basic RPT amount due, the Special Education Fund (SEF) tax (an additional 1%), and any penalties or discounts.</p></div>",
+        "<div style='white-space: normal;'><p>Pay the full amount indicated on the Statement of Account to the Cashier at the <b>CTO</b>. Payment is typically accepted in cash, manager's check, or through the city's accredited payment channels (if available).</p></div>",
+        "<div style='white-space: normal;'><p>Receive the <b>Official Receipt (OR)</b> from the Cashier. This serves as your final proof of payment for the Real Property Tax and the Special Education Fund Tax for the calendar year.</p></div>",
+        "<div style='white-space: normal;'><p>The total RPT consists of the <b>Basic Real Property Tax (RPT)</b> (up to 2% of the assessed value in highly urbanized cities like Cebu) and an additional <b>1% for the Special Education Fund (SEF)</b>. Both are collected simultaneously.</p></div>"
       ],
       "forms": [],
       "additionalInfo": {
-        "title": "Payment Schedule & Penalties",
+        "title": "Payment Deadlines, Discounts, and Penalties",
+        "subtitle": "<div style='white-space: normal;'><p>The RPT accrues on January 1st of each year. Cebu City typically adheres to the following schedule:</p></div>",
         "content": [
-          "Full Payment Discount: On or before March 31 (up to 10% discount).",
-          "Quarterly Installments: Mar 31, Jun 30, Sep 30, Dec 31.",
-          "Penalty for Delinquency: 2% per month."
+          "Full Annual Payment Deadline: January 31 of the current tax year to avoid penalties.",
+          "Discounts for Advance/Early Payment: A 10% discount is usually given if the entire annual tax is paid on or before March 31. Discounts may also apply if tax for the succeeding year is paid before December 31 (up to 20%).",
+          "Quarterly Installments: March 31, June 30, September 30, and December 31.",
+          "Penalty for Delinquency: A 2% interest is imposed per month of delinquency, not to exceed 36 months (or 72%). Interest is generally reckoned from January 1 for any tax unpaid after March 31."
         ]
-      }
+      },
+      "formsDownload": []
+    },
+    {
+      "id": "national-tax-epayment",
+      "icon": "receipt",
+      "title": "National Tax ePayment (BIR - MYEG)",
+      "description": "Pay your national taxes (e.g., Income Tax, VAT, Percentage Tax) online using the MYEG ePayment System.",
+      "color": "warning",
+      "requirements": [
+        "Taxpayer Identification Number (TIN)",
+        "Branch Code (last 3-5 digits of TIN)",
+        "Revenue District Office (RDO) Code",
+        "Form Type (e.g., 1701Q, 2551M)",
+        "Tax Type and Return Period"
+      ],
+      "steps": [
+        "Login or Register at the MYEG website.",
+        "Select the BIR Online Tax Payment service.",
+        "Enter all required BIR Payment details.",
+        "Select a payment channel (e.g., GCash, Credit Card).",
+        "Complete the payment using your selected method.",
+        "Receive the Transaction Success notification."
+      ],
+      "stepDetails": [
+        "<div style='white-space: normal;'><p>Access and log in or register at the <b>myeg.ph</b> website to begin the payment process.</p></div>",
+        "<div style='white-space: normal;'><p>From the list of government services, select the <b>BIR Online Tax Payment</b> service.</p><p>Click the <b>\"Pay your Taxes now\"</b> button to proceed to the input form.</p></div>",
+        "<div style='white-space: normal;'><p>Carefully fill out the necessary BIR Payment details. This information is critical for correct posting of your payment:</p><ul style='list-style-type: disc; padding-left: 20px;'><li><b>Taxpayer Identification Number (TIN)</b></li><li><b>Branch Code</b> (the last 3 to 5 digits of your TIN)</li><li><b>Revenue District Office (RDO) Code</b></li><li><b>Form Type, Tax Type,</b> and <b>Return Period</b></li></ul><p><b>⚠️ Warning:</b> Ensure the TIN and Branch Code are correct. No refund processing is allowed for incorrect details.</p></div>",
+        "<div style='white-space: normal;'><p>You will be redirected to the MYEG Payment Gateway. Select your preferred mode of payment:</p><ul style='list-style-type: disc; padding-left: 20px;'><li><b>Mobile (e.g., GCash):</b> Requires your mobile number and MPIN.</li><li><b>Credit Card:</b> Requires card details and an OTP (One-Time Password) for authentication.</li></ul><p>Confirm the payment amount before proceeding.</p></div>",
+        "<div style='white-space: normal;'><p>Follow the prompts for your selected payment channel (e.g., inputting your MPIN for GCash or the OTP for Credit Card) to finalize the transaction.</p></div>",
+        "<div style='white-space: normal;'><p>Upon successful payment, you will see a <b>Payment Success page</b> and receive a <b>Transaction Success email notification</b> containing a summary of your payment details.</p></div>"
+      ],
+      "additionalInfo": {
+        "title": "Payment Channels Available",
+        "subtitle": "<div style='white-space: normal;'><p>The MYEG ePayment System accepts the following modes for BIR tax payment:</p></div>",
+        "content": [
+          "GCash",
+          "Credit Card (Visa/Mastercard)",
+          "Other accredited payment facilities (varies)"
+        ]
+      },
+      "forms": [],
+      "formsDownload": []
+    },
+    {
+      "id": "education",
+      "icon": "file",
+      "title": "Education Services",
+      "description": "Guidance for new school enrollment, scholarships, and Special Study Permit (SSP) for foreign students in Cebu City.",
+      "color": "accent",
+      "requirements": [
+        "For New Enrollment: Report Card/Form 138 (or latest grades), Birth Certificate (PSA), Good Moral Certificate (if required), 2x2 photo, ID of parent/guardian (if minor), Transfer Certificate (for transferees).",
+        "For Scholarships: Certificate of Registration/Admission (if available), latest grades or TOR, Proof of income (e.g., payslip/Certificate of Indigency/ITR), Barangay Clearance or Residency, ID photos, Completed application form.",
+        "For SSP (Foreign Students): Passport (bio page + latest entry stamp), 2x2 photos, School Acceptance/Endorsement Letter (SSP-accredited), Completed SSP form, Proof of payment (as required by school/Bureau of Immigration)."
+      ],
+      "steps": [
+        "Determine your education service (enrollment, scholarship, or SSP).",
+        "Identify the school or program and check specific requirements and deadlines.",
+        "Complete the application form and prepare supporting documents.",
+        "Submit your application (online or in person) as instructed.",
+        "Attend screening/interview or verification if required.",
+        "Wait for approval and claim result (enroll, scholarship grant, or SSP certificate)."
+      ],
+      "stepDetails": [
+        "<div style='white-space: normal;'><p>Decide whether you need <b>new school enrollment</b>, a <b>scholarship</b>, or a <b>Special Study Permit (SSP)</b> as a foreign student. Each path has different requirements, fees, and processing timelines.</p><ul style='list-style-type: disc; padding-left: 20px;'><li><b>Enrollment:</b> Public/private basic ed, colleges, and universities.</li><li><b>Scholarship:</b> Cebu City Scholarship, CHED, SUC/LGU/Institution-based aid.</li><li><b>SSP:</b> Short-term study for foreign nationals enrolled in SSP-accredited institutions.</li></ul></div>",
+        "<div style='white-space: normal;'><p><b>New School Enrollment:</b> Visit the school’s website or registrar for the official checklist (report card, PSA birth certificate, good moral, photos, transfer credentials). Some schools require <b>pre-screening</b> or online pre-admission forms.</p><p><b>Scholarships:</b> Review eligibility (GPA, income bracket, residency). Check Cebu City Scholarship/CHED or school-specific programs for <b>intake windows and documentary proof</b> (grades, COR, income docs).</p><p><b>SSP:</b> Choose an SSP-accredited school (language/international schools). The school typically provides the <b>endorsement</b> and instructions for SSP processing.</p></div>",
+        "<div style='white-space: normal;'><p>Download or secure the <b>official application form</b> and fill it out completely.</p><ul style='list-style-type: disc; padding-left: 20px;'><li><b>Enrollment:</b> Student info, prior school, course/track, guardian details.</li><li><b>Scholarship:</b> Personal info, school/program, academic record, income proof.</li><li><b>SSP:</b> Passport details, school acceptance, intended study, duration.</li></ul><p>Prepare clear copies of all documentary requirements; some offices require <b>originals for verification</b>.</p></div>",
+        "<div style='white-space: normal;'><p>Follow the school or program’s submission channel:</p><ul style='list-style-type: disc; padding-left: 20px;'><li><b>Online:</b> Upload PDFs/images via portal or email as instructed; retain reference number.</li><li><b>In-person:</b> Submit to the Registrar/Scholarship Office; ask for a receiving copy or acknowledgment.</li><li><b>SSP:</b> The <b>school usually files</b> your SSP application with the Bureau of Immigration; you may be asked to provide your passport for verification.</li></ul></div>",
+        "<div style='white-space: normal;'><p>Some tracks require additional screening:</p><ul style='list-style-type: disc; padding-left: 20px;'><li><b>Enrollment:</b> Placement tests or interviews (program-dependent).</li><li><b>Scholarships:</b> Panel interview/household verification for need-based grants.</li><li><b>SSP:</b> BI may request <b>additional verification</b> via your school; keep your contact info active.</li></ul></div>",
+        "<div style='white-space: normal;'><p><b>Enrollment:</b> Receive your admission notice, finalize enrollment, and pay fees as scheduled.</p><p><b>Scholarship:</b> Monitor results; if approved, comply with any <b>grant agreement</b> and maintain GPA/residency requirements.</p><p><b>SSP:</b> Typical processing ~<b>5–7 business days</b> (varies); the school releases your <b>SSP certificate</b> when approved.</p></div>"
+      ],
+      "forms": [],
+      "formsDownload": []
     }
   ]
 }
