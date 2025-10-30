@@ -15,6 +15,15 @@
   <link rel="stylesheet" href="{% static 'mycebu_app/css/dashboard.css' %}">
   {% elif current_tab == 'services' %}
   <link rel="stylesheet" href="{% static 'mycebu_app/css/services.css' %}">
+  <script src="{% static 'mycebu_app/js/services.js' %}" defer></script>
+  {% elif current_tab == 'ordinances' %}
+  <link rel="stylesheet" href="{% static 'mycebu_app/css/ordinances.css' %}">
+  <script src="{% static 'mycebu_app/js/ordinances.js' %}" defer></script>
+  {% elif current_tab == 'directory' %}
+  <link rel="stylesheet" href="{% static 'mycebu_app/css/directory.css' %}">
+  <script src="{% static 'mycebu_app/js/directory.js' %}" defer></script>
+  <script src="{% static 'mycebu_app/js/directory-filter.js' %}" defer></script>
+  <script src="{% static 'mycebu_app/js/directory-tab.js' %}" defer></script>
   {% endif %}
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -160,9 +169,6 @@
   <script></script>
   <script src="{% static 'mycebu_app/js/header.js' %}" defer></script>
   <script src="{% static 'mycebu_app/js/section-skeleton.js' %}" defer></script>
-  {% if current_tab == 'services' %}
-  <script src="{% static 'mycebu_app/js/services.js' %}" defer></script>
-  {% endif %}
 </body>
 
 </html>

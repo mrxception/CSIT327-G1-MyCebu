@@ -630,6 +630,7 @@ def landing_view(request, tab='landing'):
         officials_all = payload.get("officials", [])
         positions = payload.get("positions", [])
         districts = payload.get("districts", [])
+        department_offices = payload.get("departmentOffices", [])
         emergency_contacts = payload.get("emergencyContacts", [])
 
         q = (request.GET.get("q", "") or "").lower()
@@ -652,6 +653,7 @@ def landing_view(request, tab='landing'):
             "officials": officials,
             "positions": positions,
             "districts": districts,
+            "department_offices": department_offices,
             "emergency_contacts": emergency_contacts,
             "q": q,
             "position": position,

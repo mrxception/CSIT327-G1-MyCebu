@@ -1,0 +1,287 @@
+{% extends 'mycebu_app/landing_base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'mycebu_app/css/directory.css' %}">
+
+<section class="tab-content-section" data-loading="false" data-skel="directory-all">
+    <header class="dir-hero">
+        <div class="container">
+            <div class="dir-hero__badge">🏛️ Government Directory</div>
+            <h1 class="dir-hero__title">Cebu City Directory</h1>
+            <p class="dir-hero__desc">Find local officials, department offices, and emergency hotlines.</p>
+        </div>
+    </header>
+
+    <div class="container" style="margin-top:8px;">
+        <nav class="tabs tabs--bar" role="tablist">
+            <button class="tab-btn is-active" data-tab="officials" role="tab" aria-selected="true">OFFICIALS
+                DIRECTORY</button>
+            <button class="tab-btn" data-tab="offices" role="tab" aria-selected="false">DEPARTMENT OFFICES</button>
+            <button class="tab-btn" data-tab="hotlines" role="tab" aria-selected="false">EMERGENCY HOTLINES</button>
+        </nav>
+    </div>
+
+    <!-- ============ OFFICIALS ============ -->
+    <section class="tab-panel" data-panel="officials" style="display:block;">
+        <div class="filter-bar">
+            <form class="container" id="form-officials" onsubmit="return false;">
+                <div class="grid grid-3">
+                    <div class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+                            <path d="M20 20L16.65 16.65" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                        <input class="input input--search" id="q-officials" type="text"
+                            placeholder="Search by name, position, or office">
+                    </div>
+
+                    <div class="ui-select" data-name="position">
+                        <select id="pos-officials" class="native-select">
+                            <option value="all" selected>All Positions</option>
+                            {% for p in positions %}
+                            <option value="{{ p }}">{{ p }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="ui-select__trigger select" data-trigger></button>
+                        <ul class="ui-select__menu" data-menu>
+                            <li class="ui-select__option" data-value="all">All Positions</li>
+                            {% for p in positions %}
+                            <li class="ui-select__option" data-value="{{ p }}">{{ p }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="ui-select" data-name="district">
+                        <select id="dist-officials" class="native-select">
+                            <option value="all" selected>All Districts</option>
+                            {% for d in districts %}
+                            <option value="{{ d }}">{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="ui-select__trigger select" data-trigger></button>
+                        <ul class="ui-select__menu" data-menu>
+                            <li class="ui-select__option" data-value="all">All Districts</li>
+                            {% for d in districts %}
+                            <li class="ui-select__option" data-value="{{ d }}">{{ d }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="py-12">
+            <div class="container px-4">
+                <div class="text-center" style="margin-bottom:24px">
+                    <div class="dir-hero__badge" style="background:var(--secondary); color:white">Department Officials
+                    </div>
+                    <h2 class="h2" style="margin-top:8px">Cebu City Department Officials</h2>
+                    <p class="muted">Government directory of the government officials in Cebu City.</p>
+                </div>
+
+                <div class="dir-grid" id="grid-officials">
+                    {% for o in officials %}
+                    <div class="card" data-name="{{ o.name|lower }}" data-position="{{ o.position|lower }}"
+                        data-office="{{ o.office|lower }}" data-district="{{ o.district|default_if_none:''|lower }}">
+                        {% if o.photo %}
+                        <img class="avatar avatar--img"
+                            src="{% static 'mycebu_app/images/directory-profiles/' %}{{ o.photo }}" alt="{{ o.name }}">
+                        {% else %}
+                        <div class="avatar">{{ o.initials }}</div>
+                        {% endif %}
+
+                        <h3 class="card-title">{{ o.name }}</h3>
+                        <div class="card-sub">{{ o.position }}</div>
+                        {% if o.district %}
+                        <div style="margin:8px auto 0">
+                            <span class="badge badge--secondary">{{o.district }}</span>
+                        </div>{% endif %}
+
+                        <div class="meta">
+                            <div class="meta-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                    width="24px" fill="var(--muted)">
+                                    <path
+                                        d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z" />
+                                </svg>
+                                <span>{{ o.office }}</span>
+                            </div>
+
+                            {% if o.emails or o.email %}
+                            <div class="meta-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960"
+                                    fill="var(--muted)" aria-hidden="true">
+                                    <path
+                                        d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
+                                </svg>
+                                <span style="display:flex; flex-direction:column; gap:10px;">
+                                    {% if o.emails %}
+                                    {% for e in o.emails %}<div>{{ e }}</div>{% endfor %}
+                                    {% else %}
+                                    <div>{{ o.email }}</div>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if o.phones or o.phone %}
+                            <div class="meta-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960"
+                                    width="24px" fill="var(--muted)">
+                                    <path
+                                        d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12Z" />
+                                </svg>
+                                <span style="display:flex; flex-direction:column; gap:10px;">
+                                    {% if o.phones %}
+                                    {% for ph in o.phones %}<div>{{ ph }}</div>{% endfor %}
+                                    {% else %}
+                                    <div>{{ o.phone }}</div>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="empty-msg" id="empty-officials" style="display:none;">No Officials Found</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ OFFICES ============ -->
+    <section class="tab-panel" data-panel="offices" style="display:none;">
+        <div class="filter-bar">
+            <form class="container" id="form-offices" onsubmit="return false;">
+                <div class="grid grid-3">
+                    <div class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+                            <path d="M20 20L16.65 16.65" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                        <input class="input input--search" id="q-offices" type="text"
+                            placeholder="Search by office name or head">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="py-12">
+            <div class="container">
+                <div class="text-center" style="margin-bottom:24px">
+                    <div class="dir-hero__badge" style="background:var(--primary); color:white">Department Offices</div>
+                    <h2 class="h2" style="margin-top:8px">Cebu City Department Offices</h2>
+                    <p class="muted">Quick access to the essential government department offices in Cebu City.</p>
+                </div>
+
+                <div class="dir-grid" id="grid-offices">
+                    {% for d in department_offices %}
+                    <div class="card" data-name="{{ d.name|lower }}" data-head="{{ d.head|default_if_none:''|lower }}">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960"
+                                aria-hidden="true" style="flex:0 0 24px; color:var(--primary);">
+                                <path fill="currentColor"
+                                    d="M160-120q-33 0-56.5-23.5T80-200v-440q0-33 23.5-56.5T160-720h160v-80q0-33 23.5-56.5T400-880h160q33 0 56.5 23.5T640-800v80h160q33 0 56.5 23.5T880-640v440q0 33-23.5 56.5T800-120H160Zm0-80h640v-440H160v440Zm240-520h160v-80H400v80ZM160-200v-440 440Z" />
+                            </svg>
+                            <h3 class="card-title" style="margin:0; text-align:start;">{{ d.name }}</h3>
+                        </div>
+
+                        {% if d.head %}
+                        <div class="card-sub" style="text-align:start; margin-bottom:8px;">{{ d.head }}</div>
+                        {% endif %}
+
+                        <div class="meta">
+                            {% if d.contact %}
+                            {% if d.contact.emails %}
+                            <div class="meta-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960"
+                                    fill="var(--muted)" aria-hidden="true">
+                                    <path
+                                        d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
+                                </svg>
+                                <span class="break-all" style="display:flex; flex-direction:column; gap:10px;">
+                                    {% for e in d.contact.emails %}<span>{{ e }}</span>{% endfor %}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            {% if d.contact.phones %}
+                            <div class="meta-row">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960"
+                                    fill="var(--muted)" aria-hidden="true">
+                                    <path
+                                        d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12Z" />
+                                </svg>
+                                <span style="display:flex; flex-direction:column; gap:10px;">
+                                    {% for ph in d.contact.phones %}<span>{{ ph }}</span>{% endfor %}
+                                </span>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="empty-msg" id="empty-offices" style="display:none;">No Offices Found</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ HOTLINES ============ -->
+    <section class="tab-panel hotlines" data-panel="hotlines" style="display:none;">
+        <div class="filter-bar">
+            <form class="container" id="form-hotlines" onsubmit="return false;">
+                <div class="grid grid-3">
+                    <div class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+                            <path d="M20 20L16.65 16.65" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" />
+                        </svg>
+                        <input class="input input--search" id="q-hotlines" type="text"
+                            placeholder="Search by service or number">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="py-12   ">
+            <div class="container px-4">
+                <div class="text-center" style="margin-bottom:24px">
+                    <div class="dir-hero__badge" style="background:rgb(219, 64, 64); color:white">Emergency Hotlines
+                    </div>
+                    <h2 class="h2" style="margin-top:8px">Emergency Contact Numbers</h2>
+                    <p class="muted">Quick access to essential emergency services and government hotlines in Cebu City.
+                    </p>
+                </div>
+
+                <div class="dir-grid" id="grid-hotlines">
+                    {% for c in emergency_contacts %}
+                    <div class="card hotline-card" data-service="{{ c.service|lower }}"
+                        data-numbers="{{ c.numbers|join:' '|lower }}">
+                        <div class="hotline-title">
+                            <svg class="i" style="height:24px; width:24px;color:red" viewBox="0 0 24 24"
+                                aria-hidden="true">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.09 4.19 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.32 1.77.59 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.14a2 2 0 0 1 2.11-.45c.83.27 1.7.47 2.6.59A2 2 0 0 1 22 16.92Z"
+                                    fill="none" stroke="red" stroke-width="2" />
+                            </svg>
+                            <span>{{ c.service }}</span>
+                        </div>
+                        <div>
+                            {% for n in c.numbers %}
+                            <a class="hotline-link" href="tel:{{ n }}">{{ n }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="empty-msg" id="empty-hotlines" style="display:none;">No Hotlines Found</div>
+            </div>
+        </div>
+    </section>
+</section>
+{% endblock content %}

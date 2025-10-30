@@ -1,0 +1,622 @@
+{
+  "officials": [
+    {
+      "name": "HON. NESTOR D. ARCHIVAL SR.",
+      "position": "City Mayor",
+      "office": "Office of the City Mayor",
+      "email": "mayor@cebu.gov.ph",
+      "phone": "(032) 255-0000",
+      "initials": "NA",
+      "photo": "archival.png"
+    },
+    {
+      "name": "HON. TOMAS R. OSMEÑA",
+      "position": "Vice Mayor",
+      "office": "Office of the Vice Mayor",
+      "email": "vicemayor@cebu.gov.ph",
+      "phone": "(032) 255-0001",
+      "initials": "TO",
+      "photo": "osmena.png"
+    },
+    {
+      "name": "CONG. RACHEL DEL MAR",
+      "position": "Congressional Representative",
+      "district": "North District",
+      "office": "1st District Office",
+      "initials": "RD",
+      "photo": "delmar.png"
+    },
+    {
+      "name": "CONG. EDUARDO RAMA JR.",
+      "position": "Congressional Representative",
+      "district": "South District",
+      "office": "2nd District Office",
+      "initials": "ER",
+      "photo": "rama.png"
+    },
+    {
+      "name": "Winston Pepito",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "WP",
+      "photo": "wpepito.png"
+    },
+    {
+      "name": "Nice Pepito",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "NP"
+    },
+    {
+      "name": "Harold Go",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "HG",
+      "photo": "go.png"
+    },
+    {
+      "name": "Jaypee Labella",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "JL",
+      "photo": "labella.png"
+    },
+    {
+      "name": "Joel Garganera",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "JG",
+      "photo": "garganera.png"
+    },
+    {
+      "name": "Alvin Arcilla",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "AA",
+      "photo": "arcilla.png"
+    },
+    {
+      "name": "Jun Alcover",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "JA",
+      "photo": "alcover.png"
+    },
+    {
+      "name": "Bebs Andales",
+      "position": "City Councilor",
+      "district": "North District",
+      "office": "City Council",
+      "initials": "BA"
+    },
+    {
+      "name": "Dave Tumulak",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "DT",
+      "photo": "tumulak.png"
+    },
+    {
+      "name": "Phillip Zafra",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "PZ",
+      "photo": "zafra.png"
+    },
+    {
+      "name": "Paul Labra",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "PL",
+      "photo": "labra.png"
+    },
+    {
+      "name": "Jose Abellanosa",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "JA",
+      "photo": "abellanosa.png"
+    },
+    {
+      "name": "Mikel Rama",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "MR",
+      "photo": "mrama.png"
+    },
+    {
+      "name": "Francis Esparis",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "FE",
+      "photo": "esparis.png"
+    },
+    {
+      "name": "Michelle Abella",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "MA"
+    },
+    {
+      "name": "Harry Eran",
+      "position": "City Councilor",
+      "district": "South District",
+      "office": "City Council",
+      "initials": "HE",
+      "photo": "eran.png"
+    },
+    {
+      "name": "Hon. Franklyn Ong",
+      "position": "Ex-Officio",
+      "office": "ABC President",
+      "initials": "FO",
+      "photo": "ong.png"
+    },
+    {
+      "name": "Hon. Rhea Mae Jakosalem",
+      "position": "Ex-Officio",
+      "office": "SK Federation President",
+      "initials": "RJ",
+      "photo": "jakosalem.png"
+    }
+  ],
+  "positions": [
+    "City Mayor",
+    "Vice Mayor",
+    "Congressional Representative",
+    "City Councilor",
+    "Ex-Officio",
+    "Department Head"
+  ],
+  "districts": [
+    "North District",
+    "South District"
+  ],
+  "departmentOffices": [
+    {
+      "name": "City Administrator's Office",
+      "head": "Engr. Albert T. Tan",
+      "contact": {
+        "emails": [
+          "cityadmin.tan@cebu.gov.ph",
+          "cityadmin@cebu.gov.ph"
+        ],
+        "phones": [
+          "(032) 254-9115 (Office)",
+          "(032) 233-4191 (Office)",
+          "LOCAL 1210 (Office)",
+          "LOCAL 1206 (Office)",
+          "LOCAL 1201 (Office)",
+          "LOCAL 1113 (Atty. Poblette)",
+          "LOCAL 1103 (City Administrator)"
+        ]
+      }
+    },
+    {
+      "name": "City Agricultural Department (CAD)",
+      "head": "Joselito L. Baclayon",
+      "contact": {
+        "emails": [
+          "cad.jlbaclayon@cebucity.gov.ph",
+          "cad@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 344-2559"
+        ]
+      }
+    },
+    {
+      "name": "Office of the Building Official (OBO)",
+      "head": "Arch. Florante Catalan",
+      "contact": {
+        "emails": [
+          "obo.fscatalan@cebucity.gov.ph",
+          "obo@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 255-3092",
+          "(032) 253-2026",
+          "(032) 266-5775",
+          "LOCAL 1208"
+        ]
+      }
+    },
+    {
+      "name": "City Legal Office",
+      "head": "Atty. Brico Joseph C. Boholst",
+      "contact": {
+        "emails": [
+          "citylegaloffice@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 564-9990",
+          "(032) 239-7260"
+        ]
+      }
+    },
+    {
+      "name": "Public Information Office (PIO)",
+      "contact": {
+        "phones": [
+          "(032) 412-1913",
+          "(032) 253-4751"
+        ]
+      }
+    },
+    {
+      "name": "Department of Foreign Affairs (DFA) - Cebu Extension Office",
+      "contact": {
+        "phones": [
+          "(032) 520-6193",
+          "(032) 520-5898"
+        ]
+      }
+    },
+    {
+      "name": "Office of the City Treasurer",
+      "contact": {
+        "emails": [
+          "treasurer@cebucity.gov.ph",
+          "cto_business@cebucity.gov.ph",
+          "cto-examdiv@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 412-0212",
+          "(032) 412-5538 (Tax Exam)",
+          "(032) 412-5539 (Cash Receipt)",
+          "LOCAL 4001 (MS. Villarete - OIC)",
+          "LOCAL 4002 (Secretary)",
+          "LOCAL 4003 (Admin)",
+          "LOCAL 4004 (Teller)",
+          "LOCAL 4006 (Mr. Limosnera - OIC)",
+          "LOCAL 4007 (Ms. Castanares - OIC)"
+        ]
+      }
+    },
+    {
+      "name": "Department of Social Welfare and Services (DSWS)",
+      "contact": {
+        "emails": [
+          "dsws@cebucity.gov.ph",
+          "dsws.pcbasmayor@cebu.gov.ph"
+        ],
+        "phones": [
+          "(032) 505-6274",
+          "(032) 414-3404",
+          "(032) 507-5114 (Admin)",
+          "(032) 262-7192 (After Care)"
+        ]
+      }
+    },
+    {
+      "name": "Department of General Services (DGS)",
+      "contact": {
+        "emails": [
+          "dgs@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 505-6274",
+          "(032) 517-9141",
+          "(032) 412-2814",
+          "(032) 272-7916 (SRP)",
+          "(032) 345-0719 (BMS-SPR)",
+          "(032) 233-4098",
+          "(032) 272-0140 (ERMM DGS)",
+          "LOCAL 1703 (Property Division)",
+          "LOCAL 1707 (BAC)"
+        ]
+      }
+    },
+    {
+      "name": "Department of Public Services (DPS)",
+      "contact": {
+        "emails": [
+          "dps.jpgelasque@cebucity.gov.ph",
+          "dps@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 344-9941 (Mr. Gelasque - OIC)",
+          "0930-259-8444 (Hotline)",
+          "0931-202-9499 (Septic Tank)",
+          "0925-305-3357 (Garbage)",
+          "0936-933-9979 (Streetlighting)"
+        ]
+      }
+    },
+    {
+      "name": "CCMC - College of Nursing",
+      "contact": {
+        "emails": [
+          "ccmc.cn@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 316-1987",
+          "(032) 342-7305",
+          "LOCAL 5128"
+        ]
+      }
+    },
+    {
+      "name": "Cebu City Transportation Office (CCTO)",
+      "contact": {
+        "emails": [
+          "ccto.rbarce@cebucity.gov.ph",
+          "ccto@cebucity.gov.ph"
+        ],
+        "phones": [
+          "(032) 238-1286",
+          "0917-722-2344 (Ms. Arce)",
+          "0922-586-6405"
+        ]
+      }
+    },
+    {
+      "name": "CEBU CITY SCHOLARSHIP OFFICE",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "503-3024"
+        ]
+      }
+    },
+    {
+      "name": "CEBU CITY SPORTS CENTER",
+      "head": "ABELLANA ADMIN",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "254-8567"
+        ]
+      }
+    },
+    {
+      "name": "CCYDO / CCYDC",
+      "head": "MR. PAOLO MARTIN L. SABERON",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "253-0358"
+        ]
+      }
+    },
+    {
+      "name": "CEBU CITY DISASTER RISK REDUCTION AND MANAGEMENT OFFICE (CCDRRMO)",
+      "head": null,
+      "contact": {
+        "emails": [
+          "ccdrrmo.aacomar@cebucity.gov.ph",
+          "ccdrrmo@cebucity.gov.ph"
+        ],
+        "phones": [
+          "262-1424",
+          "266-6317",
+          "0917-839-9896 (911 - DISASTER)"
+        ]
+      }
+    },
+    {
+      "name": "CEBU CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE (CCENRO)",
+      "head": "ENGR. EDITHA PIROS - OIC",
+      "contact": {
+        "emails": [
+          "ccenro@cebucity.gov.ph",
+          "ccenro.eperos@cebucity.gov.ph"
+        ],
+        "phones": [
+          "349-3958"
+        ]
+      }
+    },
+    {
+      "name": "CEBU CITY WOMEN & FAMILY AFFAIRS COMMISSION (CCWFAC)",
+      "head": "MS. MARICAR B. TARIMAN - OIC",
+      "contact": {
+        "emails": [
+          "ccwfac@cebucity.gov.ph"
+        ],
+        "phones": [
+          "231-1766",
+          "LOCAL 1517"
+        ]
+      }
+    },
+    
+    {
+      "name": "CCWPC",
+      "head": "MS. MYRA V. SARAOSAS",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "256-1484"
+        ]
+      }
+    },
+    {
+      "name": "CEBU CITY MEDICAL CENTER (CCMC)",
+      "head": "DR. ANTON OLIVER RESPUSAR II",
+      "contact": {
+        "emails": [
+          "ccmc.aoareposar@cebucity.gov.ph",
+          "ccmc.agarganera@cebucity.gov.ph",
+          "ccmc@cebucity.gov.ph"
+        ],
+        "phones": [
+          "516-3934",
+          "254-0517 (HOSP. ADMIN)"
+        ]
+      }
+    },
+    {
+      "name": "ACT",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "238-2384",
+          "253-1628",
+          "254-0339"
+        ]
+      }
+    },
+    {
+      "name": "ANIMAL BITES",
+      "head": "DRA. RODRIGUEZ",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "416-6177",
+          "232-6863",
+          "239-0183 (CADAVER SECTION)"
+        ]
+      }
+    },
+    {
+      "name": "ANTI MENDICANCY",
+      "head": "T. PADILLA MARKET",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "09478470864"
+        ]
+      }
+    },
+    {
+      "name": "BAYANIHAN",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "255-7490"
+        ]
+      }
+    },
+    {
+      "name": "BANTAY DAGAT COMMISSION",
+      "head": "MS. MARIA GINA V. DESAMPARADO - HEAD",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "254-2116"
+        ]
+      }
+    },
+    {
+      "name": "BARANGAY AFFAIRS OFFICE",
+      "head": "MR. BOYET OCAMPO - HEAD",
+      "contact": {
+        "emails": [],
+        "phones": [
+          "256-1484",
+          "367-9236"
+        ]
+      }
+    },
+    {
+      "name": "BARANGAY COUNCILOR'S LEAGUE OF THE PHILIPPINES (BCLP)",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "231-5108"
+        ]
+      }
+    },
+    {
+      "name": "BIKE LANE",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "436-8087"
+        ]
+      }
+    },
+    {
+      "name": "BIR",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "232-8578"
+        ]
+      }
+    },
+    {
+      "name": "BOI",
+      "head": null,
+      "contact": {
+        "emails": [],
+        "phones": [
+          "345-6442"
+        ]
+      }
+    }
+  ],
+  "emergencyContacts": [
+    {
+      "service": "Emergency Rescue & Disaster Response (ERUF)",
+      "numbers": [
+        "161 (Hotline)",
+        "(032) 233-9300 (Banilad)",
+        "(032) 255-7287 (Abellana)"
+      ]
+    },
+    {
+      "service": "Cebu City Fire Department",
+      "numbers": [
+        "160 (Hotline)"
+      ]
+    },
+    {
+      "service": "Cebu City Police Hotline",
+      "numbers": [
+        "166 (Hotline)"
+      ]
+    },
+    {
+      "service": "Police/Law Enforcement",
+      "numbers": [
+        "(032) 256-2194 (Fuente Osmeña)"
+      ]
+    },
+    {
+      "service": "Philippine National Red Cross (Cebu)",
+      "numbers": [
+        "(032) 253-4611"
+      ]
+    },
+    {
+      "service": "Traffic Management (CITOM)",
+      "numbers": [
+        "(032) 253-9211"
+      ]
+    },
+    {
+      "service": "Chong Hua Hospital",
+      "numbers": [
+        "(032) 255-8000"
+      ]
+    },
+    {
+      "service": "Cebu Doctors' Hospital",
+      "numbers": [
+        "(032) 255-5555"
+      ]
+    }
+  ]
+}
