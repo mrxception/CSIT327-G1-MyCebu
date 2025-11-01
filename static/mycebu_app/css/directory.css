@@ -44,7 +44,7 @@ html,body{margin:0;padding:0}
 .dir-hero__title{font-size:2.25rem;margin:0 0 8px}
 .dir-hero__desc{opacity:.95;margin:0}
 
-.filter-bar{background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px}
+.filter-bar{/*background:var(--card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);*/padding:16px}
 .empty-msg {text-align: center;color: var(--muted);font-size: 1.1rem;margin-top: 32px;font-weight: 500;}
 
 .dir-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;align-items:stretch}

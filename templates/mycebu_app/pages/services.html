@@ -21,7 +21,6 @@
   {% if service_selected %}
   <section class="svc-detail">
     <a class="btn btn--ghost mb-24" href="{% url 'landing_tab' 'services' %}">← Back to Services</a>
-
     <div class="detail-card">
       <div class="svc-detail__head">
         <div class="svc-icon svc-icon--{{ service_selected.color|default:'primary' }}">
@@ -94,12 +93,10 @@
               <div class="step-num">{{ forloop.counter }}</div>
               <div class="step-text">
                 {{ step.step }}
-                <span class="step-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"
-                    stroke-linejoin="round" style="width:24px; height:24px">
+                <span class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
+                    stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px">
                     <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </span>
+                  </svg></span>
               </div>
               <div class="step-extra">
                 <p>{{ step.detail|safe }}</p>
@@ -120,7 +117,8 @@
           {{ service_selected.additionalInfo.title }}
         </h2>
         <div class="det-card p-16 warn">
-          <p class="muted" style="margin-top: -15px; padding-top:0;">{{ service_selected.additionalInfo.subtitle|safe }}</p>
+          <p class="muted" style="margin-top:-15px;padding-top:0;">{{ service_selected.additionalInfo.subtitle|safe }}
+          </p>
           <ul class="bullet-list">
             {% for line in service_selected.additionalInfo.content %}
             <li>{{ line }}</li>
@@ -150,7 +148,6 @@
                 </svg>
                 {{ item.name }}
               </div>
-
               {% if item.link %}
               <a class="btn btn--outline" href="{{ item.link }}" target="_blank" rel="noopener" download>
                 <svg class="i" style="width:16px;height:16px" viewBox="0 0 24 24" aria-hidden="true">
@@ -163,7 +160,6 @@
               {% endif %}
             </div>
             {% endfor %}
-
           </div>
         </div>
       </div>
@@ -172,11 +168,27 @@
   </section>
   {% else %}
   <section class="services-section">
+    <div class="filter-bar">
+      <form class="container" id="form-services" onsubmit="return false;">
+        <div class="grid">
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+              <path d="M20 20L16.65 16.65" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            <input class="input input--search" id="q-services" type="text"
+              placeholder="Search by service name or description">
+          </div>
+        </div>
+      </form>
+    </div>
+
     <div class="services-container">
       <h2 class="h2">Available Services</h2>
-      <div class="svc-grid">
+      <div class="svc-grid" id="grid-services">
         {% for s in services_data %}
-        <a class="svc-card" href="{% url 'landing_tab' 'services' %}?id={{ s.id }}">
+        <a class="svc-card" href="{% url 'landing_tab' 'services' %}?id={{ s.id }}" data-title="{{ s.title|lower }}"
+          data-desc="{{ s.description|lower }}">
           <div class="svc-card__icon svc-icon svc-icon--{{ s.color|default:'primary' }}">
             {% if s.icon == "building" %}
             <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
@@ -215,6 +227,7 @@
         <p class="muted">No services available.</p>
         {% endfor %}
       </div>
+      <div class="empty-msg" id="empty-services" style="display:none;">No Services Found</div>
     </div>
   </section>
   {% endif %}
