@@ -1,0 +1,153 @@
+<section class="dash-panel" id="tab-complaints">
+  <nav class="dash-subtabs">
+    <button class="dash-subtab is-active" data-subtab="submit">Submit Complaint</button>
+    <button class="dash-subtab" data-subtab="track">Track Status</button>
+  </nav>
+
+  <div class="dash-subpanel is-active" id="sub-submit">
+    <div class="detail-card">
+      <div class="card-head">
+        <h3 class="card-title">Submit a Complaint</h3>
+        <p class="muted">Report issues and provide feedback to help us serve you better</p>
+      </div>
+      <form id="form-complaint" class="grid">
+        <div class="grid" style="margin-bottom: 16px;">
+          <label class="lbl">Category *</label>
+          <div class="input-wrap">
+            <div class="ui-select" data-name="cmp-category" aria-expanded="false">
+              <select id="cmp-category" class="native-select"></select>
+              <button type="button" class="ui-select__trigger select" data-trigger></button>
+              <ul class="ui-select__menu" data-menu></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid" id="wrap-subcategory" style="display:none; margin-bottom: 16px;">
+          <label class="lbl">Sub-Category *</label>
+          <div class="input-wrap">
+            <div class="ui-select" data-name="cmp-subcategory" aria-expanded="false">
+              <select id="cmp-subcategory" class="native-select"></select>
+              <button type="button" class="ui-select__trigger select" data-trigger></button>
+              <ul class="ui-select__menu" data-menu></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Subject/Title *</label>
+          <input id="cmp-subject" class="input" maxlength="100" placeholder="Brief description of the issue">
+          <p class="muted tiny"><span id="cmp-subj-count">0</span>/100 characters</p>
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Location/Address *</label>
+          <input id="cmp-location" class="input" placeholder="Please provide specific location details (e.g., house number, street)">
+          <p class="muted tiny">Specific location details help us address your concern faster</p>
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Description *</label>
+          <textarea id="cmp-description" class="input ta" placeholder="Provide detailed information about the issue"></textarea>
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Attachments (Optional)</label>
+          <div class="dropzone">
+            <input id="cmp-files" type="file" multiple accept="image/*,.pdf">
+            <p class="muted tiny">Click to upload images or PDF files</p>
+          </div>
+          <div id="cmp-filelist" class="filelist"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <label class="chk">
+          <input type="checkbox" id="cmp-anon">
+          <span>Submit Anonymously</span>
+        </label>
+
+        <div id="cmp-ident" class="grid grid-3">
+          <div class="grid">
+            <label class="lbl">Name</label>
+            <input id="cmp-name" class="input" placeholder="Your full name">
+          </div>
+          <div class="grid">
+            <label class="lbl">Email</label>
+            <input id="cmp-email" class="input" type="email" placeholder="your.email@example.com">
+          </div>
+          <div class="grid">
+            <label class="lbl">Phone Number</label>
+            <input id="cmp-phone" class="input" type="tel" placeholder="+63 XXX XXX XXXX">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn--outline w-full" id="cmp-submit">Submit Complaint</button>
+      </form>
+
+      <div id="cmp-success" class="success-card" style="display:none">
+        <div class="success-body">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 12l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <h2 class="h2">Complaint Submitted Successfully</h2>
+          <div class="trk-box">
+            <p class="tiny muted">Your Tracking Number</p>
+            <p class="trk-num" id="cmp-trk"></p>
+            <p class="muted tiny">Please save this tracking number to check the status of your complaint.</p>
+          </div>
+          <button class="btn btn--outline" id="cmp-new">Submit Another Complaint</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-subpanel" id="sub-track">
+    <div class="detail-card">
+      <div class="card-head">
+        <h3 class="card-title">Track Your Complaint</h3>
+        <p class="muted">Enter your tracking number to check the status of your complaint</p>
+      </div>
+      <form id="form-track" class="grid grid-row">
+        <div class="grid grid-inline">
+          <input id="trk-input" class="input" placeholder="GOV-2025-XXXX">
+          <button class="btn btn--outline" id="trk-btn" type="submit">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.35-3.35" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Track
+          </button>
+        </div>
+      </form>
+
+      <div id="trk-result" class="detail-card trk-card" style="display:none">
+        <div class="grid grid-2">
+          <div>
+            <p class="muted tiny">Tracking Number</p>
+            <p class="strong" id="trk-id"></p>
+          </div>
+          <div>
+            <p class="muted tiny">Submission Date</p>
+            <p class="strong" id="trk-date"></p>
+          </div>
+        </div>
+        <div class="trk-status">
+          <p class="muted tiny">Current Status</p>
+          <span class="badge" id="trk-badge"></span>
+        </div>
+        <div class="grid">
+          <div>
+            <p class="muted tiny">Category</p>
+            <p class="strong" id="trk-cat"></p>
+          </div>
+          <div>
+            <p class="muted tiny">Sub-Category</p>
+            <p class="strong" id="trk-sub"></p>
+          </div>
+          <div>
+            <p class="muted tiny">Subject</p>
+            <p class="strong" id="trk-subj"></p>
+          </div>
+        </div>
+        <div class="note">
+          <p class="tiny"><strong>Status Timeline:</strong> Pending → In Review → In Progress → Resolved/Closed</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
