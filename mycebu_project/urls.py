@@ -21,4 +21,6 @@ from django.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('mycebu_app.urls')),
+    path('accounts/', include('accounts.urls')),
+    path('reset/', include('reset.urls')),
 ]
