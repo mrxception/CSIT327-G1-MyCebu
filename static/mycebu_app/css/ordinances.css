@@ -1,0 +1,236 @@
+/* --- COMMON STYLES --- */
+.container { max-width: 1200px; margin-inline: auto; padding: 0 16px; }
+.services-container { max-width: 1200px; margin: 0 auto; }
+.h2 { font-size: 1.875rem; font-weight: 700; margin: 0 0 16px; color: var(--text); }
+.h3 { font-size: 1.5rem; font-weight: 700; margin: 0 0 16px; color: var(--text); }
+.muted { color: var(--muted); }
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 10px; padding: 10px 10px; font-size: 1rem; text-decoration: none; cursor: pointer; border: 1px solid transparent; }
+.i { width: 24px; height: 24px; display: inline-block; }
+.i--badge { width: 18px; height: 18px; margin-right: 8px; }
+.svc-hero { background: linear-gradient(165deg, var(--secondary) 0%, var(--secondary-600) 50%, var(--primary) 100%); color: #fff; padding: 48px 20px; margin-bottom: 16px; }
+.svc-hero__badge { display: inline-flex; align-items: center; background: rgba(255,255,255,.15); padding: 8px 24px; border-radius: 999px; font-weight: 600; margin-bottom: 12px; }
+.svc-hero__title { font-size: 2.25rem; margin: 0 0 8px; }
+.svc-hero__desc { opacity: .95; margin: 0; }
+.empty-msg { text-align: center; color: var(--muted); font-size: 1.1rem; margin-top: 32px; margin-bottom: 32px; font-weight: 500; }
+
+/* --- EXISTING STYLES --- */
+.material-symbols-rounded { font-size: 20px; vertical-align: middle; }
+.icon-sm { font-size: 16px; margin-right: 4px; color: #6b7280; }
+
+/* --- CONTROL BAR & FORM --- */
+.ord-controls {
+    background: transparent; /* Removed white bg to match modern look */
+    padding: 20px 0;
+    margin-top: 0px;
+    position: relative;
+    z-index: 10;
+}
+
+.ord-controls form { 
+    display: flex; 
+    align-items: center; 
+    gap: 16px; /* Prevents overlap */
+    flex-wrap: wrap; /* Allows stacking on mobile */
+    width: 100%;
+}
+
+/* Search Wrapper (First Element) */
+.ord-search-wrap { 
+    flex-grow: 2; /* Takes more space than dropdowns */
+    flex-basis: 300px;
+    position: relative; 
+    height: 48px;
+}
+
+.ord-search-wrap input { 
+    width: 100%; 
+    height: 100%;
+    padding: 0 16px 0 44px; /* Left padding for icon */
+    border: 1px solid #cbd5e1; 
+    border-radius: 8px;
+    font-size: 15px;
+    color: #334155;
+    outline: none;
+    box-sizing: border-box; 
+    display: block;
+    transition: border-color 0.2s;
+}
+
+.ord-search-wrap input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ord-search-icon { 
+    position: absolute; 
+    left: 14px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #3b82f6;
+    font-size: 20px;
+    pointer-events: none;
+}
+
+/* Dropdowns */
+.ord-select { 
+    flex-grow: 1;
+    flex-basis: 200px;
+    height: 48px;
+    padding: 0 16px; 
+    border: 1px solid #cbd5e1; 
+    border-radius: 8px; 
+    background-color: #f8fafc; 
+    font-size: 15px;
+    color: #334155;
+    cursor: pointer; 
+}
+
+.ord-select:hover {
+    background-color: #fff;
+    border-color: #94a3b8;
+}
+
+/* Filter Button */
+.btn-view-toggle { 
+    height: 48px;
+    background-color: #3b82f6; 
+    color: white; 
+    border: none; 
+    padding: 0 24px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.btn-view-toggle:hover {
+    background-color: #2563eb;
+}
+
+/* Grid & Card */
+.category-header { margin-top: 32px; margin-bottom: 16px; font-size: 1.5rem; font-weight: 700; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.ord-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+.ord-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
+.ord-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+.ord-title { font-size: 1rem; font-weight: 700; color: #1f2937; margin-bottom: 12px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ord-meta { margin-top: auto; padding-top: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: #4b5563; }
+.ord-meta-row { display: flex; align-items: center; gap: 6px; }
+.tag-badge { display: inline-flex; align-items: center; gap: 4px; background-color: #f3f4f6; color: #4b5563; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-bottom: 12px; width: fit-content; }
+
+.btn-preview {
+    margin-top: 16px;
+    background-color: #2563eb;
+    color: white;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-decoration: none;
+}
+.btn-preview:hover { background-color: #1d4ed8; }
+
+/* --- MODAL STYLES --- */
+.pdf-modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.75);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.pdf-modal-content {
+    background: white;
+    width: 90%;
+    height: 90%;
+    max-width: 1200px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.pdf-header {
+    padding: 15px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pdf-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-pdf-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    border-radius: 4px;
+    padding: 6px;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-pdf-action:hover {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+
+.pdf-title-text {
+    font-weight: 600;
+    color: #334155;
+    font-size: 1.1rem;
+    white-space: normal;
+    overflow: visible;
+    max-width: 80%;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    border-radius: 50%;
+    padding: 4px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-close-modal:hover { background-color: #ef4444; color: white; }
+
+.pdf-body {
+    flex: 1;
+    background: #525659; /* Standard PDF viewer bg color */
+    position: relative;
+}
+
+.pdf-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
