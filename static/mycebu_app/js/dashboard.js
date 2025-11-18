@@ -14,9 +14,15 @@
     "Other/Miscellaneous":["Website/Digital Service","Positive Feedback","Other"]
   }
 
+  var complaints=[
+    {id:"GOV-2025-0001",date:"2025-01-15",status:"In Progress",category:"Public Infrastructure & Utilities",subcategory:"Roads & Transport",subject:"Pothole on Main Street",location:"Main Street near Barangay Hall",description:"Large pothole causing traffic buildup and potential accidents.",anonymous:true,name:"",email:"",phone:"",files:[]},
+    {id:"GOV-2025-0002",date:"2025-01-10",status:"Resolved",category:"Government Service & Governance",subcategory:"Personnel Misconduct",subject:"Rude staff at front desk",location:"Municipal Hall Front Desk",description:"Staff member spoke rudely to a senior citizen while processing documents.",anonymous:false,name:"Juan Dela Cruz",email:"juan@example.com",phone:"+63 912 345 6789",files:[]}
+  ]
+
   var catSel=$('#cmp-category'),subSel=$('#cmp-subcategory'),wrapSub=$('#wrap-subcategory')
   var catRoot=document.querySelector('.ui-select[data-name="cmp-category"]')
   var subRoot=document.querySelector('.ui-select[data-name="cmp-subcategory"]')
+  var cmpList=$('#cmp-list'),cmpDetail=$('#cmp-detail')
 
   function setupUiSelect(root){
     if(!root)return null
@@ -70,22 +76,34 @@
   var uiCat=setupUiSelect(catRoot)
   var uiSub=setupUiSelect(subRoot)
 
-  catSel.addEventListener('change',function(){
+  function updateSubCategories(){
     subSel.innerHTML=''
     if(!catSel.value){
       wrapSub.style.display='none'
       if(uiSub)uiSub.buildMenu()
       return
     }
-    categories[catSel.value].forEach(function(s){
+    var subs=categories[catSel.value]||[]
+    subs.forEach(function(s){
       var o=document.createElement('option')
       o.value=s
       o.textContent=s
       subSel.appendChild(o)
     })
-    wrapSub.style.display='grid'
+    if(subSel.options.length)subSel.value=subSel.options[0].value
+    wrapSub.style.display=subSel.options.length?'grid':'none'
     if(uiSub)uiSub.buildMenu()
+  }
+
+  catSel.addEventListener('change',function(){
+    updateSubCategories()
   })
+
+  if(catSel.options.length){
+    catSel.value=catSel.options[0].value
+  }
+  updateSubCategories()
+  if(uiCat)uiCat.buildMenu()
 
   var subj=$('#cmp-subject'),subjCount=$('#cmp-subj-count')
   subj.addEventListener('input',function(){subjCount.textContent=String(subj.value.length)})
@@ -94,33 +112,125 @@
   anon.addEventListener('change',function(){ident.style.display=anon.checked?'none':'grid'})
 
   var fileInput=$('#cmp-files'),fileList=$('#cmp-filelist')
-  fileInput.addEventListener('change',function(){
+  var currentFiles=[]
+  var maxBytes=10*1024*1024
+
+  function formatSize(bytes){
+    var kb=bytes/1024
+    if(kb<1000)return Math.round(kb)+' KB'
+    var mb=kb/1024
+    return mb.toFixed(1)+' MB'
+  }
+
+  function badgeFor(status){
+    var s=String(status||'').toLowerCase()
+    var el=document.createElement('span')
+    el.className='badge'
+    el.textContent=status
+    if(s==='in progress')el.classList.add('badge--warn')
+    if(s==='approved'||s==='resolved'||s==='submitted')el.classList.add('badge--ok')
+    return el
+  }
+
+  function renderFileList(){
     fileList.innerHTML=''
-    Array.from(fileInput.files||[]).forEach(function(f,i){
+    currentFiles.forEach(function(f,i){
       var row=document.createElement('div')
       row.className='file-pill'
       var nm=document.createElement('span')
       nm.className='name'
-      nm.textContent=f.name
+      nm.innerHTML=f.name+' <span class="filesize">('+formatSize(f.size)+')</span>'
       var rm=document.createElement('button')
       rm.type='button'
-      rm.className='btn'
-      rm.textContent='Remove'
+      rm.className='file-remove'
+      rm.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" aria-hidden="true" class="icon-trash"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z" fill="currentColor"/></svg><span>Remove</span>'
       rm.addEventListener('click',function(){
-        var dt=new DataTransfer()
-        Array.from(fileInput.files||[]).forEach(function(ff,idx){
-          if(idx!==i)dt.items.add(ff)
-        })
-        fileInput.files=dt.files
-        row.remove()
+        currentFiles.splice(i,1)
+        syncFiles()
       })
       row.appendChild(nm)
       row.appendChild(rm)
       fileList.appendChild(row)
     })
+  }
+
+  function syncFiles(){
+    var dt=new DataTransfer()
+    currentFiles.forEach(function(f){dt.items.add(f)})
+    fileInput.files=dt.files
+    renderFileList()
+  }
+
+  fileInput.addEventListener('change',function(){
+    var files=Array.from(fileInput.files||[])
+    if(!files.length)return
+    var tooLarge=false
+    files.forEach(function(f){
+      if(f.size>maxBytes){
+        tooLarge=true
+        return
+      }
+      currentFiles.push(f)
+    })
+    if(tooLarge)alert('Each file must be 10MB or smaller.')
+    syncFiles()
   })
 
-  var form=$('#form-complaint'),success=$('#cmp-success'),trkOut=$('#cmp-trk'),btnNew=$('#cmp-new')
+  function renderComplaintDetail(c){
+    if(!cmpDetail)return
+    var filesHtml=''
+    if(c.files&&c.files.length){
+      filesHtml='<div class="cmp-files">'
+      c.files.forEach(function(f){
+        filesHtml+='<div class="file-pill"><span class="name">'+f.name+' <span class="filesize">('+formatSize(f.size)+')</span></span></div>'
+      })
+      filesHtml+='</div>'
+    }else{
+      filesHtml='<p class="tiny muted">No attachments for this complaint.</p>'
+    }
+    var dateText=''
+    if(c.date){
+      var d=new Date(c.date)
+      if(!isNaN(d.getTime()))dateText=d.toLocaleDateString()
+    }
+    cmpDetail.innerHTML=
+      '<div class="cmp-detail-header">'+
+        '<p class="tiny muted">'+c.id+'</p>'+
+        '<h4 class="cmp-detail-title">'+c.subject+'</h4>'+
+      '</div>'+
+      '<div class="cmp-meta-grid">'+
+        '<div><p class="tiny muted">Status</p>'+badgeFor(c.status).outerHTML+'</div>'+
+        '<div><p class="tiny muted">Date Submitted</p><p class="strong">'+(dateText||'-')+'</p></div>'+
+        '<div><p class="tiny muted">Category</p><p class="strong">'+c.category+'</p></div>'+
+        '<div><p class="tiny muted">Sub-Category</p><p class="strong">'+(c.subcategory||'-')+'</p></div>'+
+      '</div>'+
+      '<div class="cmp-section"><p class="tiny muted">Location</p><p class="strong">'+c.location+'</p></div>'+
+      '<div class="cmp-section"><p class="tiny muted">Description</p><p>'+c.description+'</p></div>'+
+      '<div class="cmp-section"><p class="tiny muted">Attachments</p>'+filesHtml+'</div>'+
+      (c.anonymous?'':'<div class="cmp-section"><p class="tiny muted">Submitted By</p><p class="strong">'+(c.name||'-')+'</p><p class="tiny muted">'+(c.email||'')+(c.phone?' • '+c.phone:'')+'</p></div>')
+  }
+
+  function renderComplaintsList(){
+    if(!cmpList)return
+    cmpList.innerHTML=''
+    complaints.forEach(function(c){
+      var item=document.createElement('button')
+      item.type='button'
+      item.className='list-item cmp-item'
+      var left=document.createElement('div')
+      left.innerHTML='<p class="tiny muted">'+c.id+'</p><p class="list-title">'+c.subject+'</p><p class="tiny muted">'+c.category+(c.subcategory?' • '+c.subcategory:'')+'</p>'
+      var badge=badgeFor(c.status)
+      item.appendChild(left)
+      item.appendChild(badge)
+      item.addEventListener('click',function(){renderComplaintDetail(c)})
+      cmpList.appendChild(item)
+    })
+    if(complaints.length&&cmpDetail&&cmpDetail.querySelector('.cmp-detail-empty'))renderComplaintDetail(complaints[0])
+  }
+
+  renderComplaintsList()
+
+  var form=$('#form-complaint'),success=$('#cmp-success'),btnNew=$('#cmp-new')
   function required(v){return v&&String(v).trim().length>0}
   form.addEventListener('submit',function(e){
     e.preventDefault()
@@ -136,13 +246,32 @@
     }
     if(!required(data.category)||!required(data.subcategory)||!required(data.subject)||!required(data.location)||!required(data.description))return alert('Please fill in all required fields.')
     var year=(new Date()).getFullYear(),rnd=String(Math.floor(Math.random()*10000)).padStart(4,'0'),id='GOV-'+year+'-'+rnd
-    trkOut.textContent=id
+    var now=new Date()
+    var comp={
+      id:id,
+      date:now.toISOString(),
+      status:'Submitted',
+      category:data.category,
+      subcategory:data.subcategory,
+      subject:data.subject,
+      location:data.location,
+      description:data.description,
+      anonymous:anon.checked,
+      name:anon.checked?'':data.name,
+      email:anon.checked?'':data.email,
+      phone:anon.checked?'':data.phone,
+      files:currentFiles.slice()
+    }
+    complaints.unshift(comp)
+    renderComplaintsList()
     success.style.display='grid'
     form.style.display='none'
   })
 
   btnNew.addEventListener('click',function(){
     form.reset()
+    currentFiles=[]
+    fileInput.value=''
     fileList.innerHTML=''
     subjCount.textContent='0'
     wrapSub.style.display='none'
@@ -151,30 +280,10 @@
     success.style.display='none'
     if(uiCat)uiCat.buildMenu()
     if(uiSub)uiSub.buildMenu()
-  })
-
-  var trkForm=$('#form-track'),trkInput=$('#trk-input'),res=$('#trk-result'),fId=$('#trk-id'),fDate=$('#trk-date'),fCat=$('#trk-cat'),fSub=$('#trk-sub'),fSubj=$('#trk-subj'),fBadge=$('#trk-badge')
-  function badgeFor(status){
-    var s=status.toLowerCase()
-    var el=document.createElement('span')
-    el.className='badge'
-    el.textContent=status
-    if(s==='in progress')el.classList.add('badge--warn')
-    if(s==='approved'||s==='resolved')el.classList.add('badge--ok')
-    return el
-  }
-  trkForm.addEventListener('submit',function(e){
-    e.preventDefault()
-    var id=String(trkInput.value||'').trim()
-    if(!id)return
-    var mock={id:id,status:'In Progress',submissionDate:'2025-01-15',category:'Public Infrastructure & Utilities',subcategory:'Roads & Transport',subject:'Pothole on Main Street'}
-    fId.textContent=mock.id
-    fDate.textContent=(new Date(mock.submissionDate)).toLocaleDateString()
-    fCat.textContent=mock.category
-    fSub.textContent=mock.subcategory
-    fSubj.textContent=mock.subject
-    fBadge.innerHTML=''
-    fBadge.appendChild(badgeFor(mock.status))
-    res.style.display='grid'
+    if(catSel.options.length){
+      catSel.value=catSel.options[0].value
+      updateSubCategories()
+      if(uiCat)uiCat.buildMenu()
+    }
   })
 })();
