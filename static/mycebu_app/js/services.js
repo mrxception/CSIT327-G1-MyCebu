@@ -1,9 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const stepItems = document.querySelectorAll(".step-item");
-  
-  stepItems.forEach(item => {
-    item.addEventListener("click", () => {
-      item.classList.toggle("active");
-    });
-  });
+document.addEventListener("click", function (event) {
+  const item = event.target.closest(".step-item");
+  if (!item) return;
+  item.classList.toggle("active");
 });
