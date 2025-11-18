@@ -408,40 +408,53 @@ def landing_view(request, tab='landing'):
         })
 
     if tab == 'ordinances':
-        # Load ordinances data
-        json_path = os.path.join(settings.BASE_DIR, 'static', 'mycebu_app', 'data', 'ordinance.json')
-        data = []
         try:
-            with open(json_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            pass  # data remains []
+            resp = supabase_admin.table("ordinances").select("*").execute()
+            ordinances = resp.data or []
+        except Exception as e:
+            print("❌ Error fetching ordinances:", e)
+            ordinances = []
 
-        # Filter Logic
-        query = request.GET.get('q', '').lower()
-        category_filter = request.GET.get('category', '')
-        author_filter = request.GET.get('author', '')
+        print("🔍 ORDINANCES RAW:", ordinances)
+
+        query = request.GET.get("q", "").lower().strip()
+        category_filter = request.GET.get("category", "")
+        author_filter = request.GET.get("author", "")
+
+        categories_list = sorted(list(set(
+            o.get("category") for o in ordinances if o.get("category")
+        )))
+
+        authors_list = sorted(list(set(
+            o.get("author") for o in ordinances if o.get("author")
+        )))
 
         filtered_data = []
+        for item in ordinances:
+            name = (item.get("name_or_ordinance") or "").lower()
+            author = (item.get("author") or "").lower()
+            number = (item.get("ordinance_number") or "").lower()
+            category = item.get("category")
 
-        # Create lists for dropdowns
-        categories_list = sorted(list(set(item['category'] for item in data if item.get('category'))))
-        authors_list = sorted(list(set(item['author'] for item in data if item.get('author') and item['author'] != "TO BE UPDATED")))
+            matches_q = (
+                query in name or
+                query in author or
+                query in number
+            )
 
-        for item in data:
-            # Check matches
-            matches_q = query in item.get('name_or_ordinance', '').lower() or query in item.get('ordinance_number', '')
-            matches_cat = category_filter == "" or item.get('category') == category_filter
-            matches_auth = author_filter == "" or item.get('author') == author_filter
+            matches_cat = (category_filter == "" or category_filter == category)
+            matches_auth = (author_filter == "" or item.get("author") == author_filter)
 
             if matches_q and matches_cat and matches_auth:
                 filtered_data.append(item)
 
         context.update({
-            'ordinances_data': filtered_data,
-            'categories_list': categories_list,
-            'authors_list': authors_list,
+            "ordinances_data": filtered_data,
+            "categories_list": categories_list,
+            "authors_list": authors_list,
         })
+
+
 
     try:
         response = render(request, f"mycebu_app/pages/{tab}.html", context)
@@ -696,43 +709,3 @@ def permit_progress_view(request, service: str, app_id):
     except Exception as e:
         logger.error(f"permit_progress_view: {e}")
         return HttpResponse("Error loading application", status=500)
-def ordinances_view(request):
-    # 1. Define path to your JSON file
-    # Assuming the json file is in your 'static' folder or root app folder
-    # Update this path to where your actual file is located
-    json_path = os.path.join(settings.BASE_DIR, 'static', 'mycebu_app', 'data', 'ordinance.json')
-
-    data = []
-    try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        print("JSON file not found")
-
-    # 2. Filter Logic (Python side since we are using JSON)
-    query = request.GET.get('q', '').lower()
-    category_filter = request.GET.get('category', '')
-    author_filter = request.GET.get('author', '')
-
-    filtered_data = []
-    
-    # Create lists for dropdowns
-    categories_list = sorted(list(set(item['category'] for item in data if item.get('category'))))
-    authors_list = sorted(list(set(item['author'] for item in data if item.get('author') and item['author'] != "TO BE UPDATED")))
-
-    for item in data:
-        # Check matches
-        matches_q = query in item.get('name_or_ordinance', '').lower() or query in item.get('ordinance_number', '')
-        matches_cat = category_filter == "" or item.get('category') == category_filter
-        matches_auth = author_filter == "" or item.get('author') == author_filter
-
-        if matches_q and matches_cat and matches_auth:
-            filtered_data.append(item)
-
-    # 3. Pass to template
-    context = {
-        'ordinances_data': filtered_data,
-        'categories_list': categories_list,
-        'authors_list': authors_list,
-    }
-    return render(request, 'mycebu_app/pages/ordinances.html', context)
