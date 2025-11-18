@@ -296,3 +296,10 @@ def register_success_view(request):
     response['Expires'] = '0'
     return response
     
+def validate_name_field(name, field_label):
+    """Validate that a name field contains only letters, spaces, hyphens, and apostrophes"""
+    if not name:
+        return None
+    if not re.match(r"^[a-zA-Z\s'-]+$", name):
+        return f"{field_label} should only contain letters, spaces, hyphens, and apostrophes."
+    return None
