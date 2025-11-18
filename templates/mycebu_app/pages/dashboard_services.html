@@ -8,7 +8,7 @@
     <div id="servicesCardArea" style="display:flex; gap:12px; align-items:center; margin-bottom:18px; width:100%;"> <!-- full width -->
       <div style="flex:1; position:relative;">
         <input id="serviceSearch" type="search" placeholder="Search services (click to show all)" 
-               style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid #e6eef0; box-shadow:0 2px 6px rgba(2,6,23,0.04); font-size:1rem;">
+               style="width:100%; padding:16px 18px; border-radius:10px; border:1px solid #e6eef0; box-shadow:0 2px 6px rgba(2,6,23,0.04); font-size:1.05rem; height:52px;">
       </div>
       <button id="clearSearch" type="button" style="background:#fff; border:1px solid #e6eef0; padding:10px 14px; border-radius:8px; cursor:pointer;">Clear</button>
     </div>
@@ -71,7 +71,6 @@
         </div>
         <div style="margin-top:auto; display:flex; gap:8px; justify-content:flex-end;">
           <button class="btn-apply" data-id="${escapeAttr(s.id || '')}">Apply</button>
-          <a class="btn-learn" href="${escapeAttr(s.url || '#')}" target="_blank" rel="noopener noreferrer">Learn</a>
         </div>
       `;
       servicesGrid.appendChild(item);
