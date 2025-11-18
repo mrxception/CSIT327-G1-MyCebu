@@ -59,7 +59,7 @@
 
     <div style="margin-top:34px; display:flex; gap:12px; flex-wrap:wrap;">
       {% if existing_app_id %}
-        <button type="button" id="continueApp" data-app-url="{% url 'permit_progress' app_id=existing_app_id %}"
+        <button type="button" id="continueApp" data-app-url="{% url 'permit_progress' service=service.id app_id=existing_app_id %}"
             style="min-width:160px; background:#0d9488; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; box-shadow:0 2px 8px rgba(13,148,136,0.12); cursor:pointer;">
           Continue Application
         </button>
@@ -89,10 +89,12 @@
   const restartBtn = document.getElementById('restartApp');
   const backBtn = document.getElementById('backDashboard');
 
+  const startUrl = "{% url 'start_service_application' service=service.id %}";
+
   if (startBtn) {
     startBtn.addEventListener('click', async () => {
       try {
-        const res = await fetch("{% url 'start_business_permit' %}", {
+        const res = await fetch(startUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -102,7 +104,8 @@
         });
         const data = await res.json();
         if (data.success && data.application_id) {
-          window.location.href = `/apply/business-permit/${data.application_id}/`;
+          // use service.id to build progress URL
+          window.location.href = `/apply/{{ service.id }}/${data.application_id}/`;
         } else {
           alert(data.error || "Failed to start application");
         }
@@ -126,7 +129,7 @@
         return;
       }
       try {
-        const res = await fetch("{% url 'start_business_permit' %}", {
+        const res = await fetch(startUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -136,7 +139,7 @@
         });
         const data = await res.json();
         if (data.success && data.application_id) {
-          window.location.href = `/apply/business-permit/${data.application_id}/`;
+          window.location.href = `/apply/{{ service.id }}/${data.application_id}/`;
         } else {
           alert(data.error || "Failed to restart application");
         }
