@@ -15,7 +15,7 @@ from django.core.files.base import ContentFile
 import os
 import uuid
 import time
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from pathlib import Path
 from django.conf import settings
 import json
@@ -497,190 +497,204 @@ def validate_name_field(name, field_label):
 
 
 def _get_service_by_id(service_id):
-    """
-    Load service info (steps, requirements, downloads, etc.)
-    """
     data_path = Path(settings.BASE_DIR) / "static" / "mycebu_app" / "data" / "services.json"
-
     if not data_path.exists():
         return None
+    try:
+        with open(data_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+        services = payload.get("services", [])
+        return next((s for s in services if s.get("id") == service_id), None)
+    except Exception as e:
+        logger.error(f"_get_service_by_id: {e}")
+        return None
 
-    with open(data_path, "r", encoding="utf-8") as f:
-        payload = json.load(f)
-
-    services = payload.get("services", [])
-    return next((s for s in services if s.get("id") == service_id), None)
-
-
-def apply_business_permit_view(request):
+def apply_permit_view(request, service: str):
+    """
+    Show the apply page for any service (service is the service id from services.json).
+    Template: templates/mycebu_app/pages/apply_permit.html
+    """
     user = get_authed_user(request)
     if not user:
         return redirect("login")
 
-    service = _get_service_by_id("business-permit")
-    if not service:
+    svc = _get_service_by_id(service)
+    if not svc:
         return HttpResponse("Service not found", status=404)
 
     existing_app_id = None
     try:
-        # Only find in_progress applications, not submitted/completed ones
-        apps_resp = supabase_admin.table("applications").select("*").eq("user_id", user["id"]).eq("permit_id", "business-permit").eq("status", "in_progress").execute()
-        if apps_resp.data:
-            for a in apps_resp.data:
-                if a.get("status") == "in_progress":
-                    existing_app_id = a.get("id")
-                    break
+        resp = supabase_admin.table("service_applications").select("*") \
+            .eq("user_id", user["id"]).eq("service_type", service).execute()
+        rows = getattr(resp, "data", []) or []
+        # consider "in-progress" only if progress>0 or step_index>0
+        in_progress = [r for r in rows if (r.get("progress", 0) or 0) > 0 or (r.get("step_index", 0) or 0) > 0]
+        if in_progress:
+            in_progress.sort(key=lambda x: x.get("updated_at") or "", reverse=True)
+            existing_app_id = in_progress[0].get("id")
     except Exception as e:
-        logger.debug("apply_business_permit_view: error checking existing applications: %s", e)
+        logger.debug("apply_permit_view: error checking service_applications: %s", e)
 
-    return render(request, "mycebu_app/pages/apply_business_permit.html", {
+    return render(request, "mycebu_app/pages/apply_permit.html", {
         "authed_user": user,
         "user": user,
-        "service": service,
+        "service": svc,
         "existing_app_id": existing_app_id,
         "current_tab": "services",
     })
 
 
 @csrf_exempt
-def start_business_permit_application(request):
-    if request.method != "POST":
-        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
-
+@require_POST
+def start_service_application(request, service: str):
+    """
+    POST: start or restart application for given service.
+    Body (json): { "restart": true/false, "reference_number": "optional-ref" }
+    """
     user = get_authed_user(request)
     if not user:
         return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
 
     try:
-        body = json.loads(request.body)
-        restart = body.get("restart", False)
-    except:
-        restart = False
+        body = json.loads(request.body or "{}")
+    except Exception:
+        body = {}
 
-    # If restart, delete existing application
-    if restart:
+    restart = bool(body.get("restart", False))
+    reference = body.get("reference_number") or f"{service.upper()}-{int(time.time())}"
+
+    # lookup existing record for user+service
+    existing = None
+    try:
+        resp = supabase_admin.table("service_applications").select("*") \
+            .eq("user_id", user["id"]).eq("service_type", service).execute()
+        rows = getattr(resp, "data", []) or []
+        existing = rows[0] if rows else None
+    except Exception as e:
+        logger.debug("start_service_application: lookup error: %s", e)
+        existing = None
+
+    if restart and existing:
         try:
-            supabase_admin.table("applications").delete().eq("user_id", user["id"]).eq("permit_id", "business-permit").execute()
-            logger.debug(f"start_business_permit_application: Deleted existing application for restart")
+            upd = {"progress": 0, "step_index": 0, "reference_number": reference, "updated_at": "now()"}
+            res = supabase_admin.table("service_applications").update(upd).eq("id", existing.get("id")).execute()
+            if getattr(res, "data", None):
+                return JsonResponse({"success": True, "application_id": existing.get("id"), "restarted": True})
         except Exception as e:
-            logger.debug(f"start_business_permit_application: Error deleting app for restart: {e}")
+            logger.error("start_service_application: restart failed: %s", e)
+            return JsonResponse({"success": False, "error": "Failed to restart application"}, status=500)
 
-    # If user already has an in-progress application (and not restarting), return it
-    if not restart:
-        try:
-            apps_resp = supabase_admin.table("applications").select("*").eq("user_id", user["id"]).eq("permit_id", "business-permit").eq("status", "in_progress").execute()
-            if apps_resp.data:
-                for a in apps_resp.data:
-                    if a.get("status") == "in_progress":
-                        return JsonResponse({"success": True, "application_id": a.get("id"), "existing": True})
-                return JsonResponse({"success": True, "application_id": apps_resp.data[0].get("id"), "existing": True})
-        except Exception as e:
-            logger.debug(f"start_business_permit_application: lookup error: {e}")
+    # reuse in-progress if exists and not restarting
+    if not restart and existing:
+        if (existing.get("progress", 0) or 0) > 0 or (existing.get("step_index", 0) or 0) > 0:
+            return JsonResponse({"success": True, "application_id": existing.get("id"), "existing": True})
 
-    # Create new application
+    # create new record (or reuse zeroed existing)
     payload = {
         "user_id": user["id"],
-        "permit_id": "business-permit",
+        "service_type": service,
+        "reference_number": reference,
         "progress": 0,
         "step_index": 0,
-        "status": "in_progress",
-        "requirements_data": {},
+        "created_at": "now()",
+        "updated_at": "now()",
     }
 
     try:
-        result = supabase_admin.table("applications").insert(payload).execute()
-        if not result.data or len(result.data) == 0:
-            return JsonResponse({"success": False, "error": "Failed to create application"}, status=400)
-        app_id = result.data[0]["id"]
-        return JsonResponse({"success": True, "application_id": app_id})
+        # if existing row present but zeroed, update timestamps and return
+        if existing and (existing.get("progress", 0) == 0 and existing.get("step_index", 0) == 0):
+            res = supabase_admin.table("service_applications").update({"updated_at": "now()", "reference_number": reference}).eq("id", existing.get("id")).execute()
+            if getattr(res, "data", None):
+                return JsonResponse({"success": True, "application_id": existing.get("id"), "existing": True})
+
+        result = supabase_admin.table("service_applications").insert(payload).execute()
+        if getattr(result, "data", None):
+            app_id = result.data[0].get("id")
+            return JsonResponse({"success": True, "application_id": app_id})
+        return JsonResponse({"success": False, "error": "Failed to create application"}, status=400)
     except Exception as e:
-        logger.error(f"start_business_permit_application: {str(e)}")
+        logger.error("start_service_application: create error: %s", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
 @csrf_exempt
-def update_business_permit_step(request, app_id):
-    if request.method != "POST":
-        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
-
+@require_POST
+def update_service_application(request, service: str, app_id):
+    """
+    Update step_index/progress or mark completed (resets to zero).
+    POST body JSON: { "step_index": int } OR { "mark_completed": true }
+    """
     user = get_authed_user(request)
     if not user:
         return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
 
     try:
-        data = json.loads(request.body)
-        new_step = data.get("step_index", 0)
-        mark_completed = data.get("mark_completed", False)
-    except:
-        return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+        data = json.loads(request.body or "{}")
+    except Exception:
+        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
 
-    service = _get_service_by_id("business-permit")
-    total_steps = len(service.get("steps", []))
+    mark_completed = bool(data.get("mark_completed", False))
+    new_step = data.get("step_index")
 
-    # If marking as completed, reset to step 0 and set status to "submitted"
-    if mark_completed:
-        update_data = {
-            "step_index": 0,
-            "progress": 0,
-            "status": "submitted",
-            "updated_at": "now()"
-        }
-    else:
-        # Determine if this completes the application
-        is_complete = new_step >= total_steps
-
-        # Clamp step index (but allow == total_steps for completion)
-        if new_step > total_steps:
-            new_step = total_steps - 1
-
-        # Calculate progress correctly
-        if is_complete:
-            progress = 100
-            status = "submitted"
-        else:
-            progress = int((new_step / max(total_steps, 1)) * 100)
-            status = "in_progress"
-
-        update_data = {
-            "step_index": new_step if not is_complete else total_steps - 1,
-            "progress": progress,
-            "status": status,
-            "updated_at": "now()"
-        }
+    svc = _get_service_by_id(service)
+    total_steps = len(svc.get("steps", [])) if svc else 1
 
     try:
-        result = supabase_admin.table("applications").update(update_data).eq("id", str(app_id)).execute()
-        if result.data:
-            return JsonResponse({"success": True, "progress": update_data.get("progress"), "status": update_data.get("status")})
-        else:
-            return JsonResponse({"success": False, "error": "Failed to update application"}, status=400)
+        if mark_completed:
+            # reset to 0 (user asked to complete -> we reset progress)
+            update_data = {"step_index": 0, "progress": 0, "updated_at": "now()"}
+            res = supabase_admin.table("service_applications").update(update_data).eq("id", str(app_id)).execute()
+            if getattr(res, "data", None):
+                return JsonResponse({"success": True, "progress": 0, "completed": True})
+            return JsonResponse({"success": False, "error": "Failed to mark completed"}, status=400)
+
+        if new_step is None:
+            return JsonResponse({"success": False, "error": "step_index required"}, status=400)
+
+        new_step = int(new_step)
+        if new_step < 0:
+            new_step = 0
+        if new_step >= total_steps:
+            new_step = total_steps - 1
+
+        # compute progress: treat step_index 0 as first step => (step_index+1)/total_steps
+        progress = int(((new_step + 1) / max(total_steps, 1)) * 100)
+
+        update_data = {"step_index": new_step, "progress": progress, "updated_at": "now()"}
+        res = supabase_admin.table("service_applications").update(update_data).eq("id", str(app_id)).execute()
+        if getattr(res, "data", None):
+            return JsonResponse({"success": True, "progress": progress, "step_index": new_step})
+        return JsonResponse({"success": False, "error": "Failed to update application"}, status=400)
     except Exception as e:
-        logger.error(f"update_business_permit_step: {str(e)}")
+        logger.error("update_service_application: %s", e)
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-def permit_progress_view(request, app_id):
+def permit_progress_view(request, service: str, app_id):
+    """
+    Show progress page for generic service application.
+    Template: templates/mycebu_app/pages/permit_progress.html
+    """
     user = get_authed_user(request)
     if not user:
         return redirect("login")
 
     try:
-        result = supabase_admin.table("applications").select("*").eq("id", str(app_id)).execute()
-        if not result.data:
+        result = supabase_admin.table("service_applications").select("*").eq("id", str(app_id)).execute()
+        rows = getattr(result, "data", []) or []
+        if not rows:
             return HttpResponse("Application not found", status=404)
-
-        application = result.data[0]
-        service = _get_service_by_id("business-permit")
-
-        return render(request, "mycebu_app/pages/business_permit_progress.html", {
+        application = rows[0]
+        svc = _get_service_by_id(service)
+        return render(request, "mycebu_app/pages/permit_progress.html", {
             "authed_user": user,
             "user": user,
-            "service": service,
+            "service": svc,
             "app": application,
             "current_tab": "services",
         })
     except Exception as e:
-        logger.error(f"permit_progress_view: {str(e)}")
+        logger.error(f"permit_progress_view: {e}")
         return HttpResponse("Error loading application", status=500)
 def ordinances_view(request):
     # 1. Define path to your JSON file

@@ -153,7 +153,8 @@
         // if all complete, reset to 0 and show completion modal then redirect only on user close
         if (next >= totalSteps) {
             try {
-                const res = await fetch(`/apply/business-permit/${appId}/update/`, {
+                // use service.id in URL
+                const res = await fetch(`/apply/{{ service.id }}/${appId}/update/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -163,7 +164,6 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    // show confirmation modal instead of immediate redirect
                     showModal();
                 } else {
                     alert('Failed to complete application');
@@ -176,7 +176,7 @@
         }
 
         try {
-            const res = await fetch(`/apply/business-permit/${appId}/update/`, {
+            const res = await fetch(`/apply/{{ service.id }}/${appId}/update/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
