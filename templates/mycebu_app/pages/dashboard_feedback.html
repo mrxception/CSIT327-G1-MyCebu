@@ -1,4 +1,62 @@
 <section class="dash-panel" id="tab-complaints">
+  <div class="stat-grid mb-24">
+    <a class="stat-card" href="#">
+      <div class="stat-head">
+        <span class="stat-title">Active Applications</span>
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 4h18v16H3z" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M7 8h10M7 12h10M7 16h6" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-num">3</div>
+        <div class="stat-sub muted">+1 from last month</div>
+      </div>
+    </a>
+
+    <a class="stat-card" href="#">
+      <div class="stat-head">
+        <span class="stat-title">Pending Reviews</span>
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M12 7v5l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-num">2</div>
+        <div class="stat-sub muted">Awaiting approval</div>
+      </div>
+    </a>
+
+    <a class="stat-card" href="#">
+      <div class="stat-head">
+        <span class="stat-title">Profile Status</span>
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M4 20c1.5-4 6.5-4 8-4s6.5 0 8 4" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-num">Verified</div>
+        <div class="stat-sub muted">Account active</div>
+      </div>
+    </a>
+
+    <a class="stat-card" href="#">
+      <div class="stat-head">
+        <span class="stat-title">Notifications</span>
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 8a6 6 0 10-12 0v5L4 15v1h16v-1l-2-2V8z" fill="none" stroke="currentColor" stroke-width="2" />
+          <path d="M10 19a2 2 0 004 0" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-num">5</div>
+        <div class="stat-sub muted">New messages</div>
+      </div>
+    </a>
+  </div>
+
   <nav class="dash-subtabs">
     <button class="dash-subtab is-active" data-subtab="submit">Submit Complaint</button>
     <button class="dash-subtab" data-subtab="track">Track Status</button>
@@ -52,9 +110,19 @@
 
         <div class="grid">
           <label class="lbl">Attachments (Optional)</label>
-          <div class="dropzone">
-            <input id="cmp-files" type="file" multiple accept="image/*,.pdf">
-            <p class="muted tiny">Click to upload images or PDF files</p>
+          <div class="dropzone" id="cmp-drop">
+            <input id="cmp-files" type="file" multiple accept="image/*,.pdf" class="drop-input">
+            <div class="drop-inner">
+              <div class="drop-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 17h11a3 3 0 0 0 .2-5.995A4.5 4.5 0 0 0 8.25 9.04 3.501 3.501 0 0 0 6 17z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                  <path d="M12 7v8m0 0-3-3m3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+              </div>
+              <p class="drop-title">Choose a file or drag &amp; drop it here</p>
+              <p class="drop-sub">JPEG, PNG, and PDF files, up to 10MB each</p>
+              <label for="cmp-files" class="btn btn--outline drop-btn" style="padding: 6px 6px">Browse File</label>
+            </div>
           </div>
           <div id="cmp-filelist" class="filelist"></div>
         </div>
@@ -86,13 +154,12 @@
 
       <div id="cmp-success" class="success-card" style="display:none">
         <div class="success-body">
-          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 12l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M7 12l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" />
+          </svg>
           <h2 class="h2">Complaint Submitted Successfully</h2>
-          <div class="trk-box">
-            <p class="tiny muted">Your Tracking Number</p>
-            <p class="trk-num" id="cmp-trk"></p>
-            <p class="muted tiny">Please save this tracking number to check the status of your complaint.</p>
-          </div>
+          <p class="muted tiny">Thank you for helping us improve our services.</p>
           <button class="btn btn--outline" id="cmp-new">Submit Another Complaint</button>
         </div>
       </div>
@@ -102,50 +169,16 @@
   <div class="dash-subpanel" id="sub-track">
     <div class="detail-card">
       <div class="card-head">
-        <h3 class="card-title">Track Your Complaint</h3>
-        <p class="muted">Enter your tracking number to check the status of your complaint</p>
+        <h3 class="card-title">Complaint History</h3>
+        <p class="muted">View your submitted complaints and their current status</p>
       </div>
-      <form id="form-track" class="grid grid-row">
-        <div class="grid grid-inline">
-          <input id="trk-input" class="input" placeholder="GOV-2025-XXXX">
-          <button class="btn btn--outline" id="trk-btn" type="submit">
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.35-3.35" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Track
-          </button>
+      <div class="grid grid-2 cmp-track-layout">
+        <div>
+          <p class="muted tiny">Submitted Complaints</p>
+          <div id="cmp-list" class="list list--spaced"></div>
         </div>
-      </form>
-
-      <div id="trk-result" class="detail-card trk-card" style="display:none">
-        <div class="grid grid-2">
-          <div>
-            <p class="muted tiny">Tracking Number</p>
-            <p class="strong" id="trk-id"></p>
-          </div>
-          <div>
-            <p class="muted tiny">Submission Date</p>
-            <p class="strong" id="trk-date"></p>
-          </div>
-        </div>
-        <div class="trk-status">
-          <p class="muted tiny">Current Status</p>
-          <span class="badge" id="trk-badge"></span>
-        </div>
-        <div class="grid">
-          <div>
-            <p class="muted tiny">Category</p>
-            <p class="strong" id="trk-cat"></p>
-          </div>
-          <div>
-            <p class="muted tiny">Sub-Category</p>
-            <p class="strong" id="trk-sub"></p>
-          </div>
-          <div>
-            <p class="muted tiny">Subject</p>
-            <p class="strong" id="trk-subj"></p>
-          </div>
-        </div>
-        <div class="note">
-          <p class="tiny"><strong>Status Timeline:</strong> Pending → In Review → In Progress → Resolved/Closed</p>
+        <div id="cmp-detail" class="cmp-detail">
+          <p class="muted tiny cmp-detail-empty">Select a complaint from the list to view details.</p>
         </div>
       </div>
     </div>
