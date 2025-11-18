@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mycebu_app',
+    'accounts',
+    'reset',
 ]
 
 MIDDLEWARE = [

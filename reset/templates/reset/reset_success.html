@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset – MyCebu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'mycebu_app/css/login.css' %}?v=1.5">
+</head>
+<body>
+<main class="wrap">
+    <section class="card">
+        <header>
+            <h2 class="title">Password Updated</h2>
+        </header>
+
+        {% if messages %}
+        <div class="messages" style="margin-bottom:20px;">
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <div class="alert" role="alert" style="padding:12px;border-radius:4px;margin-bottom:10px;background:#fee;color:#c33;">
+                {% else %}
+                <div class="alert" role="alert" style="padding:12px;border-radius:4px;margin-bottom:10px;background:#efe;color:#3c3;">
+                {% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <button class="btn" type="submit" style="margin-top:20px;">Go to Login</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

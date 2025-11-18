@@ -103,13 +103,13 @@
                         </label>
                         <label for="remember" style="cursor:pointer">Remember me</label>
                     </div>
-                    <a href="/password-reset-email">Forgot password?</a>
+                    <a href="{% url 'password_reset_email' %}">Forgot password?</a>
                 </div>
 
                 <button id="submitBtn" class="btn" type="submit">Sign In</button>
 
                 <p class="help"><span>Don't have an account?</span>
-                    <a href="/register">Sign Up</a>
+                    <a href="{% url 'register' %}">Sign Up</a>
                 </p>
             </form>
             {% if messages %}

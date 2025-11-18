@@ -20,6 +20,21 @@
                 <h4 class="subtitle">To recover your password, enter your registered email address.</h4>
             </header>
 
+            <!-- Display Django messages for success/error feedback -->
+            {% if messages %}
+            <div class="messages" style="margin-bottom: 20px;">
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                    <div class="alert" role="alert" style="padding:12px;border-radius:4px;margin-bottom:10px;background:#fee;color:#c33;">
+                    {% else %}
+                    <div class="alert" role="alert" style="padding:12px;border-radius:4px;margin-bottom:10px;background:#efe;color:#3c3;">
+                    {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <form id="reset-form" method="post" class="space-6" novalidate>
                 {% csrf_token %}
                 <div class="field" >

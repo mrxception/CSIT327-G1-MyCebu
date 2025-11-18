@@ -3,14 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', views.root_router_view, name='home'),
-    path('register/', views.register_view, name="register"),
-    path('login/', views.login_view, name="login"),
+    
     path('test/', views.chatbot_page, name='chatbot_page'),
     path('chat/', views.chat_view, name='chat_view'),
-    path('register-success/', views.register_success_view, name='register_success'),
-    path('password-reset-email/', views.password_reset_email_view, name='password_reset_email'),
-    path('password-reset-new-password/', views.password_reset_new_password_view, name='password_reset_new_password'),
-    path('password-reset-success/', views.password_reset_success_view, name='password_reset_success'),
+    
     path('profile/', views.profile_view, name='user_profile'),
 
     path('logout/', views.logout_view, name='logout'),
