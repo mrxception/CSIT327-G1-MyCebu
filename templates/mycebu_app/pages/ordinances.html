@@ -3,70 +3,126 @@
 {% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 
-<section class="tab-content-section" style="padding: 50px 0; min-height: 70vh;" data-loading="true" data-skel="ordinances">
-  <!-- SKELETON -->
-  <div class="section-skeleton">
-    <div class="ordinances-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
-      <div class="ordinances-header" style="text-align: center; margin-bottom: 40px;">
-        <div class="sk-title skeleton" style="height: 36px; width: 360px; margin: 0 auto 10px;"></div>
-        <div class="sk-line skeleton" style="width: 60%; height: 14px; margin: 0 auto;"></div>
+<section class="tab-content-section" data-loading="false" data-skel="ordinances">
+    <header class="svc-hero">
+    <div class="container">
+      <div class="svc-hero__badge">
+        <svg class="i i--badge" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor"
+            stroke-width="2" />
+          <path d="M14 2v6h6" fill="none" stroke="currentColor" stroke-width="2" />
+        </svg>
+        Government Services Portal
       </div>
+      <h1 class="svc-hero__title">Cebu City Ordinances</h1>
+      <p class="svc-hero__desc">Access the official database of city laws, executive orders, and resolutions directly from the City Council.</p>
+    </div>
+  </header>
 
-      <div class="ordinance-search" style="margin-bottom: 30px; text-align: center;">
-        <div style="display:inline-flex; gap:10px; width:70%; max-width:680px; justify-content:center;">
-          <div class="skeleton" style="height: 44px; flex:1; border-radius: 6px;"></div>
-          <div class="skeleton" style="height: 44px; width: 140px; border-radius: 6px;"></div>
+    <div class="container">
+        <div class="ord-controls">
+            <form action="{% url 'landing_tab' 'ordinances' %}" method="GET">
+                
+                <div class="ord-search-wrap">
+                    <span class="material-symbols-rounded ord-search-icon">search</span>
+                    <input type="text" name="q" placeholder="Search by name, position, or office" value="{{ request.GET.q }}">
+                </div>
+
+                <select name="author" class="ord-select" onchange="this.form.submit()">
+                    <option value="">All Positions</option>
+                    {% for auth in authors_list %}
+                    <option value="{{ auth }}" {% if request.GET.author == auth %}selected{% endif %}>{{ auth }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="category" class="ord-select" onchange="this.form.submit()">
+                    <option value="">All Districts</option>
+                    {% for cat in categories_list %}
+                    <option value="{{ cat }}" {% if request.GET.category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </form>
         </div>
-      </div>
 
-      <ul class="ordinance-list" style="list-style: none; padding: 0;">
-        {% for _ in "123456" %}
-        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
-          <div class="sk-title skeleton" style="height: 20px; width: 60%;"></div>
-          <div class="sk-line skeleton" style="height: 12px; width: 30%; margin-top: 6px;"></div>
-          <div class="sk-line skeleton" style="height: 12px; width: 90%; margin-top: 8px;"></div>
-        </li>
-        {% endfor %}
-      </ul>
+        <div class="services-container" style="padding-top: 20px;">
+            {% if ordinances_data %}
+                {# Regroup data by Category #}
+                {% regroup ordinances_data by category as category_list %}
+
+                {% for category in category_list %}
+                    <div class="category-group">
+                        <h2 class="category-header">
+                            <span class="material-symbols-rounded" style="color: #2563eb;">folder_open</span>
+                            {{ category.grouper|default:"General" }}
+                        </h2>
+                        
+                        <div class="ord-grid">
+                            {% for ord in category.list %}
+                            <article class="ord-card">
+                                <div class="tag-badge">
+                                    <span class="material-symbols-rounded" style="font-size:14px;">label</span>
+                                    {{ ord.category }}
+                                </div>
+
+                                <h3 class="ord-title">{{ ord.name_or_ordinance }}</h3>
+
+                                <div class="ord-meta">
+                                    <div class="ord-meta-row">
+                                        <span class="material-symbols-rounded icon-sm">person</span>
+                                        <span>{{ ord.author|default:"Unknown Author" }}</span>
+                                    </div>
+                                    <div class="ord-meta-row">
+                                        <span class="material-symbols-rounded icon-sm">tag</span>
+                                        <span>No. {{ ord.ordinance_number }}</span>
+                                    </div>
+                                    <div class="ord-meta-row">
+                                        <span class="material-symbols-rounded icon-sm">calendar_month</span>
+                                        <span>{{ ord.date_of_enactment|default:"Date Pending" }}</span>
+                                    </div>
+                                </div>
+
+                                <button type="button" class="btn-preview" 
+                                        onclick="openPdfPreview('{{ ord.pdf_file_path }}', '{{ ord.name_or_ordinance|escapejs }}')">
+                                    <span class="material-symbols-rounded">visibility</span>
+                                    Preview File
+                                </button>
+                            </article>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-msg" style="display:block; text-align:center; padding: 60px;">
+                    <span class="material-symbols-rounded" style="font-size: 48px; color: #d1d5db;">search_off</span>
+                    <h3 class="h3" style="margin-top:10px;">No Ordinances Found</h3>
+                </div>
+            {% endif %}
+        </div>
     </div>
-  </div>
-
-  <!-- REAL CONTENT -->
-  <div class="section-content">
-    <div class="ordinances-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
-      <div class="ordinances-header" style="text-align: center; margin-bottom: 40px;">
-        <h1 style="font-size: 2.5rem; color: #3d92d7;">Cebu City Ordinances</h1>
-        <p style="color: #666;">Official and consolidated list of city laws, resolutions, and local legislation.</p>
-      </div>
-
-      <div class="ordinance-search" style="margin-bottom: 30px; text-align: center;">
-        <form action="{% url 'landing_tab' tab='ordinances' %}" method="get" style="display:inline-flex; gap:10px; width:70%; max-width:680px;">
-          <input type="text" name="q" placeholder="Search by topic or number..." 
-                style="padding: 10px; width: 100%; border: 1px solid #ccc; border-radius: 5px;">
-          <button type="submit" style="padding: 10px 20px; background-color: #3d92d7; color: white; border: none; border-radius: 5px; cursor: pointer;">Search</button>
-        </form>
-      </div>
-
-      <ul class="ordinance-list" style="list-style: none; padding: 0;">
-        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
-          <h3 style="margin-top: 0; font-size: 1.2rem;">Ordinance No. 2345 (Traffic and Mobility)</h3>
-          <p style="color: #888; font-size: 0.9rem;">**Enacted:** January 15, 2023</p>
-          <p>Regulating the speed and flow of vehicles within the city proper to alleviate traffic congestion.</p>
-        </li>
-        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
-          <h3 style="margin-top: 0; font-size: 1.2rem;">Ordinance No. 2346 (Waste Management)</h3>
-          <p style="color: #888; font-size: 0.9rem;">**Enacted:** March 1, 2023</p>
-          <p>Implementing mandatory waste segregation at the source and penalizing non-compliance.</p>
-        </li>
-        <li style="border-bottom: 1px dashed #eee; padding: 15px 0;">
-          <h3 style="margin-top: 0; font-size: 1.2rem;">Ordinance No. 2347 (Digital Citizen ID)</h3>
-          <p style="color: #888; font-size: 0.9rem;">**Enacted:** May 20, 2023</p>
-          <p>Establishing the electronic MyCebu Citizen ID for streamlined government transactions.</p>
-        </li>
-      </ul>
-    </div>
-  </div>
 </section>
+
+<div id="pdfModal" class="pdf-modal-overlay">
+    <div class="pdf-modal-content">
+        <div class="pdf-header">
+            <div class="pdf-title-text" id="pdfModalTitle">Document Preview</div>
+            <div class="pdf-actions">
+                <button class="btn-pdf-action" onclick="printPdf()" title="Print">
+                    <span class="material-symbols-rounded">print</span>
+                </button>
+                <a id="downloadLink" class="btn-pdf-action" download title="Download">
+                    <span class="material-symbols-rounded">download</span>
+                </a>
+                <button class="btn-close-modal" onclick="closePdfPreview()">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+        </div>
+        <div class="pdf-body">
+            <iframe id="pdfViewerFrame" class="pdf-frame" src="" allow="fullscreen"></iframe>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}

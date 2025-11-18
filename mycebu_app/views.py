@@ -399,6 +399,42 @@ def landing_view(request, tab='landing'):
             "district": district,
         })
 
+    if tab == 'ordinances':
+        # Load ordinances data
+        json_path = os.path.join(settings.BASE_DIR, 'static', 'mycebu_app', 'data', 'ordinance.json')
+        data = []
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            pass  # data remains []
+
+        # Filter Logic
+        query = request.GET.get('q', '').lower()
+        category_filter = request.GET.get('category', '')
+        author_filter = request.GET.get('author', '')
+
+        filtered_data = []
+
+        # Create lists for dropdowns
+        categories_list = sorted(list(set(item['category'] for item in data if item.get('category'))))
+        authors_list = sorted(list(set(item['author'] for item in data if item.get('author') and item['author'] != "TO BE UPDATED")))
+
+        for item in data:
+            # Check matches
+            matches_q = query in item.get('name_or_ordinance', '').lower() or query in item.get('ordinance_number', '')
+            matches_cat = category_filter == "" or item.get('category') == category_filter
+            matches_auth = author_filter == "" or item.get('author') == author_filter
+
+            if matches_q and matches_cat and matches_auth:
+                filtered_data.append(item)
+
+        context.update({
+            'ordinances_data': filtered_data,
+            'categories_list': categories_list,
+            'authors_list': authors_list,
+        })
+
     try:
         response = render(request, f"mycebu_app/pages/{tab}.html", context)
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -450,3 +486,44 @@ def validate_name_field(name, field_label):
     if not re.match(r"^[a-zA-Z\s'-]+$", name):
         return f"{field_label} should only contain letters, spaces, hyphens, and apostrophes."
     return None
+
+def ordinances_view(request):
+    # 1. Define path to your JSON file
+    # Assuming the json file is in your 'static' folder or root app folder
+    # Update this path to where your actual file is located
+    json_path = os.path.join(settings.BASE_DIR, 'static', 'mycebu_app', 'data', 'ordinance.json')
+
+    data = []
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        print("JSON file not found")
+
+    # 2. Filter Logic (Python side since we are using JSON)
+    query = request.GET.get('q', '').lower()
+    category_filter = request.GET.get('category', '')
+    author_filter = request.GET.get('author', '')
+
+    filtered_data = []
+    
+    # Create lists for dropdowns
+    categories_list = sorted(list(set(item['category'] for item in data if item.get('category'))))
+    authors_list = sorted(list(set(item['author'] for item in data if item.get('author') and item['author'] != "TO BE UPDATED")))
+
+    for item in data:
+        # Check matches
+        matches_q = query in item.get('name_or_ordinance', '').lower() or query in item.get('ordinance_number', '')
+        matches_cat = category_filter == "" or item.get('category') == category_filter
+        matches_auth = author_filter == "" or item.get('author') == author_filter
+
+        if matches_q and matches_cat and matches_auth:
+            filtered_data.append(item)
+
+    # 3. Pass to template
+    context = {
+        'ordinances_data': filtered_data,
+        'categories_list': categories_list,
+        'authors_list': authors_list,
+    }
+    return render(request, 'mycebu_app/pages/ordinances.html', context)
