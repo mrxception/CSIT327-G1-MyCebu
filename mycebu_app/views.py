@@ -67,45 +67,53 @@ def get_authed_user(request):
         meta = getattr(user, "user_metadata", {}) or {}
         email = getattr(user, "email", None) or meta.get("email")
 
+        display_name = email.split("@")[0] if email else "User"
+        avatar_url = None
+
         try:
             user_data_resp = supabase_admin.table("users").select(
                 "first_name, middle_name, last_name, age, birthdate, avatar_url, contact_number, gender, marital_status, religion, birthplace, purok, city"
             ).eq("id", user.id).execute()
             
-            if user_data_resp.data:
+            if user_data_resp.data and len(user_data_resp.data) > 0:
                 ud = user_data_resp.data[0]
-                display_name_parts = [part for part in [ud.get("first_name"), ud.get("last_name")] if part]
-                display_name = " ".join(display_name_parts) if display_name_parts else (email.split("@")[0] if email else "User")
+                # Build display name from user data
+                first_name = ud.get("first_name") or ""
+                last_name = ud.get("last_name") or ""
+                if first_name or last_name:
+                    display_name = f"{first_name} {last_name}".strip()
+                avatar_url = ud.get("avatar_url")
             else:
-                display_name = email.split("@")[0] if email else "User"
-
-            avatar_url = ud.get("avatar_url") if user_data_resp.data else meta.get("avatar_url")
+                logger.debug("get_authed_user: No user data found in users table")
         except Exception as e:
             logger.error(f"get_authed_user: Error querying users table: {str(e)}")
-            display_name = email.split("@")[0] if email else "User"
-            avatar_url = None
 
         if not avatar_url and display_name:
-            initials = "".join([part[0].upper() for part in display_name.split()[:2]])
+            initials = "".join([part[0].upper() for part in display_name.split()[:2] if part])
             avatar_url = f"https://placehold.co/100x100/E2E8F0/4A5568?text={initials}"
+
+        user_data_resp = supabase_admin.table("users").select(
+            "first_name, middle_name, last_name, age, birthdate, avatar_url, contact_number, gender, marital_status, religion, birthplace, purok, city"
+        ).eq("id", user.id).execute()
+        ud = user_data_resp.data[0] if user_data_resp.data else {}
 
         return {
             "id": user.id,
             "email": email,
-            "first_name": ud.get("first_name") if user_data_resp.data else None,
-            "middle_name": ud.get("middle_name") if user_data_resp.data else None,
-            "last_name": ud.get("last_name") if user_data_resp.data else None,
+            "first_name": ud.get("first_name"),
+            "middle_name": ud.get("middle_name"),
+            "last_name": ud.get("last_name"),
             "display_name": display_name,
             "avatar_url": avatar_url,
-            "age": ud.get("age") if user_data_resp.data else None,
-            "birthdate": ud.get("birthdate") if user_data_resp.data else None,
-            "contact_number": ud.get("contact_number") if user_data_resp.data else None,
-            "gender": ud.get("gender") if user_data_resp.data else None,
-            "marital_status": ud.get("marital_status") if user_data_resp.data else None,
-            "religion": ud.get("religion") if user_data_resp.data else None,
-            "birthplace": ud.get("birthplace") if user_data_resp.data else None,
-            "purok": ud.get("purok") if user_data_resp.data else None,
-            "city": ud.get("city") if user_data_resp.data else None,
+            "age": ud.get("age"),
+            "birthdate": ud.get("birthdate"),
+            "contact_number": ud.get("contact_number"),
+            "gender": ud.get("gender"),
+            "marital_status": ud.get("marital_status"),
+            "religion": ud.get("religion"),
+            "birthplace": ud.get("birthplace"),
+            "purok": ud.get("purok"),
+            "city": ud.get("city"),
         }
     except Exception as e:
         logger.error(f"get_authed_user: Error validating token: {str(e)}")
@@ -487,6 +495,193 @@ def validate_name_field(name, field_label):
         return f"{field_label} should only contain letters, spaces, hyphens, and apostrophes."
     return None
 
+
+def _get_service_by_id(service_id):
+    """
+    Load service info (steps, requirements, downloads, etc.)
+    """
+    data_path = Path(settings.BASE_DIR) / "static" / "mycebu_app" / "data" / "services.json"
+
+    if not data_path.exists():
+        return None
+
+    with open(data_path, "r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    services = payload.get("services", [])
+    return next((s for s in services if s.get("id") == service_id), None)
+
+
+def apply_business_permit_view(request):
+    user = get_authed_user(request)
+    if not user:
+        return redirect("login")
+
+    service = _get_service_by_id("business-permit")
+    if not service:
+        return HttpResponse("Service not found", status=404)
+
+    existing_app_id = None
+    try:
+        # Only find in_progress applications, not submitted/completed ones
+        apps_resp = supabase_admin.table("applications").select("*").eq("user_id", user["id"]).eq("permit_id", "business-permit").eq("status", "in_progress").execute()
+        if apps_resp.data:
+            for a in apps_resp.data:
+                if a.get("status") == "in_progress":
+                    existing_app_id = a.get("id")
+                    break
+    except Exception as e:
+        logger.debug("apply_business_permit_view: error checking existing applications: %s", e)
+
+    return render(request, "mycebu_app/pages/apply_business_permit.html", {
+        "authed_user": user,
+        "user": user,
+        "service": service,
+        "existing_app_id": existing_app_id,
+        "current_tab": "services",
+    })
+
+
+@csrf_exempt
+def start_business_permit_application(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        body = json.loads(request.body)
+        restart = body.get("restart", False)
+    except:
+        restart = False
+
+    # If restart, delete existing application
+    if restart:
+        try:
+            supabase_admin.table("applications").delete().eq("user_id", user["id"]).eq("permit_id", "business-permit").execute()
+            logger.debug(f"start_business_permit_application: Deleted existing application for restart")
+        except Exception as e:
+            logger.debug(f"start_business_permit_application: Error deleting app for restart: {e}")
+
+    # If user already has an in-progress application (and not restarting), return it
+    if not restart:
+        try:
+            apps_resp = supabase_admin.table("applications").select("*").eq("user_id", user["id"]).eq("permit_id", "business-permit").eq("status", "in_progress").execute()
+            if apps_resp.data:
+                for a in apps_resp.data:
+                    if a.get("status") == "in_progress":
+                        return JsonResponse({"success": True, "application_id": a.get("id"), "existing": True})
+                return JsonResponse({"success": True, "application_id": apps_resp.data[0].get("id"), "existing": True})
+        except Exception as e:
+            logger.debug(f"start_business_permit_application: lookup error: {e}")
+
+    # Create new application
+    payload = {
+        "user_id": user["id"],
+        "permit_id": "business-permit",
+        "progress": 0,
+        "step_index": 0,
+        "status": "in_progress",
+        "requirements_data": {},
+    }
+
+    try:
+        result = supabase_admin.table("applications").insert(payload).execute()
+        if not result.data or len(result.data) == 0:
+            return JsonResponse({"success": False, "error": "Failed to create application"}, status=400)
+        app_id = result.data[0]["id"]
+        return JsonResponse({"success": True, "application_id": app_id})
+    except Exception as e:
+        logger.error(f"start_business_permit_application: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def update_business_permit_step(request, app_id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        new_step = data.get("step_index", 0)
+        mark_completed = data.get("mark_completed", False)
+    except:
+        return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
+    service = _get_service_by_id("business-permit")
+    total_steps = len(service.get("steps", []))
+
+    # If marking as completed, reset to step 0 and set status to "submitted"
+    if mark_completed:
+        update_data = {
+            "step_index": 0,
+            "progress": 0,
+            "status": "submitted",
+            "updated_at": "now()"
+        }
+    else:
+        # Determine if this completes the application
+        is_complete = new_step >= total_steps
+
+        # Clamp step index (but allow == total_steps for completion)
+        if new_step > total_steps:
+            new_step = total_steps - 1
+
+        # Calculate progress correctly
+        if is_complete:
+            progress = 100
+            status = "submitted"
+        else:
+            progress = int((new_step / max(total_steps, 1)) * 100)
+            status = "in_progress"
+
+        update_data = {
+            "step_index": new_step if not is_complete else total_steps - 1,
+            "progress": progress,
+            "status": status,
+            "updated_at": "now()"
+        }
+
+    try:
+        result = supabase_admin.table("applications").update(update_data).eq("id", str(app_id)).execute()
+        if result.data:
+            return JsonResponse({"success": True, "progress": update_data.get("progress"), "status": update_data.get("status")})
+        else:
+            return JsonResponse({"success": False, "error": "Failed to update application"}, status=400)
+    except Exception as e:
+        logger.error(f"update_business_permit_step: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+def permit_progress_view(request, app_id):
+    user = get_authed_user(request)
+    if not user:
+        return redirect("login")
+
+    try:
+        result = supabase_admin.table("applications").select("*").eq("id", str(app_id)).execute()
+        if not result.data:
+            return HttpResponse("Application not found", status=404)
+
+        application = result.data[0]
+        service = _get_service_by_id("business-permit")
+
+        return render(request, "mycebu_app/pages/business_permit_progress.html", {
+            "authed_user": user,
+            "user": user,
+            "service": service,
+            "app": application,
+            "current_tab": "services",
+        })
+    except Exception as e:
+        logger.error(f"permit_progress_view: {str(e)}")
+        return HttpResponse("Error loading application", status=500)
 def ordinances_view(request):
     # 1. Define path to your JSON file
     # Assuming the json file is in your 'static' folder or root app folder

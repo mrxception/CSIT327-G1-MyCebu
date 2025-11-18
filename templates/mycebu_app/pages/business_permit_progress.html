@@ -1,0 +1,219 @@
+{% extends "mycebu_app/landing_base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="tab-content-section" data-loading="false">
+  <header class="svc-hero" style="background:linear-gradient(135deg, #0d9488 0%, #059669 100%); color:white; padding:64px 24px; text-align:center;">
+    <div class="container" style="max-width:1200px; margin:0 auto;">
+      <div class="svc-hero__badge" style="display:inline-block; background:rgba(255,255,255,0.2); color:white; padding:8px 16px; border-radius:24px; font-size:0.875rem; font-weight:600; margin-bottom:16px;">
+        Application Progress
+      </div>
+      <h1 class="svc-hero__title" style="font-size:2.5rem; font-weight:700; margin:0 0 12px 0;">{{ service.title }}</h1>
+      <p class="svc-hero__desc" style="font-size:1.125rem; margin:0; opacity:0.95;">Track your permit application status</p>
+    </div>
+  </header>
+
+  <section class="detail-card" style="margin:48px auto; max-width:800px; padding:48px;">
+    <!-- Progress Overview -->
+    <div class="svc-block">
+      <h2 class="h3" style="margin-bottom:16px;">Application Progress</h2>
+      <div style="margin-bottom:24px;">
+        <p class="muted" style="font-size:0.875rem; margin-bottom:8px;">Overall Progress</p>
+        <progress value="{{ app.progress }}" max="100" style="width:100%; height:8px; border-radius:4px;"></progress>
+        <p style="margin:8px 0 0 0; font-weight:600; color:#0d9488;">{{ app.progress }}% Complete</p>
+      </div>
+    </div>
+
+    <!-- Current Step -->
+    <div class="svc-block" style="margin-top:32px; background:#f3f4f6; padding:20px; border-radius:8px; border-left:4px solid #0d9488;">
+      <p class="muted" style="font-size:0.875rem; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Current Step</p>
+      <h3 style="margin:0; font-size:1.25rem;">
+        Step {{ app.step_index|add:1 }}:
+        {% for step in service.steps %}
+          {% if forloop.counter0 == app.step_index %}
+            {{ step }}
+          {% endif %}
+        {% endfor %}
+      </h3>
+
+      {% if service.stepDetails %}
+        {% for detail in service.stepDetails %}
+          {% if forloop.counter0 == app.step_index %}
+            <div class="step-detail" style="margin-top:16px; background:#ffffff; padding:18px; border-radius:8px; border:1px solid #e6eef0; color:#374151; line-height:1.6;">
+              {{ detail|safe }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <!-- All Steps -->
+    <div class="svc-block" style="margin-top:32px;">
+      <h2 class="h3" style="margin-bottom:16px;">Application Steps</h2>
+      <ol class="list" style="margin-left:20px;">
+        {% for step in service.steps %}
+          {% if forloop.counter0 == app.step_index %}
+            <li style="margin-bottom:12px; font-weight:600; color:#0d9488;">
+              <span>{{ step }}</span>
+              <span style="display:inline-block; margin-left:8px; padding:4px 12px; background:#d1fae5; color:#065f46; border-radius:4px; font-size:0.75rem; font-weight:500;">You are here</span>
+            </li>
+          {% elif forloop.counter0 < app.step_index %}
+            <li style="margin-bottom:12px; color:#374151;">
+              <span>{{ step }}</span>
+              <span style="display:inline-block; margin-left:8px; padding:4px 12px; background:#d1d5db; color:#374151; border-radius:4px; font-size:0.75rem; font-weight:500;">✓ Completed</span>
+            </li>
+          {% else %}
+            <li style="margin-bottom:12px;">
+              <span>{{ step }}</span>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ol>
+    </div>
+
+    <!-- store app data for JS (avoid inline template in JS) -->
+    <div id="appData" data-step-index="{{ app.step_index }}" data-total-steps="{{ service.steps|length }}" data-app-id="{{ app.id }}" style="display:none;"></div>
+
+    <!-- Action Buttons -->
+    <div style="margin-top:48px; display:flex; gap:12px; flex-wrap:wrap;">
+      <button id="nextStep"
+          style="min-width:160px; background:#0d9488; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; box-shadow:0 2px 8px rgba(13,148,136,0.12); cursor:pointer;">
+        <span id="nextStepText">Next Step</span>
+      </button>
+      <button type="button" id="backDashboard" data-back-url="{% url 'landing_tab' tab='dashboard' %}"
+          style="min-width:160px; background:#ffffff; color:#0f172a; border:1px solid #e6eef0; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">
+        Back to Dashboard
+      </button>
+    </div>
+
+    <!-- Completion Modal (hidden by default) -->
+    <div id="completeModal" aria-hidden="true" style="display:none; position:fixed; inset:0; z-index:10000; align-items:center; justify-content:center; background:rgba(0,0,0,0.45);">
+      <div role="dialog" aria-modal="true" style="width:100%; max-width:520px; margin:16px; background:#fff; border-radius:12px; padding:28px; box-shadow:0 10px 30px rgba(2,6,23,0.2); text-align:center;">
+        <div style="display:flex; align-items:center; justify-content:center; width:84px; height:84px; margin:0 auto 18px; border-radius:48px; background:linear-gradient(180deg,#10b981,#059669);">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 6L9 17l-5-5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 style="margin:0 0 8px; font-size:1.25rem; color:#0f172a; font-weight:700;">Application Completed</h3>
+        <p style="margin:0 0 18px; color:#374151; line-height:1.5;">Your application was completed successfully. Your progress has been reset.</p>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button id="closeCompleteAlt" style="min-width:140px; background:#fff; color:#0f172a; border:1px solid #e6eef0; padding:10px 14px; border-radius:8px; font-weight:600; cursor:pointer;">Close & Dashboard</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Additional Info -->
+    {% if app.requirements_data %}
+    <div class="svc-block" style="margin-top:48px; border-top:1px solid #e5e7eb; padding-top:32px;">
+      <h2 class="h3" style="margin-bottom:16px;">Submitted Information</h2>
+      <div style="background:#f9fafb; padding:16px; border-radius:8px; font-size:0.875rem;">
+        <p class="muted">Requirements data has been saved.</p>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+</section>
+
+<script>
+(function () {
+    const appDataEl = document.getElementById('appData');
+    const nextBtn = document.getElementById('nextStep');
+    const nextBtnText = document.getElementById('nextStepText');
+    const backBtn = document.getElementById('backDashboard');
+    const completeModal = document.getElementById('completeModal');
+    const closeCompleteAlt = document.getElementById('closeCompleteAlt');
+    if (!appDataEl || !nextBtn) return;
+
+    const appId = appDataEl.dataset.appId;
+    const currentIndex = parseInt(appDataEl.dataset.stepIndex || '0', 10);
+    const totalSteps = parseInt(appDataEl.dataset.totalSteps || '0', 10);
+    const dashboardUrl = "{% url 'landing_tab' tab='dashboard' %}";
+
+    // Update button text if on last step
+    if (currentIndex >= totalSteps - 1) {
+        nextBtnText.textContent = 'Complete Application';
+    }
+
+    function showModal() {
+        if (!completeModal) return;
+        completeModal.style.display = "flex";
+        completeModal.setAttribute("aria-hidden", "false");
+    }
+
+    function hideModalAndRedirect() {
+        if (!completeModal) return;
+        completeModal.style.display = "none";
+        completeModal.setAttribute("aria-hidden", "true");
+        window.location.href = dashboardUrl;
+    }
+
+    nextBtn.addEventListener('click', async function () {
+        const next = currentIndex + 1;
+        
+        // if all complete, reset to 0 and show completion modal then redirect only on user close
+        if (next >= totalSteps) {
+            try {
+                const res = await fetch(`/apply/business-permit/${appId}/update/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ step_index: 0, mark_completed: true })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    // show confirmation modal instead of immediate redirect
+                    showModal();
+                } else {
+                    alert('Failed to complete application');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network or server error');
+            }
+            return;
+        }
+
+        try {
+            const res = await fetch(`/apply/business-permit/${appId}/update/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ step_index: next })
+            });
+            const data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Failed to update step');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Network or server error');
+        }
+    });
+
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            const url = backBtn.dataset.backUrl;
+            if (url) window.location.href = url;
+        });
+    }
+
+    if (closeCompleteAlt) closeCompleteAlt.addEventListener('click', () => {
+        hideModalAndRedirect();
+    });
+
+    // clicking overlay closes and redirects
+    if (completeModal) {
+        completeModal.addEventListener('click', (e) => {
+            if (e.target === completeModal) hideModalAndRedirect();
+        });
+    }
+
+})();
+</script>
+{% endblock %}

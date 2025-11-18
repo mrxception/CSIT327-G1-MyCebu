@@ -1,0 +1,158 @@
+{% extends "mycebu_app/landing_base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="tab-content-section" data-loading="false">
+  <header class="svc-hero" style="background:linear-gradient(135deg, #0d9488 0%, #059669 100%); color:white; padding:56px 24px; text-align:center;">
+    <div class="container" style="max-width:1200px; margin:0 auto;">
+      <div class="svc-hero__badge" style="display:inline-block; background:rgba(255,255,255,0.12); color:white; padding:8px 16px; border-radius:24px; font-size:0.9rem; font-weight:600; margin-bottom:12px;">
+        Application
+      </div>
+      <h1 class="svc-hero__title" style="font-size:2rem; font-weight:700; margin:6px 0 8px 0;">{{ service.title }}</h1>
+      <p class="svc-hero__desc" style="font-size:1rem; margin:0; opacity:0.95;">{{ service.description }}</p>
+    </div>
+  </header>
+
+  <section class="detail-card" style="margin:40px auto; max-width:960px; padding:36px;">
+    <div class="svc-block">
+      <h2 class="h3" style="margin-bottom:12px;">Requirements</h2>
+      <ul class="list" style="margin-left:20px;">
+        {% for req in service.requirements %}
+        <li style="margin-bottom:8px;">{{ req }}</li>
+        {% empty %}
+        <li class="muted">No specific requirements listed.</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="svc-block" style="margin-top:28px;">
+      <h2 class="h3" style="margin-bottom:12px;">Steps to Complete</h2>
+      <ol class="list" style="margin-left:20px;">
+        {% for step in service.steps %}
+        <li style="margin-bottom:8px;">{{ step }}</li>
+        {% empty %}
+        <li class="muted">No steps defined.</li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <!-- New: Additional Requirements & Joint Inspection -->
+    <div class="svc-block" style="margin-top:28px;">
+      <h2 class="h3" style="margin-bottom:12px;">Additional Requirements and Joint Inspection</h2>
+      <div style="margin-bottom:12px; color:#374151; line-height:1.5;">
+        <div style="white-space: normal;">
+          <p>Some businesses may be required to submit <strong>additional documents or undergo a joint inspection</strong> before the Mayor's Permit can be issued. These requirements vary depending on the <strong>nature, location, and risk level</strong> of your business activity.</p>
+          <p><strong>Possible additional clearances include:</strong></p>
+        </div>
+      </div>
+      <ul class="list" style="margin-left:20px;">
+        <li>Fire Safety Inspection Certificate (FSIC) from the Bureau of Fire Protection (BFP)</li>
+        <li>Environmental Compliance or CCENRO Clearance (for environmentally critical or waste-producing businesses)</li>
+        <li>Sanitary Permit or Health Certificate (for food, wellness, or healthcare-related establishments)</li>
+        <li>Police Clearance (for security-sensitive or entertainment establishments)</li>
+        <li>Market Clearance (for public market vendors or stalls)</li>
+        <li>Occupancy Permit (for newly constructed or renovated commercial spaces)</li>
+        <li>Zoning or Locational Clearance from the City Planning and Development Office (CPDO)</li>
+        <li>Electrical Inspection Certificate (for establishments using heavy machinery or high electrical load)</li>
+      </ul>
+    </div>
+
+    <div style="margin-top:34px; display:flex; gap:12px; flex-wrap:wrap;">
+      {% if existing_app_id %}
+        <button type="button" id="continueApp" data-app-url="{% url 'permit_progress' app_id=existing_app_id %}"
+            style="min-width:160px; background:#0d9488; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; box-shadow:0 2px 8px rgba(13,148,136,0.12); cursor:pointer;">
+          Continue Application
+        </button>
+        <button type="button" id="restartApp"
+            style="min-width:160px; background:#ffffff; color:#0f172a; border:1px solid #e6eef0; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">
+          Restart Application
+        </button>
+      {% else %}
+        <button id="startApp"
+            style="min-width:160px; background:#0d9488; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; box-shadow:0 2px 8px rgba(13,148,136,0.12); cursor:pointer;">
+          Start Application
+        </button>
+      {% endif %}
+
+      <button type="button" id="backDashboard" data-back-url="{% url 'landing_tab' tab='dashboard' %}"
+          style="min-width:160px; background:#ffffff; color:#0f172a; border:1px solid #e6eef0; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">
+        Back to Dashboard
+      </button>
+    </div>
+  </section>
+</section>
+
+<script>
+(function () {
+  const startBtn = document.getElementById('startApp');
+  const continueBtn = document.getElementById('continueApp');
+  const restartBtn = document.getElementById('restartApp');
+  const backBtn = document.getElementById('backDashboard');
+
+  if (startBtn) {
+    startBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch("{% url 'start_business_permit' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success && data.application_id) {
+          window.location.href = `/apply/business-permit/${data.application_id}/`;
+        } else {
+          alert(data.error || "Failed to start application");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Network or server error");
+      }
+    });
+  }
+
+  if (continueBtn) {
+    continueBtn.addEventListener('click', () => {
+      const url = continueBtn.dataset.appUrl;
+      if (url) window.location.href = url;
+    });
+  }
+
+  if (restartBtn) {
+    restartBtn.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to restart? This will reset your progress.')) {
+        return;
+      }
+      try {
+        const res = await fetch("{% url 'start_business_permit' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({ restart: true })
+        });
+        const data = await res.json();
+        if (data.success && data.application_id) {
+          window.location.href = `/apply/business-permit/${data.application_id}/`;
+        } else {
+          alert(data.error || "Failed to restart application");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Network or server error");
+      }
+    });
+  }
+
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      const url = backBtn.dataset.backUrl;
+      if (url) window.location.href = url;
+    });
+  }
+})();
+</script>
+{% endblock %}
