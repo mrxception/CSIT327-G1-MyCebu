@@ -19,6 +19,21 @@
     /* secondary accent blue */
     --secondary-600: #42a5f5;
     /* secondary accent darker blue */
+    --accent: #f59e0b;
+    /* amber */
+    --accent-600: #d97706;
+    --success: #10b981;
+    /* emerald */
+    --success-600: #059669;
+    --warning: #f97316;
+    /* orange */
+    --warning-600: #ea580c;
+    --info: #8b5cf6;
+    /* violet */
+    --info-600: #7c3aed;
+    --danger: #ef4444;
+    /* red */
+    --danger-600: #dc2626;
 }
 
 body {

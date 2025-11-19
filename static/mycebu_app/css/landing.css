@@ -48,7 +48,7 @@
 }
 
 .nav-links a:hover {
-  color: black;
+  color: var(--text);
   opacity: 1;
   font-weight: 600;
 }
@@ -88,7 +88,7 @@
 }
 
 .sign-in:hover{
-    background: rgb(226, 226, 226);
+    background: var(--border);
 }
 
 .dashboard {
@@ -97,7 +97,7 @@
     box-shadow: 0 4px 14px rgba(205, 214, 207, 0.39);
     transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    color: white;
+    color: var(--bg);
 }
 
 .dashboard:hover{
@@ -170,32 +170,35 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+a.btn-primary, a.btn-secondary {
+    text-decoration: none;
 }
 
 .btn-primary {
-    background: linear-gradient(140deg, #1741b6, #02c854);
-    color: white;
+    background: var(--primary);
+    color: var(--bg);
 }
 
 
 .btn-primary:hover {
-    background-color: #f0f0f0;
+    opacity: 0.9;
     transform: translateY(-2px);
 }
 
 .btn-secondary {
-    background-color: rgba(255, 255, 255, 0.9);
-    color: #4d6ec9;
-    border: 2px solid transparent;
-    border-radius: 8px; /* optional */
-    background: 
-      linear-gradient(white, white) padding-box, 
-      linear-gradient(140deg, #3b64d5, #02c854) border-box;
+    background: var(--primary);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
 }
 
 
 .btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    opacity: 0.9;
     transform: translateY(-2px);
 }
 
@@ -371,7 +374,7 @@ footer {
   align-items: flex-start;
   padding: 1.5rem;
   border-radius: 12px;
-  background: #fff;
+  background: var(--bg);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   min-height: 280px; /* consistent card height */
 }
@@ -420,10 +423,10 @@ footer {
   padding: 0.6rem 1.2rem;
   border: none;
   border-radius: 8px;
-  color: #fff;
+  color: var(--bg);
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(140deg, #1741b6, #02c854);
+  background: var(--primary);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -440,7 +443,7 @@ footer {
   margin-top: 2rem;
   padding: 1.5rem;
   border-radius: 12px;
-  background: #fff;
+  background: var(--bg);
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
@@ -460,10 +463,10 @@ footer {
   padding: 0.8rem 1.5rem;
   border: none;
   border-radius: 8px;
-  color: #fff;
+  color: var(--bg);
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(140deg, #1741b6, #02c854);
+  background: var(--primary);
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
