@@ -75,31 +75,18 @@
         <p>Access government services, ordinances, and directories with AI-powered assistance. Available 24/7 for Cebu City residents and businesses.</p>
 
         <div class="buttons">
-          <button class="btn-primary">Explore Services</button>
-          <button class="btn-secondary">View Ordinances</button>
+           <a href="{% url 'landing_tab' 'services' %}" class="btn-primary">Explore Services</a>
+           <a href="{% url 'landing_tab' 'ordinances' %}" class="btn-secondary">View Ordinances</a>
         </div>
 
-        <div class="stats">
-          <div class="stat-item">
-            <h3>100+</h3>
-            <span>Services Available</span>
-          </div>
-          <div class="stat-item">
-            <h3>24/7</h3>
-            <span>AI Assistance</span>
-          </div>
-          <div class="stat-item">
-            <h3>1M+</h3>
-            <span>Citizens Served</span>
-          </div>
-        </div>
+        
       </div>
 
       <div class="hero-right">
         <div class="features">
           <div class="feature-card">
-            <div class="feature-icon">
-              <img src="{% static 'mycebu_app/icons/landing-clock-ico.png' %}" alt="24/7 Icon">
+            <div class="feature-icon feature-icon--primary">
+              <i class="material-icons">schedule</i>
             </div>
             <div class="feature-content">
               <h3>24/7 Service Access</h3>
@@ -108,8 +95,8 @@
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">
-              <img src="{% static 'mycebu_app/icons/landing-people-ico.png' %}" alt="AI Icon">
+            <div class="feature-icon feature-icon--secondary">
+              <i class="material-icons">people</i>
             </div>
             <div class="feature-content">
               <h3>AI-Powered Guidance</h3>
@@ -118,8 +105,8 @@
           </div>
 
           <div class="feature-card">
-            <div class="feature-icon">
-              <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Centralized Icon">
+            <div class="feature-icon feature-icon--accent">
+              <i class="material-icons">article</i>
             </div>
             <div class="feature-content">
               <h3>Centralized Information</h3>
@@ -175,8 +162,8 @@
 
       <div class="services-grid">
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Business Permits">
+          <div class="service-icon service-icon--primary">
+            <i class="material-icons">business</i>
           </div>
           <div class="service-content">
             <h3>Business Permits</h3>
@@ -186,8 +173,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Tax Services">
+          <div class="service-icon service-icon--secondary">
+            <i class="material-icons">account_balance</i>
           </div>
           <div class="service-content">
             <h3>Tax Services</h3>
@@ -197,8 +184,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Building Permits">
+          <div class="service-icon service-icon--accent">
+            <i class="material-icons">apartment</i>
           </div>
           <div class="service-content">
             <h3>Building Permits</h3>
@@ -208,8 +195,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Education Services">
+          <div class="service-icon service-icon--success">
+            <i class="material-icons">school</i>
           </div>
           <div class="service-content">
             <h3>Education Services</h3>
@@ -219,8 +206,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Health Services">
+          <div class="service-icon service-icon--warning">
+            <i class="material-icons">local_hospital</i>
           </div>
           <div class="service-content">
             <h3>Health Services</h3>
@@ -230,8 +217,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Transportation">
+          <div class="service-icon service-icon--info">
+            <i class="material-icons">directions_car</i>
           </div>
           <div class="service-content">
             <h3>Transportation</h3>
@@ -241,8 +228,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Social Services">
+          <div class="service-icon service-icon--danger">
+            <i class="material-icons">group</i>
           </div>
           <div class="service-content">
             <h3>Social Services</h3>
@@ -252,8 +239,8 @@
         </div>
 
         <div class="service-card">
-          <div class="service-icon">
-            <img src="{% static 'mycebu_app/icons/landing-document-ico.png' %}" alt="Land Services">
+          <div class="service-icon service-icon--secondary">
+            <i class="material-icons">location_on</i>
           </div>
           <div class="service-content">
             <h3>Land Services</h3>
@@ -270,7 +257,7 @@
           <button class="ai-assistant-btn">Ask AI Assistant</button>
         </div>
         <div class="ai-icon">
-          <img src="{% static 'mycebu_app/icons/my-cebu-ico.png' %}" alt="AI Assistant">
+          <img src="{% static 'mycebu_app/icons/mycebu-logo.png' %}" alt="AI Assistant">
         </div>
       </div>
     </div>
