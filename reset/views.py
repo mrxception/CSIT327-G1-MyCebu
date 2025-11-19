@@ -42,10 +42,10 @@ If you did not request this, please ignore this message.
 
     ctx = ssl.create_default_context()
 
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls(context=ctx)
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx) as server:
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+
 
 
 def _store_otp(email: str, otp: str):
