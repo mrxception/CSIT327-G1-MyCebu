@@ -176,59 +176,59 @@
     syncFiles()
   })
 
-  function renderComplaintDetail(c){
-    if(!cmpDetail)return
-    var filesHtml=''
-    if(c.files&&c.files.length){
-      filesHtml='<div class="cmp-files">'
-      c.files.forEach(function(f){
-        filesHtml+='<div class="file-pill"><span class="name">'+f.name+' <span class="filesize">('+formatSize(f.size)+')</span></span></div>'
-      })
-      filesHtml+='</div>'
-    }else{
-      filesHtml='<p class="tiny muted">No attachments for this complaint.</p>'
-    }
-    var dateText=''
-    if(c.date){
-      var d=new Date(c.date)
-      if(!isNaN(d.getTime()))dateText=d.toLocaleDateString()
-    }
-    cmpDetail.innerHTML=
-      '<div class="cmp-detail-header">'+
-        '<p class="tiny muted">'+c.id+'</p>'+
-        '<h4 class="cmp-detail-title">'+c.subject+'</h4>'+
-      '</div>'+
-      '<div class="cmp-meta-grid">'+
-        '<div><p class="tiny muted">Status</p>'+badgeFor(c.status).outerHTML+'</div>'+
-        '<div><p class="tiny muted">Date Submitted</p><p class="strong">'+(dateText||'-')+'</p></div>'+
-        '<div><p class="tiny muted">Category</p><p class="strong">'+c.category+'</p></div>'+
-        '<div><p class="tiny muted">Sub-Category</p><p class="strong">'+(c.subcategory||'-')+'</p></div>'+
-      '</div>'+
-      '<div class="cmp-section"><p class="tiny muted">Location</p><p class="strong">'+c.location+'</p></div>'+
-      '<div class="cmp-section"><p class="tiny muted">Description</p><p>'+c.description+'</p></div>'+
-      '<div class="cmp-section"><p class="tiny muted">Attachments</p>'+filesHtml+'</div>'+
-      (c.anonymous?'':'<div class="cmp-section"><p class="tiny muted">Submitted By</p><p class="strong">'+(c.name||'-')+'</p><p class="tiny muted">'+(c.email||'')+(c.phone?' • '+c.phone:'')+'</p></div>')
-  }
+  // function renderComplaintDetail(c){
+  //   if(!cmpDetail)return
+  //   var filesHtml=''
+  //   if(c.files&&c.files.length){
+  //     filesHtml='<div class="cmp-files">'
+  //     c.files.forEach(function(f){
+  //       filesHtml+='<div class="file-pill"><span class="name">'+f.name+' <span class="filesize">('+formatSize(f.size)+')</span></span></div>'
+  //     })
+  //     filesHtml+='</div>'
+  //   }else{
+  //     filesHtml='<p class="tiny muted">No attachments for this complaint.</p>'
+  //   }
+  //   var dateText=''
+  //   if(c.date){
+  //     var d=new Date(c.date)
+  //     if(!isNaN(d.getTime()))dateText=d.toLocaleDateString()
+  //   }
+  //   cmpDetail.innerHTML=
+  //     '<div class="cmp-detail-header">'+
+  //       '<p class="tiny muted">'+c.id+'</p>'+
+  //       '<h4 class="cmp-detail-title">'+c.subject+'</h4>'+
+  //     '</div>'+
+  //     '<div class="cmp-meta-grid">'+
+  //       '<div><p class="tiny muted">Status</p>'+badgeFor(c.status).outerHTML+'</div>'+
+  //       '<div><p class="tiny muted">Date Submitted</p><p class="strong">'+(dateText||'-')+'</p></div>'+
+  //       '<div><p class="tiny muted">Category</p><p class="strong">'+c.category+'</p></div>'+
+  //       '<div><p class="tiny muted">Sub-Category</p><p class="strong">'+(c.subcategory||'-')+'</p></div>'+
+  //     '</div>'+
+  //     '<div class="cmp-section"><p class="tiny muted">Location</p><p class="strong">'+c.location+'</p></div>'+
+  //     '<div class="cmp-section"><p class="tiny muted">Description</p><p>'+c.description+'</p></div>'+
+  //     '<div class="cmp-section"><p class="tiny muted">Attachments</p>'+filesHtml+'</div>'+
+  //     (c.anonymous?'':'<div class="cmp-section"><p class="tiny muted">Submitted By</p><p class="strong">'+(c.name||'-')+'</p><p class="tiny muted">'+(c.email||'')+(c.phone?' • '+c.phone:'')+'</p></div>')
+  // }
 
-  function renderComplaintsList(){
-    if(!cmpList)return
-    cmpList.innerHTML=''
-    complaints.forEach(function(c){
-      var item=document.createElement('button')
-      item.type='button'
-      item.className='list-item cmp-item'
-      var left=document.createElement('div')
-      left.innerHTML='<p class="tiny muted">'+c.id+'</p><p class="list-title">'+c.subject+'</p><p class="tiny muted">'+c.category+(c.subcategory?' • '+c.subcategory:'')+'</p>'
-      var badge=badgeFor(c.status)
-      item.appendChild(left)
-      item.appendChild(badge)
-      item.addEventListener('click',function(){renderComplaintDetail(c)})
-      cmpList.appendChild(item)
-    })
-    if(complaints.length&&cmpDetail&&cmpDetail.querySelector('.cmp-detail-empty'))renderComplaintDetail(complaints[0])
-  }
+  // function renderComplaintsList(){
+  //   if(!cmpList)return
+  //   cmpList.innerHTML=''
+  //   complaints.forEach(function(c){
+  //     var item=document.createElement('button')
+  //     item.type='button'
+  //     item.className='list-item cmp-item'
+  //     var left=document.createElement('div')
+  //     left.innerHTML='<p class="tiny muted">'+c.id+'</p><p class="list-title">'+c.subject+'</p><p class="tiny muted">'+c.category+(c.subcategory?' • '+c.subcategory:'')+'</p>'
+  //     var badge=badgeFor(c.status)
+  //     item.appendChild(left)
+  //     item.appendChild(badge)
+  //     item.addEventListener('click',function(){renderComplaintDetail(c)})
+  //     cmpList.appendChild(item)
+  //   })
+  //   if(complaints.length&&cmpDetail&&cmpDetail.querySelector('.cmp-detail-empty'))renderComplaintDetail(complaints[0])
+  // }
 
-  renderComplaintsList()
+  // renderComplaintsList()
 
   var form=$('#form-complaint'),success=$('#cmp-success'),btnNew=$('#cmp-new')
   function required(v){return v&&String(v).trim().length>0}
@@ -263,7 +263,7 @@
       files:currentFiles.slice()
     }
     complaints.unshift(comp)
-    renderComplaintsList()
+    // renderComplaintsList()
     success.style.display='grid'
     form.style.display='none'
   })
