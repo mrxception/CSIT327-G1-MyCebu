@@ -49,8 +49,8 @@ textarea{font-family:"Poppins",system-ui,-apple-system,BlinkMacSystemFont,"Segoe
 .svc-hero,.services-section{display:none}
 .dashboard-hero{background-image:linear-gradient(rgba(251,250,250,.7),rgba(255,255,255,.7)),url('/static/mycebu_app/images/barangay-hall-bg.jpg');background-size:cover;background-position:center;padding:4rem 6rem 3rem}
 .dashboard-hero-content{display:flex;align-items:baseline;gap:.5rem}
-.dashboard-hero-content h4{font-size:3rem;background:linear-gradient(90deg,#236aa4,#09469a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
-.dashboard-hero-content h2{font-size:3rem;background:linear-gradient(90deg,#427c40,#2c7124);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
+.dashboard-hero-content h4{font-size:3rem;background:linear-gradient(90deg,#236aa4,#09469a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin: 0 0 0 16rem;}
+.dashboard-hero-content h2{font-size:3rem;background:linear-gradient(90deg, var(--primary), var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin:0}
 .dash-head{margin:16px 0}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .stat-card{display:flex;flex-direction:column;justify-content:space-between;padding:16px;border-radius:16px;background:#fff;border:1px solid var(--border);text-decoration:none;color:inherit;box-shadow:0 2px 4px rgba(0,0,0,.04)}
@@ -106,4 +106,4 @@ textarea{font-family:"Poppins",system-ui,-apple-system,BlinkMacSystemFont,"Segoe
 .cmp-item p.tiny{margin-top:0}
 .cmp-detail p.tiny{margin-top:0}
 @media (max-width:1200px){.grid-2{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:700px){.stat-grid{grid-template-columns:1fr}.dash-tabs{grid-template-columns:1fr}.dash-subtabs{grid-template-columns:1fr}.dashboard-hero-content{flex-direction:column;line-height:1;align-items:center}.dashboard-hero-content h2{margin-top:-.5rem;text-align:center;padding-bottom:.5rem}.dashboard-hero-content h4{text-align:center}}
+@media (max-width:700px){.stat-grid{grid-template-columns:1fr}.dash-tabs{grid-template-columns:1fr}.dash-subtabs{grid-template-columns:1fr}.dashboard-hero-content{flex-direction:column;line-height:1;align-items:center}.dashboard-hero-content h2{margin-top:-.5rem;text-align:center;padding-bottom:.5rem}.dashboard-hero-content h4{margin-top:-.5rem;text-align:center;padding-bottom:.5rem;margin-left:0}}
