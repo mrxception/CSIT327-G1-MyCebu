@@ -20,4 +20,8 @@ urlpatterns = [
     path("apply/<str:service>/<uuid:app_id>/", views.permit_progress_view, name="permit_progress"),
     path("apply/<str:service>/<uuid:app_id>/update/", views.update_service_application, name="update_service_application"),
 
+    path("complaints/submit/", views.submit_complaint_view, name="submit_complaint"),
+    path("complaints/list/", views.list_complaints_view, name="list_complaints"),
+    path("complaints/<uuid:complaint_id>/", views.complaint_detail_view, name="complaint_detail"),
+    path("complaints/<uuid:complaint_id>/status/", views.update_complaint_status_view, name="update_complaint_status"),
 ]

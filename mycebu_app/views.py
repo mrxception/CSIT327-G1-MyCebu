@@ -709,3 +709,232 @@ def permit_progress_view(request, service: str, app_id):
     except Exception as e:
         logger.error(f"permit_progress_view: {e}")
         return HttpResponse("Error loading application", status=500)
+
+def _normalize_bool(val):
+    if val is None:
+        return False
+    if isinstance(val, bool):
+        return val
+    return str(val).strip().lower() in ("1", "true", "yes", "on")
+@csrf_exempt
+@require_POST
+def submit_complaint_view(request):
+    user = get_authed_user(request)
+    if not user or not user.get("id"):
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        # Accept both JSON and form-data
+        if request.content_type and "application/json" in request.content_type:
+            payload = json.loads(request.body)
+        else:
+            payload = request.POST
+
+        category = (payload.get("category") or "").strip()
+        subcategory = payload.get("subcategory")
+        subject = (payload.get("subject") or "").strip()
+        location = (payload.get("location") or "").strip()
+        description = (payload.get("description") or "").strip()
+        is_anonymous = payload.get("is_anonymous") in (True, "true", "True", 1)
+
+        name = payload.get("name", "").strip() if not is_anonymous else None
+        email = payload.get("email", "").strip() if not is_anonymous else None
+        phone = payload.get("phone", "").strip() if not is_anonymous else None
+
+        # Get attachments from JSON (Cloudinary URLs) OR from uploaded files
+        attachments = payload.get("attachments", [])
+
+        # Fallback: if no JSON attachments, try old file upload method
+        if not attachments:
+            files = request.FILES.getlist("cmp-files") or request.FILES.getlist("attachments")
+            attachments = []
+            for f in files:
+                file_ext = os.path.splitext(f.name)[1]
+                file_name = f"complaints/{user['id']}/{uuid.uuid4()}{file_ext}"
+                saved_path = default_storage.save(file_name, ContentFile(f.read()))
+                file_url = default_storage.url(saved_path)
+                attachments.append({
+                    "name": f.name,
+                    "url": file_url,
+                    "size": f.size,
+                    "content_type": f.content_type,
+                })
+
+        # Validation
+        errors = {}
+        if not category: errors["category"] = "Required"
+        if not subject: errors["subject"] = "Required"
+        if not location: errors["location"] = "Required"
+        if not description: errors["description"] = "Required"
+        if not is_anonymous and not (name or email or phone):
+            errors["identity"] = "Provide at least one contact if not anonymous"
+
+        if errors:
+            return JsonResponse({"success": False, "errors": errors}, status=400)
+
+        # Save to Supabase
+        record = {
+            "user_id": user["id"],
+            "category": category,
+            "subcategory": subcategory or None,
+            "subject": subject,
+            "location": location,
+            "description": description,
+            "is_anonymous": is_anonymous,
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "attachments": attachments if attachments else None,
+        }
+
+        result = supabase_admin.table("complaints").insert(record).execute()
+        if not result.data:
+            logger.error(f"Insert failed: {result}")
+            return JsonResponse({"success": False, "error": "Database error"}, status=500)
+
+        complaint = result.data[0]
+
+        return JsonResponse({
+            "success": True,
+            "complaint": {
+                "id": complaint["id"],
+                "status": complaint["status"],
+                "created_at": complaint["created_at"],
+                "attachments": complaint["attachments"],
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"submit_complaint_view error: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@require_GET
+def list_complaints_view(request):
+    """
+    Return the logged-in user's complaints list (for the Track tab).
+    Used to populate #cmp-list.
+    """
+    user = get_authed_user(request)
+    if not user or not user.get("id"):
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        resp = supabase_admin.table("complaints") \
+            .select("id, category, subcategory, subject, status, created_at, location") \
+            .eq("user_id", user["id"]) \
+            .order("created_at", desc=True) \
+            .execute()
+
+        rows = getattr(resp, "data", []) or []
+        items = []
+        for row in rows:
+            items.append({
+                "id": row.get("id"),
+                "category": row.get("category"),
+                "subcategory": row.get("subcategory"),
+                "subject": row.get("subject"),
+                "status": row.get("status"),
+                "location": row.get("location"),
+                "created_at": row.get("created_at"),
+            })
+
+        return JsonResponse({"success": True, "items": items})
+    except Exception as e:
+        logger.error(f"list_complaints_view: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@require_GET
+def complaint_detail_view(request, complaint_id):
+    """
+    Return full details of a single complaint of the logged-in user.
+    Used to populate the right-side detail panel (#cmp-detail).
+    """
+    user = get_authed_user(request)
+    if not user or not user.get("id"):
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        resp = supabase_admin.table("complaints") \
+            .select("*") \
+            .eq("id", str(complaint_id)) \
+            .eq("user_id", user["id"]) \
+            .execute()
+
+        rows = getattr(resp, "data", []) or []
+        if not rows:
+            return JsonResponse({"success": False, "error": "Complaint not found"}, status=404)
+
+        c = rows[0]
+        return JsonResponse({
+            "success": True,
+            "complaint": {
+                "id": c.get("id"),
+                "category": c.get("category"),
+                "subcategory": c.get("subcategory"),
+                "subject": c.get("subject"),
+                "location": c.get("location"),
+                "description": c.get("description"),
+                "is_anonymous": c.get("is_anonymous"),
+                "name": c.get("name"),
+                "email": c.get("email"),
+                "phone": c.get("phone"),
+                "status": c.get("status"),
+                "attachments": c.get("attachments"),
+                "created_at": c.get("created_at"),
+                "updated_at": c.get("updated_at"),
+            }
+        })
+    except Exception as e:
+        logger.error(f"complaint_detail_view: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def update_complaint_status_view(request, complaint_id):
+    """
+    Optional: update a complaint's status.
+    This is mainly for admin usage. If you want only admins,
+    add your own admin check here (e.g., check user role in Supabase users table).
+    JSON body: { "status": "In Review" }
+    """
+    user = get_authed_user(request)
+    if not user or not user.get("id"):
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "Invalid JSON body"}, status=400)
+
+    new_status = (payload.get("status") or "").strip()
+    if not new_status:
+        return JsonResponse({"success": False, "error": "Status is required"}, status=400)
+
+    try:
+        # For now, only update complaints that belong to this user.
+        # If you want admin-only, remove the user_id filter and add role checks.
+        res = supabase_admin.table("complaints") \
+            .update({"status": new_status, "updated_at": "now()"}) \
+            .eq("id", str(complaint_id)) \
+            .eq("user_id", user["id"]) \
+            .execute()
+
+        data = getattr(res, "data", []) or []
+        if not data:
+            return JsonResponse({"success": False, "error": "Complaint not found or not owned by user"}, status=404)
+
+        c = data[0]
+        return JsonResponse({
+            "success": True,
+            "complaint": {
+                "id": c.get("id"),
+                "status": c.get("status"),
+                "updated_at": c.get("updated_at"),
+            }
+        })
+    except Exception as e:
+        logger.error(f"update_complaint_status_view: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
