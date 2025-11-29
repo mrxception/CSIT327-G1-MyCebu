@@ -787,7 +787,7 @@ def submit_complaint_view(request):
             email=email,
             phone=phone,
             attachments=attachments if attachments else None,
-            status="Pending", # Default status
+            status="Submitted", # Default status
             created_at=timezone.now(),
             updated_at=timezone.now()
         )
