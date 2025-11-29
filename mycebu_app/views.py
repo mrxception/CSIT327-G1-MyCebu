@@ -8,6 +8,11 @@ import requests
 from pathlib import Path
 from datetime import datetime
 
+# Cloudinary Imports
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 # Django Imports
 from django.db import connection
 from django.db.models import Q
@@ -24,24 +29,55 @@ from django.utils import timezone
 
 # Auth Imports
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User as DjangoAuthUser # Rename default user to avoid conflict
+from django.contrib.auth.models import User as DjangoAuthUser
 
 # === MODEL IMPORTS ===
 from .models import Complaint, Ordinance, ServiceApplication
 
-# !!! CHANGE 'authentication' TO THE ACTUAL NAME OF YOUR APP WITH THE USER TABLE !!!
+# Try to import the Custom User model from 'accounts' app, fallback to 'mycebu_app' if not found
 try:
-    from accounts.models import User as DbUser 
+    from accounts.models import User as DbUser
 except ImportError:
-    # Fallback if app name is different, strictly for error handling
     from mycebu_app.models import User as DbUser
 
 # ==========================================
-# SETUP & HELPERS
+# SETUP & LOGGING
 # ==========================================
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# ==========================================
+# CLOUDINARY UPLOAD HELPER
+# ==========================================
+def upload_to_cloudinary(file_obj, folder="profiles"):
+    """
+    Uploads a file object to Cloudinary.
+    NO ERROR HANDLING - We want it to crash if it fails so we see why.
+    """
+    # 1. Print keys to console to verify they are loaded (Check your terminal!)
+    print(f"DEBUG: Cloud Name: {settings.CLOUDINARY_STORAGE['CLOUD_NAME']}")
+    print(f"DEBUG: API Key: {settings.CLOUDINARY_STORAGE['API_KEY']}")
+    
+    # 2. Configure
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_STORAGE['CLOUD_NAME'],
+        api_key=settings.CLOUDINARY_STORAGE['API_KEY'],
+        api_secret=settings.CLOUDINARY_STORAGE['API_SECRET']
+    )
+    
+    # 3. Upload
+    upload_result = cloudinary.uploader.upload(
+        file_obj,
+        folder=f"mycebu/{folder}",
+        resource_type="auto"
+    )
+    
+    return upload_result.get("secure_url")
+
+# ==========================================
+# DATA LOADING HELPERS
+# ==========================================
 
 def _load_services_data():
     data_path = Path(settings.BASE_DIR) / "static" / "mycebu_app" / "data" / "services.json"
@@ -76,12 +112,9 @@ def get_authed_user(request):
     auth_user = request.user
     
     # 2. Find the corresponding record in your custom 'users' table
-    # We use .filter().first() to avoid crashing if the record is missing
     db_user = DbUser.objects.filter(email=auth_user.email).first()
 
     # 3. Construct the full profile dictionary
-    # We prefer data from the custom table (db_user), fallback to auth_user
-    
     user_id = auth_user.id
     if db_user:
         user_id = db_user.id # Use the UUID from your custom table if available
@@ -234,7 +267,6 @@ def register_view(request):
             )
 
             # 2. Create in Your Custom 'users' Table (for profile data)
-            # This ensures the record exists when they try to save profile later
             DbUser.objects.create(
                 id=uuid.uuid4(),
                 email=email,
@@ -270,7 +302,7 @@ def root_router_view(request):
     return redirect("landing_tab", tab="landing")
                     
 def profile_view(request):
-    user_data = get_authed_user(request) # For display
+    user_data = get_authed_user(request)
     if not user_data:
         return redirect("login")
 
@@ -279,7 +311,7 @@ def profile_view(request):
 
     if request.method == "POST":
         try:
-            # 1. Capture All Fields
+            # 1. Capture Fields
             first_name = request.POST.get("first_name", "").strip()
             last_name = request.POST.get("last_name", "").strip()
             email = request.POST.get("email", "").strip()
@@ -313,31 +345,22 @@ def profile_view(request):
                 messages.error(request, "Please correct the errors.")
                 return render(request, "mycebu_app/pages/profile.html", {"user": user_data, "errors": errors})
 
-            # ================================================
-            # DUAL SAVE STRATEGY
-            # ================================================
-
-            # A. Update Django Auth User (Allows you to keep logging in)
+            # A. Update Django Auth User
             auth_u = request.user
             auth_u.first_name = first_name
             auth_u.last_name = last_name
-            # If email changes, we update it in both places
             old_email = auth_u.email
             auth_u.email = email 
             auth_u.save()
 
-            # B. Update Custom 'users' Table (Stores your profile data)
-            # Find record by OLD email (in case they changed it) or NEW email
+            # B. Update Custom 'users' Table
             db_user = DbUser.objects.filter(email=old_email).first()
             if not db_user:
-                # If finding by old email failed, try new email or create new
                 db_user = DbUser.objects.filter(email=email).first()
             
             if not db_user:
-                # Create if completely missing (Safety net)
                 db_user = DbUser(id=uuid.uuid4(), email=email)
 
-            # Assign fields to custom model
             db_user.email = email
             db_user.first_name = first_name
             db_user.last_name = last_name
@@ -353,18 +376,27 @@ def profile_view(request):
             db_user.purok = purok
             db_user.city = city
 
-            # Handle Avatar
+            # --- AVATAR UPLOAD LOGIC ---
             if "avatar" in request.FILES:
+                print("DEBUG: Avatar file detected in request.FILES")
                 avatar_file = request.FILES["avatar"]
-                file_name = f"avatars/{auth_u.id}/{uuid.uuid4()}{os.path.splitext(avatar_file.name)[1]}"
-                file_path = default_storage.save(file_name, ContentFile(avatar_file.read()))
-                db_user.avatar_url = default_storage.url(file_path)
+                
+                # Upload to Cloudinary
+                uploaded_url = upload_to_cloudinary(avatar_file, folder=f"profiles/{auth_u.id}")
+                
+                if uploaded_url:
+                    print(f"DEBUG: Saving URL to database: {uploaded_url}")
+                    db_user.avatar_url = uploaded_url
+                else:
+                    print("DEBUG: Cloudinary returned None")
+                    messages.warning(request, "Profile picture upload failed. Check server logs.")
+            # ---------------------------
 
             db_user.save()
-            # ================================================
+            print("DEBUG: Database saved successfully.")
 
             messages.success(request, "Profile updated successfully.")
-            user_data = get_authed_user(request) # Refresh data
+            user_data = get_authed_user(request)
 
         except Exception as e:
             logger.error(f"profile_view: Update error: {str(e)}")
@@ -730,6 +762,7 @@ def submit_complaint_view(request):
         return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
 
     try:
+        # Accept both JSON and form-data
         if request.content_type and "application/json" in request.content_type:
             payload = json.loads(request.body)
         else:
@@ -748,20 +781,20 @@ def submit_complaint_view(request):
 
         attachments = payload.get("attachments", [])
 
+        # Fallback: if no JSON attachments, try form-data files and upload to Cloudinary
         if not attachments:
             files = request.FILES.getlist("cmp-files") or request.FILES.getlist("attachments")
             attachments = []
             for f in files:
-                file_ext = os.path.splitext(f.name)[1]
-                file_name = f"complaints/{user['id']}/{uuid.uuid4()}{file_ext}"
-                saved_path = default_storage.save(file_name, ContentFile(f.read()))
-                file_url = default_storage.url(saved_path)
-                attachments.append({
-                    "name": f.name,
-                    "url": file_url,
-                    "size": f.size,
-                    "content_type": f.content_type,
-                })
+                # Upload to Cloudinary
+                uploaded_url = upload_to_cloudinary(f, folder=f"complaints/{user['id']}")
+                if uploaded_url:
+                    attachments.append({
+                        "name": f.name,
+                        "url": uploaded_url,
+                        "size": f.size,
+                        "content_type": f.content_type,
+                    })
 
         errors = {}
         if not category: errors["category"] = "Required"
@@ -787,7 +820,7 @@ def submit_complaint_view(request):
             email=email,
             phone=phone,
             attachments=attachments if attachments else None,
-            status="Submitted", # Default status
+            status="Submitted",
             created_at=timezone.now(),
             updated_at=timezone.now()
         )
@@ -814,7 +847,6 @@ def list_complaints_view(request):
         return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
 
     try:
-        # Django ORM Select
         complaints = Complaint.objects.filter(user_id=user["id"]).order_by('-created_at').values(
             "id", "category", "subcategory", "subject", "status", "created_at", "location"
         )
@@ -878,7 +910,6 @@ def update_complaint_status_view(request, complaint_id):
         return JsonResponse({"success": False, "error": "Status is required"}, status=400)
 
     try:
-        # Django ORM Update
         updated_count = Complaint.objects.filter(id=complaint_id, user_id=user["id"]).update(
             status=new_status,
             updated_at=timezone.now()
