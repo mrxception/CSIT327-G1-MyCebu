@@ -1,29 +1,33 @@
 import os
-import re
 import time
 import random
 import logging
-import requests
 import ssl
 import smtplib
+from email.message import EmailMessage
 
 from django.shortcuts import render, redirect
 from django.core.cache import cache
 from django.contrib import messages
+from django.contrib.auth.models import User  # IMPORT DJANGO USER MODEL
 from django.conf import settings
-from email.message import EmailMessage
 
 logger = logging.getLogger(__name__)
 
 OTP_TTL_SECONDS = 10 * 60  
 OTP_LENGTH = 6
 
+# ==========================================
+# OTP HELPERS (SMTP & CACHE)
+# ==========================================
 
 def _send_otp_email(to_email: str, otp: str):
+    """Sends OTP via SMTP (Gmail or other providers)"""
     smtp_user = os.getenv("SMTP_USER")
     smtp_pass = os.getenv("SMTP_PASS")
 
     if not smtp_user or not smtp_pass:
+        # Log error but don't crash app if env vars missing, just raise to be caught
         raise RuntimeError("SMTP_USER or SMTP_PASS missing in environment")
 
     subject = "MyCebu Password Reset OTP"
@@ -40,15 +44,21 @@ If you did not request this, please ignore this message.
     msg["To"] = to_email
     msg.set_content(body)
 
+    # Create secure SSL context
     ctx = ssl.create_default_context()
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx) as server:
+    try:
+        # Connect to Gmail SMTP (adjust host/port if using different provider)
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx) as server:
             server.login(smtp_user, smtp_pass)
             server.send_message(msg)
-
+    except Exception as e:
+        logger.error(f"SMTP Error: {e}")
+        raise e
 
 
 def _store_otp(email: str, otp: str):
+    """Stores OTP in Django Cache (Redis or LocalMem)"""
     cache.set(
         f"otp_{email.lower()}",
         {"otp": otp, "timestamp": int(time.time())},
@@ -57,6 +67,7 @@ def _store_otp(email: str, otp: str):
 
 
 def _verify_otp(email: str, otp: str) -> bool:
+    """Verifies OTP from Cache"""
     payload = cache.get(f"otp_{email.lower()}")
     if not payload:
         return False
@@ -64,72 +75,20 @@ def _verify_otp(email: str, otp: str) -> bool:
     if str(payload["otp"]) != str(otp):
         return False
 
+    # Optional: Delete OTP after successful use to prevent replay
     cache.delete(f"otp_{email.lower()}")
     return True
 
 
-def _get_supabase_service_role_key():
-    key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    if not key:
-        raise RuntimeError("SUPABASE_SERVICE_ROLE_KEY missing")
-    return key
-
-
-def _find_supabase_user(email: str):
-    """
-    Find user in Supabase Auth (not SQL).
-    Supabase's GET /admin/users?email= is unreliable and returns ALL users,
-    so we must manually filter.
-    """
-    service_role = _get_supabase_service_role_key()
-
-    url = f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1/admin/users?email={email}"
-    headers = {
-        "apikey": service_role,
-        "Authorization": f"Bearer {service_role}",
-    }
-
-    r = requests.get(url, headers=headers)
-    r.raise_for_status()
-    data = r.json()
-
-    print("RAW SUPABASE RESPONSE:", data)
-
-    if isinstance(data, dict) and "users" in data:
-        for user in data["users"]:
-            if user.get("email", "").lower() == email.lower():
-                return user
-
-    if isinstance(data, list):
-        for user in data:
-            if user.get("email", "").lower() == email.lower():
-                return user
-
-    return None
-
-
-def _update_supabase_password(user_id: str, new_password: str, email: str):
-    """Update user password using Supabase Admin API (must use PUT)."""
-    service_role = _get_supabase_service_role_key()
-
-    url = f"{settings.SUPABASE_URL.rstrip('/')}/auth/v1/admin/users/{user_id}"
-    headers = {
-        "apikey": service_role,
-        "Authorization": f"Bearer {service_role}",
-        "Content-Type": "application/json",
-    }
-
-    payload = {
-        "email": email,
-        "password": new_password,
-    }
-
-    r = requests.put(url, headers=headers, json=payload)
-    r.raise_for_status()
-    return r.json()
+# ==========================================
+# PASSWORD RESET VIEWS
+# ==========================================
 
 
 def password_reset_email_view(request):
+    """
+    Step 1: User enters email. We check DB, generate OTP, send Email.
+    """
     if request.method == "POST":
         email = request.POST.get("email", "").strip().lower()
 
@@ -137,21 +96,27 @@ def password_reset_email_view(request):
             messages.error(request, "Email is required.")
             return render(request, "reset/email_form.html")
 
-        user = _find_supabase_user(email)
-        if not user:
+        # CHANGED: Use Django ORM instead of Supabase API
+        # Check if user exists in the PostgreSQL database
+        if not User.objects.filter(email=email).exists():
             messages.error(request, "No account found in MyCebu for that email.")
             return render(request, "reset/email_form.html")
 
+        # Generate OTP
         otp = str(random.randint(10**(OTP_LENGTH - 1), 10**OTP_LENGTH - 1))
+        
+        # Store in Cache
         _store_otp(email, otp)
 
         try:
+            # Send Email
             _send_otp_email(email, otp)
         except Exception as e:
             logger.error("Email sending failed: %s", e)
-            messages.error(request, "Failed to send email. Try again later.")
+            messages.error(request, "Failed to send email. Please check your SMTP settings.")
             return render(request, "reset/email_form.html")
 
+        # Save email to session for the next step
         request.session["reset_email"] = email
         request.session.set_expiry(OTP_TTL_SECONDS)
 
@@ -161,42 +126,56 @@ def password_reset_email_view(request):
 
 
 def password_reset_new_password_view(request):
-
+    """
+    Step 2: User enters OTP and New Password. We verify and update DB.
+    """
     email = request.session.get("reset_email")
+
+    # If session expired or user accessed directly without step 1
+    if not email:
+        messages.error(request, "Session expired. Please start over.")
+        return redirect("password_reset_email")
 
     if request.method == "POST":
         otp = request.POST.get("otp", "")
         password = request.POST.get("password", "")
         confirm = request.POST.get("confirm-password", "")
 
+        # 1. Verify OTP
         if not _verify_otp(email, otp):
             messages.error(request, "Invalid or expired OTP.")
             return render(request, "reset/new_password.html")
 
+        # 2. Validate Password Match
         if password != confirm:
             messages.error(request, "Passwords do not match.")
             return render(request, "reset/new_password.html")
 
-        user = _find_supabase_user(email)
-        if not user:
-            messages.error(request, "No user found.")
-            return render(request, "reset/new_password.html")
-
         try:
-            _update_supabase_password(user["id"], password, email)
+            # CHANGED: Use Django ORM to update password
+            user = User.objects.get(email=email)
+            user.set_password(password) # set_password handles hashing automatically
+            user.save()
 
+            # Clean up session
+            request.session.pop("reset_email", None)
+            
+            messages.success(request, "Password updated successfully!")
+            return redirect("password_reset_success")
+
+        except User.DoesNotExist:
+            messages.error(request, "User not found.")
+            return render(request, "reset/new_password.html")
         except Exception as e:
             logger.error("Password update failed: %s", e)
-            messages.error(request, "Failed to update password. Please try again later.")
+            messages.error(request, "An error occurred while updating the password.")
             return render(request, "reset/new_password.html")
-
-        request.session.pop("reset_email", None)
-        messages.success(request, "Password updated successfully!")
-
-        return redirect("password_reset_success")
 
     return render(request, "reset/new_password.html")
 
 
 def password_reset_success_view(request):
+    """
+    Step 3: Success page.
+    """
     return render(request, "reset/reset_success.html")
