@@ -19,6 +19,7 @@ class User(models.Model):
     city = models.TextField(blank=True, null=True)
     avatar_url = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
+    role = models.TextField(default='user')
 
     class Meta:
         db_table = "users"
