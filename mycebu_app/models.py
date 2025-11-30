@@ -49,3 +49,65 @@ class ServiceApplication(models.Model):
 
     class Meta:
         db_table = "service_applications"
+
+
+class Official(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.TextField()
+    position = models.TextField()
+    office = models.TextField(blank=True, null=True)
+    district = models.TextField(blank=True, null=True)
+    email = models.TextField(blank=True, null=True)
+    phone = models.TextField(blank=True, null=True)
+    initials = models.TextField(blank=True, null=True)
+    photo = models.TextField(blank=True, null=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "directory_officials"
+
+
+class Department(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.TextField()
+    head = models.TextField(blank=True, null=True)
+    contact_details = models.JSONField(blank=True, null=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "directory_departments"
+
+
+class EmergencyContact(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    service = models.TextField()
+    numbers = models.JSONField(blank=True, null=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "directory_emergency"
+
+class Service(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    service_id = models.TextField(unique=True)      
+    icon = models.TextField()                    
+    title = models.TextField()
+    description = models.TextField()
+    color = models.TextField()                       
+
+    requirements = models.JSONField(default=list, blank=True)
+    steps = models.JSONField(default=list, blank=True)
+    step_details = models.JSONField(default=list, blank=True, null=True)  
+    additional_info = models.JSONField(blank=True, null=True)
+    forms = models.JSONField(default=list, blank=True)
+    forms_download = models.JSONField(default=list, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "services"
+        verbose_name_plural = "services"
+
+    def __str__(self):
+        return self.title
