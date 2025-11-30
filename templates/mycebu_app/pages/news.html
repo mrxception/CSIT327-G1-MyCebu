@@ -1,0 +1,34 @@
+{% extends 'mycebu_app/landing_base.html' %}
+{% load static %}
+{% block content %}
+<section class="news-hero">
+  <div class="container">
+    <div class="news-hero__badge">
+      <span class="material-icons news-hero__icon">article</span>
+      <span class="news-hero__badge-text">Latest Updates</span>
+    </div>
+    <h1 class="news-hero__title">News &amp; Announcements</h1>
+    <p class="news-hero__desc">
+      Stay informed with the latest news, updates, and announcements from Cebu City Government.
+    </p>
+  </div>
+</section>
+
+<section class="news-section">
+  <div class="container py-16">
+    <div class="news-filters">
+      <div class="news-filter-block">
+        <h2 class="news-filter__label">Filter by Category</h2>
+        <div class="tabs--bar news-tabs" id="news-category-tabs"></div>
+      </div>
+      <div class="news-filter-block">
+        <h2 class="news-filter__label">Filter by Tag</h2>
+        <div class="news-tags" id="news-tags"></div>
+      </div>
+    </div>
+
+    <div class="news-grid" id="news-grid"></div>
+    <p class="empty-msg" id="news-empty">No news found for the selected filters.</p>
+  </div>
+</section>
+{% endblock content %}
