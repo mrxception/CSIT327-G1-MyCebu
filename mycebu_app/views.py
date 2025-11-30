@@ -568,11 +568,9 @@ def chat_view(request):
         if not prompt:
             return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-        # 1. SEARCH DATABASE FOR CONTEXT
         context_data = []
         q_term = prompt.strip()
 
-        # Search Services
         services = Service.objects.filter(
             Q(title__icontains=q_term) | 
             Q(description__icontains=q_term)
@@ -580,7 +578,6 @@ def chat_view(request):
         for s in services:
             context_data.append(f"[Service] {s.title}: {s.description}")
 
-        # Search Officials
         officials = Official.objects.filter(
             Q(name__icontains=q_term) | 
             Q(position__icontains=q_term) |
@@ -589,7 +586,6 @@ def chat_view(request):
         for o in officials:
             context_data.append(f"[Official] {o.name} ({o.position}) - {o.office}. Phone: {o.phone}")
 
-        # Search Ordinances
         ordinances = Ordinance.objects.filter(
             Q(name_or_ordinance__icontains=q_term) |
             Q(ordinance_number__icontains=q_term)
@@ -597,32 +593,27 @@ def chat_view(request):
         for o in ordinances:
             context_data.append(f"[Ordinance] {o.ordinance_number} - {o.name_or_ordinance} by {o.author}")
 
-        # Search Emergency Contacts (if keywords match)
         if any(x in q_term.lower() for x in ['emergency', 'hotline', 'police', 'fire', 'help']):
             emergencies = EmergencyContact.objects.all()
             for e in emergencies:
                 nums = ", ".join(e.numbers) if isinstance(e.numbers, list) else str(e.numbers)
                 context_data.append(f"[Emergency] {e.service}: {nums}")
 
-        # 2. CONSTRUCT SYSTEM PROMPT
         context_str = "\n".join(context_data)
         
         if not context_str:
-            # If no data found, tell AI to be honest about it
             system_instruction = (
                 "You are the Cebu City AI assistant. The user asked a question, but I found NO matching records "
                 "in the database for Services, Officials, or Ordinances. "
                 "Politely tell the user you couldn't find specific information in the system records."
             )
         else:
-            # If data found, tell AI to use it strictly
             system_instruction = (
                 "You are the Cebu City AI assistant. Answer the user's question using ONLY the following database records. "
                 "Do not make up information. If the answer is not in the records, say you don't know.\n\n"
                 f"--- DATABASE RECORDS ---\n{context_str}\n------------------------"
             )
 
-        # 3. CALL AI API
         api_url = "https://router.huggingface.co/novita/v3/openai/chat/completions"
         headers = {
             "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
