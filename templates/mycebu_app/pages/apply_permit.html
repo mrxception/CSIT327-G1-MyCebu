@@ -89,7 +89,8 @@
   const restartBtn = document.getElementById('restartApp');
   const backBtn = document.getElementById('backDashboard');
 
-  const startUrl = "{% url 'start_service_application' service=service.id %}";
+  // CORRECT: Use service.service_id (string slug), NOT service.id (UUID)
+  const startUrl = "{% url 'start_service_application' service=service.service_id %}";
 
   if (startBtn) {
     startBtn.addEventListener('click', async () => {
@@ -104,14 +105,14 @@
         });
         const data = await res.json();
         if (data.success && data.application_id) {
-          // use service.id to build progress URL
-          window.location.href = `/apply/{{ service.id }}/${data.application_id}/`;
+          // CORRECT: Use service.service_id
+          window.location.href = `/apply/{{ service.service_id }}/${data.application_id}/`;
         } else {
           alert(data.error || "Failed to start application");
         }
       } catch (err) {
         console.error(err);
-        alert("Network or server error");
+        alert("Network error");
       }
     });
   }
@@ -125,9 +126,8 @@
 
   if (restartBtn) {
     restartBtn.addEventListener('click', async () => {
-      if (!confirm('Are you sure you want to restart? This will reset your progress.')) {
-        return;
-      }
+      if (!confirm('Are you sure you want to restart? This will reset your progress.')) return;
+
       try {
         const res = await fetch(startUrl, {
           method: "POST",
@@ -139,21 +139,20 @@
         });
         const data = await res.json();
         if (data.success && data.application_id) {
-          window.location.href = `/apply/{{ service.id }}/${data.application_id}/`;
+          window.location.href = `/apply/{{ service.service_id }}/${data.application_id}/`;
         } else {
-          alert(data.error || "Failed to restart application");
+          alert(data.error || "Failed to restart");
         }
       } catch (err) {
         console.error(err);
-        alert("Network or server error");
+        alert("Network error");
       }
     });
   }
 
   if (backBtn) {
     backBtn.addEventListener('click', () => {
-      const url = backBtn.dataset.backUrl;
-      if (url) window.location.href = url;
+      window.location.href = backBtn.dataset.backUrl;
     });
   }
 })();

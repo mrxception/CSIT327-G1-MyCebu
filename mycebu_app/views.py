@@ -123,7 +123,7 @@ def get_authed_user(request):
 
 def _get_service_by_id(service_id):
     """Helper to fetch a specific service from DB by its string ID (e.g., 'business-permit')"""
-    return Service.objects.filter(service_id=service_id).values().first()
+    return Service.objects.filter(service_id=service_id).first()
 
 def logout_view(request):
     logout(request)
@@ -799,29 +799,58 @@ def permit_progress_view(request, service: str, app_id):
         return redirect("login")
 
     try:
-        app_obj = ServiceApplication.objects.get(id=app_id)
-        application = {
-            "id": app_obj.id,
-            "reference_number": app_obj.reference_number,
-            "progress": app_obj.progress,
-            "step_index": app_obj.step_index,
-            "updated_at": app_obj.updated_at,
-            "service_type": app_obj.service_type
-        }
-        
-        svc = _get_service_by_id(service)
-        return render(request, "mycebu_app/pages/permit_progress.html", {
+        # 1. Get the application (must belong to user + match service)
+        app_obj = ServiceApplication.objects.get(
+            id=app_id,
+            user_id=user["id"],
+            service_type=service
+        )
+
+        # 2. Get the Service object using the service_id string (e.g., 'business-permit')
+        svc = Service.objects.get(service_id=service)
+
+        # 3. Extract steps & details (JSONField → auto-decoded to Python list)
+        steps = svc.steps or []
+        step_details = svc.step_details or []
+
+        total_steps = len(steps)
+        current_idx = app_obj.step_index or 0
+
+        # Clamp index
+        if total_steps > 0 and current_idx >= total_steps:
+            current_idx = total_steps - 1
+
+        # Recalculate progress
+        progress = 100 if total_steps == 0 else int(((current_idx + 1) / total_steps) * 100)
+
+        # Optional: Fix outdated DB values
+        if app_obj.progress != progress or app_obj.step_index != current_idx:
+            app_obj.progress = progress
+            app_obj.step_index = current_idx
+            app_obj.save(update_fields=['progress', 'step_index'])
+
+        context = {
             "authed_user": user,
             "user": user,
             "service": svc,
-            "app": application,
+            "app": {
+                "id": app_obj.id,
+                "reference_number": app_obj.reference_number or "N/A",
+                "progress": progress,
+                "step_index": current_idx,
+            },
             "current_tab": "services",
-        })
+        }
+
+        return render(request, "mycebu_app/pages/permit_progress.html", context)
+
     except ServiceApplication.DoesNotExist:
-        return HttpResponse("Application not found", status=404)
+        return HttpResponse("Application not found or you don't have access.", status=404)
+    except Service.DoesNotExist:
+        return HttpResponse(f"Service '{service}' configuration not found in database.", status=404)
     except Exception as e:
-        logger.error(f"permit_progress_view: {e}")
-        return HttpResponse("Error loading application", status=500)
+        logger.error(f"permit_progress_view error: {e}", exc_info=True)
+        return HttpResponse("Internal server error.", status=500)
 
 @csrf_exempt
 @require_POST
@@ -1036,10 +1065,10 @@ def directory_list_api(request):
                 "office": o.office or "",
                 "district": dist,
                 # IMPORTANT: Return empty string if no photo, never None
-                "photo": o.photo if o.photo else "", 
+                "photo": o.photo if o.photo else None, 
                 "initials": o.initials or (o.name[:2].upper() if o.name else "??"),
-                "email": o.email or "",
-                "phone": o.phone or ""
+                "email": o.email or None,
+                "phone": o.phone or None
             })
 
         # 2. Departments

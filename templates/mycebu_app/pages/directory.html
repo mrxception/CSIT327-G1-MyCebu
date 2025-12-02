@@ -4,7 +4,43 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'mycebu_app/css/directory.css' %}">
 
-<section class="tab-content-section" data-loading="false" data-skel="directory-all">
+<style>
+    /* --- Spinner Styles --- */
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e6eef0;
+        border-top-color: var(--primary, #0d9488);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Animation for cards */
+    .card {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .card.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* CRITICAL: When the parent section has class "loading", 
+       hide all tab panels (filters + grids) immediately. 
+    */
+    .tab-content-section.loading .tab-panel {
+        display: none !important;
+    }
+</style>
+
+<section class="tab-content-section" id="directorySection" data-skel="directory-all">
     <header class="dir-hero">
         <div class="container">
             <div class="dir-hero__badge">🏛️ Government Directory</div>
@@ -19,6 +55,11 @@
             <button class="tab-btn" data-tab="offices" onclick="switchTab('offices')">DEPARTMENT OFFICES</button>
             <button class="tab-btn" data-tab="hotlines" onclick="switchTab('hotlines')">EMERGENCY HOTLINES</button>
         </nav>
+    </div>
+
+    <div id="directoryLoading" style="display:none; text-align:center; padding:60px 20px; color:#6b7280; background:#f8fafc; margin-top: 20px; border-radius: 8px;">
+        <div class="spinner"></div> 
+        <span style="font-size: 1.1em; font-weight: 500;">Loading directory data...</span>
     </div>
 
     <section class="tab-panel" data-panel="officials" style="display:block;">
@@ -56,10 +97,7 @@
                     <p class="muted">Government directory of the government officials in Cebu City.</p>
                 </div>
 
-                <div class="dir-grid" id="grid-officials">
-                    <div style="grid-column: 1/-1; text-align: center; padding: 20px;">Loading...</div>
-                </div>
-
+                <div class="dir-grid" id="grid-officials"></div>
                 <div class="empty-msg" id="empty-officials" style="display:none; text-align:center; padding:20px;">No Officials Found</div>
             </div>
         </div>
@@ -137,15 +175,13 @@ let directoryData = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initialize Tabs based on URL
     const urlParams = new URLSearchParams(window.location.search);
     const currentTab = urlParams.get('t') || 'officials';
     switchTab(currentTab);
 
-    // 2. Fetch Data
+    // Fetch Data
     fetchDirectoryData();
 
-    // 3. Attach Listeners
     setupListener('q-officials', filterOfficials);
     setupListener('pos-officials', filterOfficials, 'change');
     setupListener('dist-officials', filterOfficials, 'change');
@@ -158,31 +194,42 @@ function setupListener(id, fn, evt='input') {
     if(el) el.addEventListener(evt, fn);
 }
 
-// --- Tab Switching Logic (Matching your CSS) ---
 function switchTab(tabName) {
-    // Hide all panels
     document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
-    // Remove active class from buttons
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active'));
 
-    // Show target panel
     const targetPanel = document.querySelector(`.tab-panel[data-panel="${tabName}"]`);
     if(targetPanel) targetPanel.style.display = 'block';
 
-    // Activate button
     const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
     if(targetBtn) targetBtn.classList.add('is-active');
 
-    // Update URL
     const url = new URL(window.location);
     url.searchParams.set('t', tabName);
     window.history.replaceState({}, '', url);
 }
 
-// --- API Fetch ---
+// --- UPDATED LOADER LOGIC ---
+function toggleLoader(show) {
+    const loader = document.getElementById('directoryLoading');
+    const section = document.getElementById('directorySection');
+    
+    if (show) {
+        // Show loader
+        loader.style.display = 'block';
+        // Add 'loading' class to parent -> This triggers CSS to hide all .tab-panel
+        section.classList.add('loading');
+    } else {
+        loader.style.display = 'none';
+        section.classList.remove('loading');
+    }
+}
+
 async function fetchDirectoryData() {
+    toggleLoader(true); // Start Loading
+
     try {
-        const res = await fetch('/api/directory/');
+        const res = await fetch('/api/directory/', {cache: "no-cache"});
         const data = await res.json();
 
         if(!data.success) {
@@ -192,21 +239,35 @@ async function fetchDirectoryData() {
 
         directoryData = data;
         
-        // Render Grids
         renderOfficials(data.officials);
         renderOffices(data.offices);
         renderHotlines(data.hotlines);
 
-        // Populate Filters
         populateSelect('pos-officials', data.filters.positions, 'All Positions');
         populateSelect('dist-officials', data.filters.districts, 'All Districts');
 
     } catch (err) {
         console.error("Fetch Error", err);
+    } finally {
+        // Stop Loading after a small delay to prevent flickering
+        setTimeout(() => {
+            toggleLoader(false);
+        }, 300);
     }
 }
 
-// --- Render Officials (Matches your exact Card HTML) ---
+function animateItems(containerId) {
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    const cards = container.querySelectorAll('.card');
+    cards.forEach((card, idx) => {
+        setTimeout(() => {
+            card.classList.add('visible');
+        }, 50 * idx);
+    });
+}
+
+// --- Rendering Functions (Same as before) ---
 function renderOfficials(list) {
     const grid = document.getElementById('grid-officials');
     const empty = document.getElementById('empty-officials');
@@ -220,7 +281,6 @@ function renderOfficials(list) {
     if(empty) empty.style.display = 'none';
 
     list.forEach(o => {
-        // Image Logic
         let imgHtml;
         const photoUrl = o.photo || "";
         if (photoUrl.trim() !== "") {
@@ -247,15 +307,13 @@ function renderOfficials(list) {
                     </svg>
                     <span>${escapeHtml(o.office)}</span>
                 </div>` : ''}
-
                 ${o.email ? `
                 <div class="meta-row">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 -960 960 960" fill="var(--muted)">
-                         <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
+                          <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
                     </svg>
                     <span>${escapeHtml(o.email)}</span>
                 </div>` : ''}
-
                 ${o.phone ? `
                 <div class="meta-row">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="var(--muted)">
@@ -267,9 +325,9 @@ function renderOfficials(list) {
         `;
         grid.appendChild(card);
     });
+    animateItems('grid-officials');
 }
 
-// --- Render Offices ---
 function renderOffices(list) {
     const grid = document.getElementById('grid-offices');
     const empty = document.getElementById('empty-offices');
@@ -317,9 +375,9 @@ function renderOffices(list) {
         `;
         grid.appendChild(card);
     });
+    animateItems('grid-offices');
 }
 
-// --- Render Hotlines ---
 function renderHotlines(list) {
     const grid = document.getElementById('grid-hotlines');
     const empty = document.getElementById('empty-hotlines');
@@ -348,9 +406,9 @@ function renderHotlines(list) {
         `;
         grid.appendChild(card);
     });
+    animateItems('grid-hotlines');
 }
 
-// --- Filtering ---
 function filterOfficials() {
     const q = (document.getElementById('q-officials').value || '').toLowerCase();
     const pos = document.getElementById('pos-officials').value;
