@@ -12,7 +12,9 @@
 .i{width:24px;height:24px;display:inline-block}
 .i--badge{width:18px;height:18px;margin-right:8px}
 .svc-hero{background:linear-gradient(165deg,var(--secondary) 0%,var(--secondary-600) 50%,var(--primary) 100%);color:#fff;padding:48px 20px;margin-bottom:16px}
-.svc-hero__badge{display:inline-flex;align-items:center;background:rgba(255,255,255,.15);padding:8px 24px;border-radius:999px;font-weight:600;margin-bottom:12px}
+.svc-hero::before{content:"";position:absolute;inset:auto -80px -120px auto;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.22) 0,transparent 60%);opacity:.9}
+.svc-hero::after{content:"";position:absolute;inset:10% auto auto -120px;width:220px;height:220px;border-radius:999px;background:radial-gradient(circle at 70% 70%,rgba(255,255,255,.18) 0,transparent 60%)}
+.svc-hero__badge{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(6px);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
 .svc-hero__title{font-size:2.25rem;margin:0 0 8px}
 .svc-hero__desc{opacity:.95;margin:0}
 .services-section{background-color:var(--bg);padding:1rem 1rem}

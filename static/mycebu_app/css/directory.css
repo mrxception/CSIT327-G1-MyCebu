@@ -40,7 +40,9 @@ html,body{margin:0;padding:0}
 .ui-select__option.is-selected::before{content:"✓";display:inline-block;font-weight:700;color:var(--primary)}
 
 .dir-hero{background:linear-gradient(165deg,var(--secondary) 0%,var(--secondary-600) 50%,var(--primary) 100%);color:#fff;padding:48px 20px;margin-bottom:16px;position:relative;overflow:hidden}
-.dir-hero__badge{display:inline-flex;align-items:center;background:rgba(255,255,255,.15);padding:8px 24px;border-radius:999px;font-weight:700;margin-bottom:12px;color:white}
+.dir-hero::before{content:"";position:absolute;inset:auto -80px -120px auto;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.22) 0,transparent 60%);opacity:.9}
+.dir-hero::after{content:"";position:absolute;inset:10% auto auto -120px;width:220px;height:220px;border-radius:999px;background:radial-gradient(circle at 70% 70%,rgba(255,255,255,.18) 0,transparent 60%)}
+.dir-hero__badge{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(6px);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
 .dir-hero__title{font-size:2.25rem;margin:0 0 8px}
 .dir-hero__desc{opacity:.95;margin:0}
 
