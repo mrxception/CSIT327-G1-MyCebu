@@ -1,3 +1,21 @@
+<style>
+  /* CSS for the Spinner */
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e6eef0;
+    border-top-color: #0d9488; /* Teal color to match your theme */
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
 <section class="dash-panel is-active" id="tab-services">
   <div class="detail-card" style="width:95%; margin:0 auto;"> 
     <div class="card-head" style="margin-bottom:18px;">
@@ -13,8 +31,12 @@
       <button id="clearSearch" type="button" style="background:#fff; border:1px solid #e6eef0; padding:10px 14px; border-radius:8px; cursor:pointer;">Clear</button>
     </div>
 
+    <div id="servicesLoading" style="display:none; text-align:center; padding:30px; color:#6b7280;">
+      <div class="spinner"></div> Loading services...
+    </div>
+
     <div id="servicesGrid" class="services-grid" style="width:100%; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
-      </div>
+    </div>
 
     <p id="noResults" class="muted" style="display:none; margin-top:12px;">No services found.</p>
   </div>
@@ -25,22 +47,46 @@
   const searchInput = document.getElementById('serviceSearch');
   const servicesGrid = document.getElementById('servicesGrid');
   const noResults = document.getElementById('noResults');
+  const loadingEl = document.getElementById('servicesLoading'); // New Element
   const clearBtn = document.getElementById('clearSearch');
   const cardArea = document.getElementById('servicesCardArea');
 
   let services = [];
   let hideTimer = null;
+  let isFetching = false;
+
+  // Helper to toggle loading state
+  function toggleLoader(show) {
+    if (show) {
+      loadingEl.style.display = 'block';
+      servicesGrid.style.display = 'none';
+      noResults.style.display = 'none';
+    } else {
+      loadingEl.style.display = 'none';
+    }
+  }
 
   async function loadServices() {
-    if (services.length) return services;
+    // If we already have data, don't fetch again, just return it
+    if (services.length > 0) return services;
+    
+    // Prevent double fetching
+    if (isFetching) return; 
+
     try {
-      // UPDATED: Fetch from Django API instead of static JSON
+      isFetching = true;
+      toggleLoader(true); // Show loader immediately
+
       const res = await fetch('/api/services/', {cache: "no-cache"});
       const data = await res.json();
       services = data.services || [];
+      
     } catch (err) {
       console.error('Failed to load services from API', err);
       services = [];
+    } finally {
+      isFetching = false;
+      toggleLoader(false); // Hide loader when done
     }
     return services;
   }
@@ -48,25 +94,27 @@
   function renderServices(list) {
     servicesGrid.innerHTML = '';
 
+    // If list is empty (and we are not loading)
     if (!list || list.length === 0) {
       servicesGrid.classList.remove('visible');
       servicesGrid.style.display = 'none';
-      noResults.style.display = 'block';
+      // Only show "No Results" if we are not currently loading
+      if(!isFetching) noResults.style.display = 'block';
       return;
     }
 
     noResults.style.display = 'none';
     servicesGrid.style.display = 'grid';
-    servicesGrid.classList.add('visible'); 
+    // Small delay to allow display:grid to apply before adding class for opacity transition
+    requestAnimationFrame(() => servicesGrid.classList.add('visible'));
 
     list.forEach((s, idx) => {
       const item = document.createElement('div');
       item.className = 'service-item';
       
-      // Updated to match Database fields
       const title = s.title || 'Untitled Service';
       const desc = s.description || '';
-      const serviceId = s.id || ''; // matches 'id' from the API response (which maps to db service_id)
+      const serviceId = s.id || ''; 
 
       item.innerHTML = `
         <div>
@@ -79,9 +127,11 @@
       `;
       servicesGrid.appendChild(item);
 
+      // Cascade animation
       setTimeout(() => item.classList.add('visible'), 30 * idx);
     });
 
+    // Re-attach event listeners for dynamic buttons
     Array.from(servicesGrid.querySelectorAll('.btn-apply')).forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = btn.dataset.id;
@@ -100,31 +150,32 @@
       return;
     }
     const filtered = services.filter(s => {
-      // Updated hay stack to match DB fields
       const hay = ((s.title||'') + ' ' + (s.description||'') + ' ' + (s.id||'')).toLowerCase();
       return hay.indexOf(term) !== -1;
     });
     renderServices(filtered);
   }
 
-  function showGrid() {
+  async function showGrid() {
+    // If services are empty, we need to load them
     if (!services.length) {
-      loadServices().then(() => {
-        renderServices(services);
-        requestAnimationFrame(() => servicesGrid.classList.add('visible'));
-      });
-    } else {
+      // Load logic handles the loader display
+      await loadServices(); 
       renderServices(services);
-      requestAnimationFrame(() => servicesGrid.classList.add('visible'));
+    } else {
+      // If already loaded, just render immediately
+      renderServices(services);
     }
   }
 
   function hideGridImmediate() {
     servicesGrid.classList.remove('visible');
+    // Hide grid after transition
     setTimeout(() => {
       servicesGrid.innerHTML = '';
       servicesGrid.style.display = 'none';
       noResults.style.display = 'none';
+      loadingEl.style.display = 'none'; // Ensure loader is hidden too
     }, 340);
   }
 
@@ -148,9 +199,13 @@
   }
   function escapeAttr(s){ return escapeHtml(s); }
 
-  searchInput.addEventListener('focus', async () => {
+  // --- Event Listeners ---
+
+  searchInput.addEventListener('focus', () => {
+    // Determine if we need to show loader or just grid
     showGrid();
   });
+
   searchInput.addEventListener('input', (e) => {
     filterAndRender(e.target.value);
   });
