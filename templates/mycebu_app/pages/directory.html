@@ -225,10 +225,10 @@ function renderOfficials(list) {
         const photoUrl = o.photo || "";
         if (photoUrl.trim() !== "") {
             const src = photoUrl.startsWith('http') ? photoUrl : STATIC_BASE_URL + photoUrl;
-            imgHtml = `<img class="avatar avatar--img" src="${src}" alt="${escapeHtml(o.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`;
-            imgHtml += `<div class="avatar" style="display:none">${escapeHtml(o.initials)}</div>`;
+            imgHtml = `<img class="profile profile--img" src="${src}" alt="${escapeHtml(o.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`;
+            imgHtml += `<div class="profile" style="display:none">${escapeHtml(o.initials)}</div>`;
         } else {
-            imgHtml = `<div class="avatar">${escapeHtml(o.initials)}</div>`;
+            imgHtml = `<div class="profile">${escapeHtml(o.initials)}</div>`;
         }
 
         const card = document.createElement('div');
