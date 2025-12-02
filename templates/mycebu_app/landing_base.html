@@ -33,6 +33,7 @@
     {% endif %}
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'mycebu_app/css/chatbot.css' %}">
 </head>
 
 <body>
@@ -194,7 +195,57 @@
         <p>© 2025 MyCebu Government Services. All rights reserved.</p>
     </footer>
 
-    <script></script>
+    <div class="chatbot-root" id="chatbot-root">
+      <button class="chatbot-toggle" id="chatbot-toggle"
+              aria-expanded="false" aria-controls="chatbot-panel">
+        <span class="material-icons chatbot-toggle-icon">support_agent</span>
+        <span class="chatbot-toggle-label">Get Help</span>
+      </button>
+
+      <section class="chatbot-panel" id="chatbot-panel" aria-hidden="true">
+        <header class="chatbot-header">
+          <div class="chatbot-header-main">
+            <div class="chatbot-logo">
+              <span class="material-icons">support_agent</span>
+            </div>
+            <div class="chatbot-header-text">
+              <h2>Hello{% if authed_user %} {{ authed_user.first_name|default:authed_user.display_name }}{% endif %} 👋</h2>
+              <p>How can we help you today?</p>
+            </div>
+          </div>
+          <button class="chatbot-close" id="chatbot-close" aria-label="Close help panel">
+            <span class="material-icons">close</span>
+          </button>
+        </header>
+
+        <div class="chatbot-tabs">
+          <button class="chatbot-tab is-active" data-tab="chat">Chat</button>
+          <button class="chatbot-tab" data-tab="history">History</button>
+        </div>
+
+        <div class="chatbot-body" data-view="chat">
+          <div class="chatbot-message-placeholder">
+            <p>This is a preview of the MyCebu assistant. Type a question below to start a conversation.</p>
+          </div>
+        </div>
+
+        <div class="chatbot-body chatbot-body--hidden" data-view="history">
+            <div class="chatbot-history-empty chatbot-message-placeholder" data-history-empty>
+                <p>Your recent conversations will appear here.</p>
+            </div>
+            <div class="chatbot-history-list" data-history-list></div>
+        </div>
+
+        <form class="chatbot-input-bar" id="chatbot-form">
+            <div id="chatbot-input" class="chatbot-input" contenteditable="true"></div>
+            <button type="submit" class="chatbot-send" aria-label="Send">
+                <span class="material-icons">send</span>
+            </button>
+        </form>
+
+      </section>
+    </div>
+    <script src="{% static 'mycebu_app/js/chatbot.js' %}" defer></script>
     <script src="{% static 'mycebu_app/js/header.js' %}" defer></script>
     <script src="{% static 'mycebu_app/js/section-skeleton.js' %}" defer></script>
 </body>
