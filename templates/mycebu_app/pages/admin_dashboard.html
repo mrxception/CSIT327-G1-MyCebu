@@ -7,28 +7,22 @@
 <style>
     .loader {
         border: 2px solid #f3f3f3;
-        border-top: 2px solid #3498db;
+        border-top: 2px solid #3b82f6;
         border-radius: 50%;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         animation: spin 1s linear infinite;
         display: inline-block;
-        margin-right: 8px;
+        margin-right: 6px;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    /* Toast Animation */
-    .toast-enter { transform: translateX(100%); opacity: 0; }
-    .toast-enter-active { transform: translateX(0); opacity: 1; transition: all 300ms ease-out; }
-    .toast-exit { transform: translateX(0); opacity: 1; }
-    .toast-exit-active { transform: translateX(100%); opacity: 0; transition: all 300ms ease-in; }
 </style>
 
-{% csrf_token %} 
+{% csrf_token %}
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 relative">
 
   <div id="toast-container" class="fixed top-5 right-5 z-[60] flex flex-col gap-3"></div>
-  
+
   <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -36,7 +30,6 @@
           <h1 class="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
           <p class="text-slate-600 text-sm mt-1">Manage content, services, and complaints</p>
         </div>
-        
         <div class="flex items-center gap-3 px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg w-fit">
           {% if authed_user.avatar_url %}
             <img src="{{ authed_user.avatar_url }}" alt="Profile" class="w-9 h-9 rounded-full object-cover border border-slate-300 shadow-sm">
@@ -45,7 +38,6 @@
               {{ authed_user.display_name|slice:":1"|upper }}
             </div>
           {% endif %}
-          
           <div class="flex flex-col">
             <p class="text-sm font-semibold text-slate-900">{{ authed_user.display_name }}</p>
             <p class="text-xs text-slate-500">Administrator</p>
@@ -57,6 +49,7 @@
 
   <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
+    <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200">
         <div class="flex items-start justify-between mb-4">
@@ -65,7 +58,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
           </div>
         </div>
-        <p class="text-4xl font-bold text-slate-900" id="stat-total-complaints">{{ admin_stats.total_complaints }}</p>
+        <p class="text-4xl font-bold text-slate-900">{{ admin_stats.total_complaints }}</p>
       </div>
       <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-orange-300 transition-all duration-200">
         <div class="flex items-start justify-between mb-4">
@@ -74,13 +67,13 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
         </div>
-        <p class="text-4xl font-bold text-slate-900" id="stat-pending-complaints">{{ admin_stats.pending_complaints }}</p>
+        <p class="text-4xl font-bold text-slate-900">{{ admin_stats.pending_complaints }}</p>
       </div>
       <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-emerald-300 transition-all duration-200">
         <div class="flex items-start justify-between mb-4">
           <h3 class="text-sm font-semibold text-slate-600 uppercase tracking-wide">Total Users</h3>
           <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </div>
         </div>
         <p class="text-4xl font-bold text-slate-900">{{ admin_stats.total_users }}</p>
@@ -96,24 +89,57 @@
       </div>
     </div>
 
+    <!-- Tabs -->
     <div class="bg-white border border-slate-200 rounded-t-xl shadow-sm">
       <nav class="flex border-b border-slate-200 overflow-x-auto" aria-label="Tabs">
-        <button onclick="switchTab('complaints')" id="tab-complaints" class="tab-btn active flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-blue-600 text-blue-600">
-          Complaints
-        </button>
-        <button onclick="switchTab('services')" id="tab-services" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">
-          Services
-        </button>
-        <button onclick="switchTab('ordinances')" id="tab-ordinances" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">
-          Ordinances
-        </button>
-        <button onclick="switchTab('directory')" id="tab-directory" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">
-          Directory
-        </button>
+        <button onclick="switchTab('users')" id="tab-users" class="tab-btn active flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-blue-600 text-blue-600">Users</button>
+        <button onclick="switchTab('complaints')" id="tab-complaints" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Complaints</button>
+        <button onclick="switchTab('services')" id="tab-services" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Services</button>
+        <button onclick="switchTab('ordinances')" id="tab-ordinances" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Ordinances</button>
+        <button onclick="switchTab('directory')" id="tab-directory" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Directory</button>
       </nav>
     </div>
 
-    <div id="panel-complaints" class="panel block bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden">
+    <!-- Users Panel (Default Open) -->
+    <div id="panel-users" class="panel block bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-slate-100">
+        <h3 class="font-bold text-slate-900">Registered Users</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">User</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Contact</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Role</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Joined</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for u in admin_users %}
+            <tr class="hover:bg-slate-50">
+              <td class="px-6 py-4"><div class="text-sm font-medium text-slate-900">{{ u.first_name }} {{ u.last_name }}</div></td>
+              <td class="px-6 py-4 text-sm text-slate-600">
+                <div>{{ u.email }}</div>
+                {% if u.contact_number %}<div class="text-xs text-slate-500">{{ u.contact_number }}</div>{% endif %}
+              </td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 rounded-full text-xs font-semibold {% if u.role|lower|slice:'0:5' == 'admin' %}bg-blue-100 text-blue-700{% else %}bg-slate-100 text-slate-700{% endif %}">
+                  {{ u.role|capfirst }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-slate-600">{{ u.created_at|date:"M d, Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="p-6 text-center text-slate-500">No users found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Complaints Panel -->
+    <div id="panel-complaints" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-slate-50">
@@ -129,15 +155,13 @@
           <tbody class="divide-y divide-slate-100" id="complaints-table-body">
             {% for c in admin_complaints %}
             <tr class="hover:bg-slate-50" id="complaint-row-{{ c.id }}">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                {{ c.created_at|date:"M d, Y" }}
-              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{{ c.created_at|date:"M d, Y" }}</td>
               <td class="px-6 py-4 text-sm">
                 {% if c.is_anonymous %}
                   <span class="text-amber-600 font-medium">Anonymous</span>
                 {% else %}
                   <div class="font-medium text-slate-900">{{ c.name|default:"-" }}</div>
-                  <div class="text-xs text-slate-500">{{ c.phone|default:c.email }}</div>
+                  <div class="text-xs text-slate-500">{{ c.phone|default:c.email|default:"-" }}</div>
                 {% endif %}
               </td>
               <td class="px-6 py-4 text-sm text-slate-900">{{ c.category }}</td>
@@ -146,12 +170,13 @@
                 <div class="text-xs text-slate-500 truncate max-w-xs">{{ c.location }}</div>
               </td>
               <td class="px-6 py-4">
-                  <span id="status-badge-{{ c.id }}" class="px-2 py-1 rounded-full text-xs font-semibold 
+                <span id="status-badge-{{ c.id }}" class="px-2 py-1 rounded-full text-xs font-semibold 
                   {% if c.status == 'Resolved' %}bg-emerald-100 text-emerald-700
-                  {% elif c.status == 'Submitted' %}bg-amber-100 text-amber-700
-                  {% else %}bg-slate-100 text-slate-700{% endif %}">
-                    {{ c.status }}
-                  </span>
+                  {% elif c.status == 'In Progress' %}bg-blue-100 text-blue-700
+                  {% elif c.status == 'Cancelled' %}bg-red-100 text-red-700
+                  {% else %}bg-amber-100 text-amber-700{% endif %}">
+                  {{ c.status }}
+                </span>
               </td>
               <td class="px-6 py-4 text-right">
                 <button onclick="openComplaintModal('{{ c.id }}', '{{ c.status }}', `{{ c.description|escapejs }}`)" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Manage</button>
@@ -165,46 +190,43 @@
       </div>
     </div>
 
+    <!-- Services Panel -->
     <div id="panel-services" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
       <div class="p-6 flex justify-between items-center border-b border-slate-100">
         <h3 class="font-bold text-slate-900">All Services</h3>
-        <button onclick="openServiceModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-          + Add Service
-        </button>
+        <button onclick="openServiceModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Add Service</button>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6" id="services-grid">
         {% for svc in admin_services %}
         <div id="service-card-{{ svc.id }}" class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
           <div class="flex justify-between items-start">
-             <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
-               <i class="fas fa-{{ svc.icon }}"></i> 
-               <span class="font-bold text-lg">{{ svc.title|slice:":1" }}</span>
-             </div>
-             <div class="flex gap-2">
-               <button onclick='openServiceModal("{{ svc.id|safe }}", "{{ svc.service_id }}", "{{ svc.title }}", "{{ svc.description|escapejs }}")' class="text-slate-400 hover:text-blue-600">
-                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-               </button>
-               <button onclick="deleteItem('service', '{{ svc.id }}')" class="text-slate-400 hover:text-red-600">
-                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-               </button>
-             </div>
+            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
+              <span class="font-bold text-lg">{{ svc.title|slice:":1" }}</span>
+            </div>
+            <div class="flex gap-2">
+              <button onclick='openServiceModal("{{ svc.id }}", "{{ svc.service_id }}", "{{ svc.title }}", "{{ svc.description|escapejs }}")' class="text-slate-400 hover:text-blue-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+              </button>
+              <button onclick="deleteItem('service', '{{ svc.id }}', this)" class="text-slate-400 hover:text-red-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4 a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
           </div>
           <h4 class="font-bold text-slate-900" id="svc-title-{{svc.id}}">{{ svc.title }}</h4>
           <p class="text-xs text-slate-500 mb-2" id="svc-slug-{{svc.id}}">ID: {{ svc.service_id }}</p>
           <p class="text-sm text-slate-600 line-clamp-2" id="svc-desc-{{svc.id}}">{{ svc.description }}</p>
         </div>
         {% empty %}
-        <div id="no-services-msg" class="col-span-full text-center py-8 text-slate-500">No services added yet.</div>
+        <div class="col-span-full text-center py-8 text-slate-500">No services added yet.</div>
         {% endfor %}
       </div>
     </div>
 
+    <!-- Ordinances Panel -->
     <div id="panel-ordinances" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
       <div class="p-6 flex justify-between items-center border-b border-slate-100">
         <h3 class="font-bold text-slate-900">Ordinances</h3>
-        <button onclick="openOrdinanceModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-          + Upload Ordinance
-        </button>
+        <button onclick="openOrdinanceModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Upload Ordinance</button>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full">
@@ -223,38 +245,41 @@
               <td class="px-6 py-4 text-sm text-slate-900 font-medium">{{ ord.name_or_ordinance }}</td>
               <td class="px-6 py-4 text-sm text-slate-600">{{ ord.author }}</td>
               <td class="px-6 py-4 text-right">
-                <button onclick="deleteItem('ordinance', '{{ ord.id }}')" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                <button onclick="deleteItem('ordinance', '{{ ord.id }}', this)" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
               </td>
             </tr>
             {% empty %}
-            <tr id="no-ordinances-msg"><td colspan="4" class="p-6 text-center text-slate-500">No ordinances found.</td></tr>
+            <tr><td colspan="4" class="p-6 text-center text-slate-500">No ordinances found.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
+    <!-- Directory Panel -->
     <div id="panel-directory" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
       <div class="p-6 flex justify-between items-center border-b border-slate-100">
         <h3 class="font-bold text-slate-900">Officials Directory</h3>
-        <button onclick="openOfficialModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-          + Add Official
-        </button>
+        <button onclick="openOfficialModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Add Official</button>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6" id="officials-grid">
         {% for off in admin_officials %}
         <div id="official-card-{{ off.id }}" class="bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition relative group">
           <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
-             <button onclick='openOfficialModal("{{ off.id }}", "{{ off.name }}", "{{ off.position }}", "{{ off.office }}", "{{ off.district }}", "{{ off.phone }}", "{{ off.email }}", "{{ off.photo|default:"" }}")' class="text-slate-400 hover:text-blue-600 mr-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
-             <button onclick="deleteItem('official', '{{ off.id }}')" class="text-slate-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+            <button onclick='openOfficialModal("{{ off.id }}", "{{ off.name }}", "{{ off.position }}", "{{ off.office }}", "{{ off.district }}", "{{ off.phone }}", "{{ off.email }}", "{{ off.photo|default:"" }}")' class="text-slate-400 hover:text-blue-600 mr-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+            </button>
+            <button onclick="deleteItem('official', '{{ off.id }}', this)" class="text-slate-400 hover:text-red-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4 a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
           </div>
           <div class="flex items-center gap-4">
             {% if off.photo %}
-               <img src="{{ off.photo }}" alt="{{ off.name }}" class="w-12 h-12 rounded-full object-cover border border-slate-200">
+              <img src="{{ off.photo }}" alt="{{ off.name }}" class="w-12 h-12 rounded-full object-cover border border-slate-200" id="off-photo-display-{{off.id}}">
             {% else %}
-               <div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
-                 {{ off.initials|default:off.name|slice:":2"|upper }}
-               </div>
+              <div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600" id="off-photo-display-{{off.id}}">
+                {{ off.name|slice:":2"|upper }}
+              </div>
             {% endif %}
             <div>
               <h4 class="font-bold text-slate-900" id="off-name-display-{{off.id}}">{{ off.name }}</h4>
@@ -262,24 +287,26 @@
             </div>
           </div>
           <div class="mt-4 space-y-1 text-sm text-slate-600" id="off-details-{{off.id}}">
-            {% if off.office %}<p><span class="font-medium text-slate-900">Office:</span> {{ off.office }}</p>{% endif %}
-            {% if off.phone %}<p><span class="font-medium text-slate-900">Phone:</span> {{ off.phone }}</p>{% endif %}
+            <p {% if not off.office %}style="display:none;"{% endif %} id="off-office-display-{{off.id}}"><span class="font-medium text-slate-900">Office:</span> {{ off.office }}</p>
+            <p {% if not off.phone %}style="display:none;"{% endif %} id="off-phone-display-{{off.id}}"><span class="font-medium text-slate-900">Phone:</span> {{ off.phone }}</p>
+            <p {% if not off.email %}style="display:none;"{% endif %} id="off-email-display-{{off.id}}"><span class="font-medium text-slate-900">Email:</span> {{ off.email }}</p>
           </div>
         </div>
         {% empty %}
-        <div id="no-officials-msg" class="col-span-full text-center py-8 text-slate-500">No officials found.</div>
+        <div class="col-span-full text-center py-8 text-slate-500">No officials found.</div>
         {% endfor %}
       </div>
     </div>
 
   </main>
 
+  <!-- Modals -->
   <div id="modal-service" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
       <form id="form-service" onsubmit="handleServiceSubmit(event)">
         <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
           <h3 id="modal-service-title" class="font-bold text-lg text-slate-800">Add Service</h3>
-          <button type="button" onclick="closeModal('modal-service')" class="text-slate-400 hover:text-slate-600">&times;</button>
+          <button type="button" onclick="closeModal('modal-service')" class="text-slate-400 hover:text-slate-600">×</button>
         </div>
         <div class="p-6 space-y-4">
           <input type="hidden" id="service-db-id" name="id">
@@ -293,166 +320,131 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-            <textarea id="service-desc" name="description" rows="3" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required placeholder="Brief description of the service..."></textarea>
+            <textarea id="service-desc" name="description" rows="3" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required placeholder="Brief description..."></textarea>
           </div>
         </div>
         <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
-           <button type="button" onclick="closeModal('modal-service')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
-           <button type="submit" id="btn-save-service" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
-              <span>Save Service</span>
-           </button>
+          <button type="button" onclick="closeModal('modal-service')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
+          <button type="submit" id="btn-save-service" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
+            <span class="loader hidden"></span><span>Save Service</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <div id="modal-official" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
       <form id="form-official" onsubmit="handleOfficialSubmit(event)">
         <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
           <h3 id="modal-official-title" class="font-bold text-lg text-slate-800">Add Official</h3>
-          <button type="button" onclick="closeModal('modal-official')" class="text-slate-400 hover:text-slate-600">&times;</button>
+          <button type="button" onclick="closeModal('modal-official')" class="text-slate-400 hover:text-slate-600">×</button>
         </div>
         <div class="p-6 grid grid-cols-2 gap-4">
           <input type="hidden" id="off-id" name="id">
-          <div class="col-span-2">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-            <input type="text" id="off-name" name="name" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required placeholder="e.g. Juan dela Cruz">
-          </div>
-          <div class="col-span-2">
-             <label class="block text-sm font-medium text-slate-700 mb-1">Position</label>
-             <input type="text" id="off-position" name="position" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required placeholder="e.g. Councilor">
-          </div>
-          <div class="col-span-2">
-             <label class="block text-sm font-medium text-slate-700 mb-1">Photo URL <span class="text-xs text-slate-500 font-normal">(Optional)</span></label>
-             <input type="url" id="off-photo" name="photo" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="https://example.com/image.jpg">
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Office</label>
-             <input type="text" id="off-office" name="office" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Office Name">
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">District</label>
-             <input type="text" id="off-district" name="district" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="District #">
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-             <input type="text" id="off-phone" name="phone" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="09xxxxxxxxx">
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-             <input type="email" id="off-email" name="email" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="email@example.com">
-          </div>
+          <div class="col-span-2"><label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label><input type="text" id="off-name" name="name" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required></div>
+          <div class="col-span-2"><label class="block text-sm font-medium text-slate-700 mb-1">Position</label><input type="text" id="off-position" name="position" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required></div>
+          <div class="col-span-2"><label class="block text-sm font-medium text-slate-700 mb-1">Photo URL <span class="text-xs text-slate-500">(Optional)</span></label><input type="url" id="off-photo" name="photo" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Office</label><input type="text" id="off-office" name="office" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">District</label><input type="text" id="off-district" name="district" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Phone</label><input type="text" id="off-phone" name="phone" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" id="off-email" name="email" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"></div>
         </div>
         <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
-           <button type="button" onclick="closeModal('modal-official')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
-           <button type="submit" id="btn-save-official" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
-             <span>Save Official</span>
-           </button>
+          <button type="button" onclick="closeModal('modal-official')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
+          <button type="submit" id="btn-save-official" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
+            <span class="loader hidden"></span><span>Save Official</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <div id="modal-ordinance" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
       <form id="form-ordinance" onsubmit="handleOrdinanceSubmit(event)" enctype="multipart/form-data">
         <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
           <h3 class="font-bold text-lg text-slate-800">Upload Ordinance</h3>
-          <button type="button" onclick="closeModal('modal-ordinance')" class="text-slate-400 hover:text-slate-600">&times;</button>
+          <button type="button" onclick="closeModal('modal-ordinance')" class="text-slate-400 hover:text-slate-600">×</button>
         </div>
         <div class="p-6 space-y-4">
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Ordinance Number</label>
-             <input type="text" name="ordinance_number" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Ordinance Number</label><input type="text" name="ordinance_number" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Title / Description</label><input type="text" name="title" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Author</label><input type="text" name="author" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500"></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
+            <select name="category" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
+              <option value="General">General</option>
+              <option value="Traffic">Traffic</option>
+              <option value="Business">Business</option>
+              <option value="Environmental">Environmental</option>
+            </select>
           </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Title / Description</label>
-             <input type="text" name="title" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" required>
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Author</label>
-             <input type="text" name="author" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-             <select name="category" class="w-full rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500">
-                <option value="General">General</option>
-                <option value="Traffic">Traffic</option>
-                <option value="Business">Business</option>
-                <option value="Environmental">Environmental</option>
-             </select>
-          </div>
-          <div>
-             <label class="block text-sm font-medium text-slate-700 mb-1">PDF File</label>
-             <input type="file" name="pdf_file" accept="application/pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
+          <div><label class="block text-sm font-medium text-slate-700 mb-1">PDF File</label>
+            <input type="file" name="pdf_file" accept="application/pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
           </div>
         </div>
         <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
-           <button type="button" onclick="closeModal('modal-ordinance')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
-           <button type="submit" id="btn-save-ordinance" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
-             <span>Upload</span>
-           </button>
+          <button type="button" onclick="closeModal('modal-ordinance')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
+          <button type="submit" id="btn-save-ordinance" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
+            <span class="loader hidden"></span><span>Upload</span>
+          </button>
         </div>
       </form>
     </div>
   </div>
 
   <div id="modal-complaint" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
-        <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-          <h3 class="font-bold text-lg text-slate-800">Manage Complaint</h3>
-          <button type="button" onclick="closeModal('modal-complaint')" class="text-slate-400 hover:text-slate-600">&times;</button>
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+        <h3 class="font-bold text-lg text-slate-800">Manage Complaint</h3>
+        <button type="button" onclick="closeModal('modal-complaint')" class="text-slate-400 hover:text-slate-600">×</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div class="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 border border-slate-100" id="complaint-desc-display"></div>
+        <hr class="border-slate-100">
+        <label class="block text-sm font-medium text-slate-700 mb-1">Update Status</label>
+        <div class="flex gap-2">
+          <button onclick="updateComplaintStatus('Submitted', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-amber-50 text-amber-600 border-amber-200 transition font-medium">Pending</button>
+          <button onclick="updateComplaintStatus('In Progress', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-blue-50 text-blue-600 border-blue-200 transition font-medium">In Progress</button>
+          <button onclick="updateComplaintStatus('Cancelled', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-red-50 text-red-600 border-red-200 transition font-medium">Cancelled</button>
+          <button onclick="updateComplaintStatus('Resolved', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-emerald-50 text-emerald-600 border-emerald-200 transition font-medium">Resolved</button>
         </div>
-        <div class="p-6 space-y-4">
-           <div class="bg-slate-50 p-4 rounded-lg text-sm text-slate-700 border border-slate-100" id="complaint-desc-display"></div>
-           
-           <hr class="border-slate-100">
-           <label class="block text-sm font-medium text-slate-700 mb-1">Update Status</label>
-           <div class="flex gap-2" id="complaint-actions">
-              <button onclick="updateComplaintStatus('Submitted', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-amber-50 text-amber-600 border-amber-200 transition font-medium">Pending</button>
-              <button onclick="updateComplaintStatus('In Progress', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-blue-50 text-blue-600 border-blue-200 transition font-medium">Processing</button>
-              <button onclick="updateComplaintStatus('Resolved', this)" class="flex-1 py-2 text-sm border rounded-lg hover:bg-emerald-50 text-emerald-600 border-emerald-200 transition font-medium">Resolved</button>
-           </div>
-           <input type="hidden" id="current-complaint-id">
-        </div>
+        <input type="hidden" id="current-complaint-id">
+      </div>
     </div>
   </div>
 
 </div>
 
 <script>
-// --- UTILS ---
+// COMPLETE SCRIPT - NO REFRESH, WITH LOADING STATES EVERYWHERE
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-// Helper: Shows a loading spinner on the button
-function toggleLoading(btn, isLoading, originalText) {
-    if(!btn) return;
-    if(isLoading) {
+function toggleLoading(btn, loading = true) {
+    const loader = btn.querySelector('.loader');
+    const text = btn.querySelector('span:last-child');
+    if (loading) {
         btn.disabled = true;
-        btn.innerHTML = `<span class="loader"></span> Processing...`;
-        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        if (loader) loader.classList.remove('hidden');
+        if (text) text.style.opacity = '0.7';
     } else {
         btn.disabled = false;
-        btn.innerHTML = originalText;
-        btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        if (loader) loader.classList.add('hidden');
+        if (text) text.style.opacity = '1';
     }
 }
 
-// Helper: Shows a popup notification
-function showToast(msg, type='success') {
+function showToast(msg, type = 'success') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
     const color = type === 'error' ? 'bg-red-500' : 'bg-emerald-600';
-    toast.className = `${color} text-white px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 flex items-center gap-3 min-w-[300px] mb-3`;
-    toast.innerHTML = `<p class="font-bold">${type === 'error'?'Error':'Success'}</p><p class="text-sm">${msg}</p>`;
+    toast.className = `${color} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px] mb-3 animate-pulse`;
+    toast.innerHTML = `<p class="font-bold">${type === 'error' ? 'Error' : 'Success'}</p><p class="text-sm">${msg}</p>`;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
 
-function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-}
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 function switchTab(tab) {
     document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
@@ -461,11 +453,12 @@ function switchTab(tab) {
         b.classList.remove('border-blue-600', 'text-blue-600', 'active');
         b.classList.add('border-transparent', 'text-slate-600');
     });
-    document.getElementById(`tab-${tab}`).classList.add('border-blue-600', 'text-blue-600');
+    const btn = document.getElementById(`tab-${tab}`);
+    if (btn) btn.classList.add('border-blue-600', 'text-blue-600', 'active');
 }
 
-// --- 1. SERVICE LOGIC ---
-function openServiceModal(id='', sid='', title='', desc='') {
+// SERVICE - FULLY DYNAMIC
+function openServiceModal(id = '', sid = '', title = '', desc = '') {
     document.getElementById('service-db-id').value = id;
     document.getElementById('service-id').value = sid;
     document.getElementById('service-title').value = title;
@@ -477,55 +470,57 @@ function openServiceModal(id='', sid='', title='', desc='') {
 async function handleServiceSubmit(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-save-service');
-    const originalText = btn.innerHTML; // Save original button text/icon
-    toggleLoading(btn, true, originalText);
-    
+    toggleLoading(btn, true);
     const id = document.getElementById('service-db-id').value;
-    const action = id ? 'edit_service' : 'add_service';
-    const formData = new FormData(e.target);
-    const dataObj = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(new FormData(e.target));
 
     try {
-        const res = await fetch(`/admin-action/${action}/`, {
+        const res = await fetch(`/admin-action/${id ? 'edit_service' : 'add_service'}/`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
-            body: JSON.stringify(dataObj)
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify(data)
         });
         const result = await res.json();
-
-        if(result.success) {
+        if (result.success) {
             closeModal('modal-service');
-            showToast('Service saved successfully!');
-
+            showToast(id ? 'Service updated!' : 'Service added!');
             if (id) {
-                // --- INSTANT EDIT UPDATE (No Refresh) ---
-                // We use the values from the FORM inputs to update the screen
-                const titleEl = document.getElementById(`svc-title-${id}`);
-                const descEl = document.getElementById(`svc-desc-${id}`);
-                const slugEl = document.getElementById(`svc-slug-${id}`);
-                
-                // Update the text immediately
-                if(titleEl) titleEl.innerText = dataObj.title;
-                if(descEl) descEl.innerText = dataObj.description;
-                if(slugEl) slugEl.innerText = "ID: " + dataObj.service_id;
+                document.getElementById(`svc-title-${id}`).innerText = data.title;
+                document.getElementById(`svc-desc-${id}`).innerText = data.description;
+                document.getElementById(`svc-slug-${id}`).innerText = "ID: " + data.service_id;
             } else {
-                // --- ADD NEW ---
-                // Since we don't have the new ID from the backend, we must reload
-                window.location.reload(); 
+                const grid = document.getElementById('services-grid');
+                const card = document.createElement('div');
+                card.id = `service-card-${result.new_id}`;
+                card.className = 'bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition opacity-0 scale-95';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
+                            <span class="font-bold text-lg">${data.title[0]}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick='openServiceModal("${result.new_id}", "${data.service_id}", "${data.title}", "${data.description.replace(/"/g, '&quot;')}")' class="text-slate-400 hover:text-blue-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </button>
+                            <button onclick="deleteItem('service', '${result.new_id}', this)" class="text-slate-400 hover:text-red-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4 a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-slate-900">${data.title}</h4>
+                    <p class="text-xs text-slate-500 mb-2">ID: ${data.service_id}</p>
+                    <p class="text-sm text-slate-600 line-clamp-2">${data.description}</p>
+                `;
+                grid.prepend(card);
+                setTimeout(() => card.classList.remove('opacity-0', 'scale-95'), 10);
             }
-        } else {
-            showToast(result.error || 'Failed to save', 'error');
-        }
-    } catch(err) {
-        console.error(err);
-        showToast('Network error', 'error');
-    } finally {
-        toggleLoading(btn, false, originalText);
-    }
+        } else showToast(result.error || 'Failed', 'error');
+    } catch (err) { showToast('Network error', 'error'); }
+    finally { toggleLoading(btn, false); }
 }
 
-// --- 2. OFFICIAL LOGIC ---
-function openOfficialModal(id='', name='', position='', office='', district='', phone='', email='', photo='') {
+// OFFICIAL - FULLY DYNAMIC
+function openOfficialModal(id = '', name = '', position = '', office = '', district = '', phone = '', email = '', photo = '') {
     document.getElementById('off-id').value = id;
     document.getElementById('off-name').value = name;
     document.getElementById('off-position').value = position;
@@ -541,44 +536,74 @@ function openOfficialModal(id='', name='', position='', office='', district='', 
 async function handleOfficialSubmit(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-save-official');
-    const originalText = btn.innerHTML;
-    toggleLoading(btn, true, originalText);
-
+    toggleLoading(btn, true);
     const id = document.getElementById('off-id').value;
-    const action = id ? 'edit_official' : 'add_official';
-    const formData = new FormData(e.target);
-    const dataObj = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(new FormData(e.target));
 
     try {
-        const res = await fetch(`/admin-action/${action}/`, {
+        const res = await fetch(`/admin-action/${id ? 'edit_official' : 'add_official'}/`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
-            body: JSON.stringify(dataObj)
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify(data)
         });
         const result = await res.json();
-
-        if(result.success) {
+        if (result.success) {
             closeModal('modal-official');
-            showToast('Official saved!');
-            
-            if(id) {
-                // --- INSTANT EDIT UPDATE ---
-                const nameEl = document.getElementById(`off-name-display-${id}`);
-                const posEl = document.getElementById(`off-pos-display-${id}`);
-                if(nameEl) nameEl.innerText = dataObj.name;
-                if(posEl) posEl.innerText = dataObj.position;
-                // Add more field updates here if needed
+            showToast(id ? 'Official updated!' : 'Official added!');
+            if (id) {
+                document.getElementById(`off-name-display-${id}`).innerText = data.name;
+                document.getElementById(`off-pos-display-${id}`).innerText = data.position;
+                const officeEl = document.getElementById(`off-office-display-${id}`);
+                const phoneEl = document.getElementById(`off-phone-display-${id}`);
+                const emailEl = document.getElementById(`off-email-display-${id}`);
+                const photoEl = document.getElementById(`off-photo-display-${id}`);
+                if (officeEl) { officeEl.innerHTML = `<span class="font-medium text-slate-900">Office:</span> ${data.office}`; officeEl.style.display = data.office ? 'block' : 'none'; }
+                if (phoneEl) { phoneEl.innerHTML = `<span class="font-medium text-slate-900">Phone:</span> ${data.phone}`; phoneEl.style.display = data.phone ? 'block' : 'none'; }
+                if (emailEl) { emailEl.innerHTML = `<span class="font-medium text-slate-900">Email:</span> ${data.email}`; emailEl.style.display = data.email ? 'block' : 'none'; }
+                if (photoEl) {
+                    if (data.photo) {
+                        photoEl.outerHTML = `<img src="${data.photo}" alt="${data.name}" class="w-12 h-12 rounded-full object-cover border border-slate-200" id="off-photo-display-${id}">`;
+                    } else {
+                        const initials = data.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+                        photoEl.outerHTML = `<div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600" id="off-photo-display-${id}">${initials}</div>`;
+                    }
+                }
             } else {
-                window.location.reload(); // Reload for new items
+                const grid = document.getElementById('officials-grid');
+                const card = document.createElement('div');
+                card.id = `official-card-${result.new_id}`;
+                card.className = 'bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-300 transition relative group opacity-0 scale-95';
+                card.innerHTML = `
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition">
+                        <button onclick='openOfficialModal("${result.new_id}", "${data.name}", "${data.position}", "${data.office}", "${data.district}", "${data.phone}", "${data.email}", "${data.photo}")' class="text-slate-400 hover:text-blue-600 mr-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </button>
+                        <button onclick="deleteItem('official', '${result.new_id}', this)" class="text-slate-400 hover:text-red-600">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4 a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        ${data.photo ? `<img src="${data.photo}" alt="${data.name}" class="w-12 h-12 rounded-full object-cover border border-slate-200">` : `<div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">${data.name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase()}</div>`}
+                        <div>
+                            <h4 class="font-bold text-slate-900">${data.name}</h4>
+                            <p class="text-xs text-blue-600 font-semibold uppercase">${data.position}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 space-y-1 text-sm text-slate-600">
+                        ${data.office ? `<p><span class="font-medium text-slate-900">Office:</span> ${data.office}</p>` : ''}
+                        ${data.phone ? `<p><span class="font-medium text-slate-900">Phone:</span> ${data.phone}</p>` : ''}
+                        ${data.email ? `<p><span class="font-medium text-slate-900">Email:</span> ${data.email}</p>` : ''}
+                    </div>
+                `;
+                grid.prepend(card);
+                setTimeout(() => card.classList.remove('opacity-0', 'scale-95'), 10);
             }
-        } else {
-            showToast(result.error, 'error');
-        }
-    } catch(err) { showToast('Error', 'error'); }
-    finally { toggleLoading(btn, false, originalText); }
+        } else showToast(result.error || 'Failed', 'error');
+    } catch (err) { showToast('Error', 'error'); }
+    finally { toggleLoading(btn, false); }
 }
 
-// --- 3. ORDINANCE LOGIC ---
+// ORDINANCE - FULLY DYNAMIC
 function openOrdinanceModal() {
     document.getElementById('form-ordinance').reset();
     document.getElementById('modal-ordinance').classList.remove('hidden');
@@ -587,34 +612,59 @@ function openOrdinanceModal() {
 async function handleOrdinanceSubmit(e) {
     e.preventDefault();
     const btn = document.getElementById('btn-save-ordinance');
-    const originalText = btn.innerHTML;
-    toggleLoading(btn, true, originalText);
-    
-    // For File Uploads, we usually need to reload to show the file link correctly
-    // unless we construct a complex DOM element.
+    toggleLoading(btn, true);
     const formData = new FormData(e.target);
-    
+
     try {
-        const response = await fetch(`/admin-action/add_ordinance/`, {
+        const res = await fetch('/admin-action/add_ordinance/', {
             method: 'POST',
             headers: { 'X-CSRFToken': csrftoken },
-            body: formData 
+            body: formData
         });
-        const result = await response.json();
-        
-        if(result.success) {
+        const result = await res.json();
+        if (result.success) {
             closeModal('modal-ordinance');
-            showToast('Ordinance uploaded');
-            // Reloading because handling file display via JS without backend data is hard
-            setTimeout(() => window.location.reload(), 1000); 
-        } else {
-            showToast(result.error || 'Upload failed', 'error');
-        }
-    } catch (err) { showToast('Network error', 'error'); } 
-    finally { toggleLoading(btn, false, originalText); }
+            showToast('Ordinance uploaded!');
+            const tbody = document.getElementById('ordinances-table-body');
+            const row = document.createElement('tr');
+            row.id = `ordinance-row-${result.new_id}`;
+            row.className = 'hover:bg-slate-50 opacity-0';
+            row.innerHTML = `
+                <td class="px-6 py-4 text-sm font-mono text-blue-600">${formData.get('ordinance_number')}</td>
+                <td class="px-6 py-4 text-sm text-slate-900 font-medium">${formData.get('title')}</td>
+                <td class="px-6 py-4 text-sm text-slate-600">${formData.get('author') || '-'}</td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="deleteItem('ordinance', '${result.new_id}', this)" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                </td>
+            `;
+            tbody.prepend(row);
+            setTimeout(() => row.classList.remove('opacity-0'), 10);
+        } else showToast(result.error || 'Upload failed', 'error');
+    } catch (err) { showToast('Network error', 'error'); }
+    finally { toggleLoading(btn, false); }
 }
 
-// --- 4. COMPLAINT LOGIC ---
+// DELETE WITH LOADING
+async function deleteItem(type, id, btn) {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+    if (btn) toggleLoading(btn.parentElement, true);
+    try {
+        const res = await fetch(`/admin-action/delete_${type}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ id })
+        });
+        const result = await res.json();
+        if (result.success) {
+            showToast('Item deleted!');
+            const el = document.getElementById(`${type === 'ordinance' ? 'ordinance-row' : type + '-card'}-${id}`);
+            if (el) { el.style.transition = 'all 0.3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }
+        } else showToast('Delete failed', 'error');
+    } catch (err) { showToast('Error', 'error'); }
+    finally { if (btn) toggleLoading(btn.parentElement, false); }
+}
+
+// COMPLAINT
 function openComplaintModal(id, status, desc) {
     document.getElementById('current-complaint-id').value = id;
     document.getElementById('complaint-desc-display').innerText = desc;
@@ -624,81 +674,30 @@ function openComplaintModal(id, status, desc) {
 async function updateComplaintStatus(newStatus, btn) {
     const id = document.getElementById('current-complaint-id').value;
     const originalText = btn.innerText;
-    
-    // Tiny loading state on the button itself
-    btn.innerText = '...';
-    btn.disabled = true;
-    
+    btn.innerText = '...'; btn.disabled = true;
     try {
         const res = await fetch('/admin-action/update_complaint/', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
-            body: JSON.stringify({id: id, status: newStatus})
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+            body: JSON.stringify({ id, status: newStatus })
         });
         const result = await res.json();
-        
-        if(result.success) {
+        if (result.success) {
             closeModal('modal-complaint');
             showToast(`Status updated to ${newStatus}`);
-            
-            // --- INSTANT DOM UPDATE ---
             const badge = document.getElementById(`status-badge-${id}`);
-            if(badge) {
+            if (badge) {
                 badge.innerText = newStatus;
-                // Remove old colors
                 badge.className = "px-2 py-1 rounded-full text-xs font-semibold";
-                // Add new colors
-                if(newStatus === 'Resolved') {
-                    badge.classList.add('bg-emerald-100', 'text-emerald-700');
-                } else if(newStatus === 'Submitted') {
-                    badge.classList.add('bg-amber-100', 'text-amber-700');
-                } else {
-                    badge.classList.add('bg-slate-100', 'text-slate-700');
-                }
+                const classes = newStatus === 'Resolved' ? ['bg-emerald-100', 'text-emerald-700'] :
+                              newStatus === 'In Progress' ? ['bg-blue-100', 'text-blue-700'] :
+                              newStatus === 'Cancelled' ? ['bg-red-100', 'text-red-700'] : ['bg-amber-100', 'text-amber-700'];
+                badge.classList.add(...classes);
             }
-        } else {
-            showToast('Update failed', 'error');
         }
-    } catch(err) { showToast('Error', 'error'); }
-    finally { 
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-}
-
-// --- 5. DELETE LOGIC ---
-async function deleteItem(type, id) {
-    if(!confirm("Are you sure you want to delete this item?")) return;
-    
-    try {
-        const res = await fetch(`/admin-action/delete_${type}/`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrftoken},
-            body: JSON.stringify({id: id})
-        });
-        const result = await res.json();
-        
-        if(result.success) {
-            showToast('Item deleted');
-            
-            // --- INSTANT DOM REMOVAL ---
-            // Construct the ID of the HTML element to remove
-            let elId = '';
-            if(type === 'service') elId = `service-card-${id}`;
-            else if(type === 'official') elId = `official-card-${id}`;
-            else if(type === 'ordinance') elId = `ordinance-row-${id}`;
-            
-            const el = document.getElementById(elId);
-            if(el) {
-                // Fade out effect
-                el.style.transition = "all 0.3s ease";
-                el.style.opacity = "0";
-                setTimeout(() => el.remove(), 300);
-            }
-        } else {
-            showToast('Delete failed', 'error');
-        }
-    } catch(err) { showToast('Error', 'error'); }
+    } catch (err) { showToast('Error', 'error'); }
+    finally { btn.innerText = originalText; btn.disabled = false; }
 }
 </script>
+
 {% endblock %}
