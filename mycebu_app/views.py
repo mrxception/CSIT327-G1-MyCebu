@@ -1046,61 +1046,66 @@ def chat_send_view(request):
         user_message = data.get('prompt', '').strip()
         conversation_id = data.get('conversation_id')
         
-        # Create a new conversation ID if one wasn't provided
         if not conversation_id:
             conversation_id = str(uuid.uuid4())
 
         if not user_message:
             return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-        # --- SMART SEARCH (RAG) ---
-        context_data = []
-        search_query = user_message.lower()
-
-        # 1. SERVICES SEARCH
-        # Check for service intent keywords
-        service_triggers = ['permit', 'license', 'clearance', 'certificate', 'registration', 'business', 'apply', 'renew', 'how to', 'requirements']
+        recent_history_qs = ChatHistory.objects.filter(
+            conversation_id=conversation_id, 
+            user_id=user['id']
+        ).order_by('-created_at')[:3]
         
-        # Also check for broad listing intents
+        recent_history = list(recent_history_qs)[::-1]
+        
+        history_str = ""
+        last_user_topic = ""
+        
+        for h in recent_history:
+            history_str += f"User: {h.user_message}\nMyCebu AI: {h.bot_response}\n"
+            last_user_topic = h.user_message 
+
+        search_query = user_message.lower()
+        
+        if len(search_query.split()) < 4 and last_user_topic:
+            search_query += " " + last_user_topic.lower()
+
+        context_data = []
+
+        service_triggers = ['permit', 'license', 'clearance', 'certificate', 'registration', 'business', 'apply', 'renew', 'how to', 'requirements']
         list_triggers = ['available services', 'list of services', 'what services', 'show services']
         
         if any(t in search_query for t in list_triggers):
-             # Broad search: fetch a mix of services
-            services = Service.objects.all().order_by('title')[:10]
+            services = Service.objects.all().order_by('title')[:15]
             context_data.append("Here is a list of some available services:")
             for s in services:
                 context_data.append(f"- {s.title}")
         elif any(word in search_query for word in service_triggers):
-            # Specific search: user likely wants details on a specific permit
             services = Service.objects.filter(
                 Q(title__icontains=search_query) | 
                 Q(description__icontains=search_query) |
-                Q(title__icontains="Business") # Fallback to show business permits if vague
+                Q(title__icontains="Business") 
             ).distinct()[:5]
-            
             for s in services:
                 reqs = ", ".join(s.requirements) if s.requirements else "No specific requirements listed."
                 context_data.append(f"[Service] {s.title}: {s.description}. Requirements: {reqs}")
 
-        # 2. OFFICIALS SEARCH
         roles_to_check = ['mayor', 'vice mayor', 'councilor', 'captain', 'chief', 'director', 'head']
         found_role = next((role for role in roles_to_check if role in search_query), None)
         
         if found_role:
-            # If role is found, fetch ALL matches (limit 20 for councilors)
-            officials = Official.objects.filter(position__icontains=found_role)[:20]
+            officials = Official.objects.filter(position__icontains=found_role)[:30]
         else:
-            # Fallback text search
             officials = Official.objects.filter(
                 Q(name__icontains=search_query) | 
                 Q(position__icontains=search_query) |
                 Q(office__icontains=search_query)
-            )[:3]
+            )[:5]
 
         for o in officials:
             context_data.append(f"[Official] {o.name} ({o.position}) - {o.office}")
 
-        # 3. ORDINANCES & EMERGENCY
         ordinances = Ordinance.objects.filter(
             Q(name_or_ordinance__icontains=search_query) |
             Q(ordinance_number__icontains=search_query)
@@ -1114,18 +1119,17 @@ def chat_send_view(request):
                 nums = str(e.numbers)
                 context_data.append(f"[Emergency] {e.service}: {nums}")
 
-        # --- GENERATE RESPONSE ---
-        context_str = "\n".join(context_data) if context_data else "No specific database records found."
+        db_records_str = "\n".join(context_data) if context_data else "No specific database records found."
         
         system_instruction = (
             "You are 'MyCebu', the Cebu City government assistant. "
-            "Use the DATABASE RECORDS below to answer.\n"
+            "Use the provided CHAT HISTORY and DATABASE RECORDS to answer.\n\n"
             "RULES:\n"
-            "1. Use **bold** for names of officials and titles of services.\n"
-            "2. If listing officials (like councilors), list ALL names found in the records.\n"
-            "3. If asking about a service, summarize the requirements nicely.\n"
-            "4. If the answer is NOT in the records, politely say you don't have that info.\n\n"
-            f"--- DATABASE RECORDS FOUND ---\n{context_str}\n------------------------------"
+            "1. If the user says 'another one' or 'more', look at the history to see what they were asking about.\n"
+            "2. Use **bold** for names and titles.\n"
+            "3. If listing officials, list them clearly.\n"
+            f"--- DATABASE RECORDS ---\n{db_records_str}\n\n"
+            f"--- CHAT HISTORY ---\n{history_str}\n"
         )
 
         model = genai.GenerativeModel('gemini-2.5-flash')
@@ -1134,7 +1138,6 @@ def chat_send_view(request):
         response = model.generate_content(full_prompt)
         bot_reply = response.text
 
-        # --- SAVE HISTORY ---
         ChatHistory.objects.create(
             user_id=user['id'],
             conversation_id=conversation_id,
@@ -1154,18 +1157,12 @@ def chat_send_view(request):
 
 @require_GET
 def chat_history_view(request):
-    """
-    Returns unique conversation sessions for the user.
-    """
     user = get_authed_user(request)
     if not user:
         return JsonResponse({'error': 'Authentication required'}, status=401)
     
     try:
-        # Fetch distinct conversation IDs
-        # We fetch all, group by ID manually to get the latest metadata
         all_chats = ChatHistory.objects.filter(user_id=user['id']).order_by('-created_at')
-        
         sessions = []
         seen_ids = set()
         
@@ -1173,7 +1170,6 @@ def chat_history_view(request):
             c_id = str(chat.conversation_id)
             if c_id not in seen_ids:
                 seen_ids.add(c_id)
-                # Use the first user message as the "Title" of the chat
                 sessions.append({
                     "conversation_id": c_id,
                     "title": chat.user_message[:50] + "...", 
@@ -1186,19 +1182,15 @@ def chat_history_view(request):
 
 @require_GET
 def chat_session_detail_view(request, conversation_id):
-    """
-    Returns all messages for a specific conversation ID.
-    """
     user = get_authed_user(request)
     if not user:
         return JsonResponse({'error': 'Authentication required'}, status=401)
 
     try:
-        # Fetch messages strictly for this conversation and user
         messages = ChatHistory.objects.filter(
             user_id=user['id'], 
             conversation_id=conversation_id
-        ).order_by('created_at') # Ensure chronological order (Oldest -> Newest)
+        ).order_by('created_at') 
         
         data = []
         for m in messages:
@@ -1207,5 +1199,4 @@ def chat_session_detail_view(request, conversation_id):
 
         return JsonResponse({'success': True, 'messages': data})
     except Exception as e:
-        logger.error(f"Session Load Error: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
