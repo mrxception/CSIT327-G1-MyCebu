@@ -1052,10 +1052,38 @@ def chat_send_view(request):
         if not user_message:
             return JsonResponse({'error': 'Prompt is required'}, status=400)
 
+        manual_content = ""
+        
+        try:
+            file_path = os.path.join(
+                settings.BASE_DIR, 
+                'static', 
+                'mycebu_app', 
+                'data', 
+                'AI_CHATBOT_GUIDE.txt'
+            )
+            
+            if not os.path.exists(file_path):
+                file_path = os.path.join(
+                    settings.BASE_DIR,
+                    'mycebu_app',
+                    'static',
+                    'mycebu_app',
+                    'data',
+                    'AI_CHATBOT_GUIDE.txt'
+                )
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                manual_content = f.read()
+                
+        except Exception as e:
+            logger.error(f"Error reading knowledge base at {file_path}: {e}")
+            manual_content = "System Note: Knowledge base unavailable."
+
         recent_history_qs = ChatHistory.objects.filter(
             conversation_id=conversation_id, 
             user_id=user['id']
-        ).order_by('-created_at')[:3]
+        ).order_by('-created_at')[:5]
         
         recent_history = list(recent_history_qs)[::-1]
         
@@ -1064,72 +1092,63 @@ def chat_send_view(request):
         
         for h in recent_history:
             history_str += f"User: {h.user_message}\nMyCebu AI: {h.bot_response}\n"
-            last_user_topic = h.user_message 
+            if len(h.user_message.split()) > 2:
+                last_user_topic = h.user_message
 
         search_query = user_message.lower()
-        
         if len(search_query.split()) < 4 and last_user_topic:
             search_query += " " + last_user_topic.lower()
 
         context_data = []
 
-        service_triggers = ['permit', 'license', 'clearance', 'certificate', 'registration', 'business', 'apply', 'renew', 'how to', 'requirements']
-        list_triggers = ['available services', 'list of services', 'what services', 'show services']
-        
-        if any(t in search_query for t in list_triggers):
-            services = Service.objects.all().order_by('title')[:15]
-            context_data.append("Here is a list of some available services:")
-            for s in services:
-                context_data.append(f"- {s.title}")
-        elif any(word in search_query for word in service_triggers):
+        if any(w in search_query for w in ['permit', 'license', 'clearance', 'business', 'apply', 'service', 'registration']):
             services = Service.objects.filter(
                 Q(title__icontains=search_query) | 
                 Q(description__icontains=search_query) |
-                Q(title__icontains="Business") 
+                Q(title__icontains="Business")
             ).distinct()[:5]
             for s in services:
-                reqs = ", ".join(s.requirements) if s.requirements else "No specific requirements listed."
-                context_data.append(f"[Service] {s.title}: {s.description}. Requirements: {reqs}")
+                reqs = ", ".join(s.requirements) if s.requirements else "See manual."
+                context_data.append(f"[DB: Service] {s.title}: {s.description}. Req: {reqs}")
 
-        roles_to_check = ['mayor', 'vice mayor', 'councilor', 'captain', 'chief', 'director', 'head']
-        found_role = next((role for role in roles_to_check if role in search_query), None)
+        roles = ['mayor', 'vice mayor', 'councilor', 'captain', 'chief', 'head', 'director', 'official']
+        found_role = next((r for r in roles if r in search_query), None)
         
         if found_role:
-            officials = Official.objects.filter(position__icontains=found_role)[:30]
+            officials = Official.objects.filter(position__icontains=found_role)[:50]
         else:
             officials = Official.objects.filter(
                 Q(name__icontains=search_query) | 
-                Q(position__icontains=search_query) |
-                Q(office__icontains=search_query)
+                Q(position__icontains=search_query)
             )[:5]
 
         for o in officials:
-            context_data.append(f"[Official] {o.name} ({o.position}) - {o.office}")
+            context_data.append(f"[DB: Official] {o.name} ({o.position}) - {o.office}")
 
-        ordinances = Ordinance.objects.filter(
-            Q(name_or_ordinance__icontains=search_query) |
-            Q(ordinance_number__icontains=search_query)
-        )[:3]
-        for o in ordinances:
-            context_data.append(f"[Ordinance] {o.ordinance_number} - {o.name_or_ordinance}")
+        if 'ordinance' in search_query or 'law' in search_query:
+            ordinances = Ordinance.objects.filter(name_or_ordinance__icontains=search_query)[:3]
+            for o in ordinances:
+                context_data.append(f"[DB: Ordinance] {o.ordinance_number} - {o.name_or_ordinance}")
 
-        if any(x in search_query for x in ['emergency', 'hotline', 'police', 'fire', 'help']):
+        if any(x in search_query for x in ['emergency', 'hotline', 'police', 'fire']):
             emergencies = EmergencyContact.objects.all()
             for e in emergencies:
-                nums = str(e.numbers)
-                context_data.append(f"[Emergency] {e.service}: {nums}")
+                context_data.append(f"[DB: Emergency] {e.service}: {e.numbers}")
 
         db_records_str = "\n".join(context_data) if context_data else "No specific database records found."
-        
+
         system_instruction = (
-            "You are 'MyCebu', the Cebu City government assistant. "
-            "Use the provided CHAT HISTORY and DATABASE RECORDS to answer.\n\n"
-            "RULES:\n"
-            "1. If the user says 'another one' or 'more', look at the history to see what they were asking about.\n"
-            "2. Use **bold** for names and titles.\n"
-            "3. If listing officials, list them clearly.\n"
-            f"--- DATABASE RECORDS ---\n{db_records_str}\n\n"
-            f"--- CHAT HISTORY ---\n{history_str}\n"
+            "You are 'MyCebu', the Cebu City government assistant.\n"
+            "You have access to a STATIC USER MANUAL (Local File) and DYNAMIC DATABASE RECORDS.\n\n"
+            "INSTRUCTIONS:\n"
+            "1. For general questions (how to apply, navigation, FAQs), use the USER MANUAL content below.\n"
+            "2. For specific questions (who is the mayor, specific service requirements), use the DATABASE RECORDS.\n"
+            "3. If the user asks for 'another one', check the CHAT HISTORY.\n"
+            "4. Use **bold** for titles/names.\n"
+            "\n"
+            f"=== USER MANUAL (General Info) ===\n{manual_content[:30000]}\n\n"
+            f"=== DATABASE RECORDS (Specific Data) ===\n{db_records_str}\n\n"
+            f"=== CHAT HISTORY ===\n{history_str}\n"
         )
 
         model = genai.GenerativeModel('gemini-2.5-flash')
