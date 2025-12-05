@@ -12,16 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
 
 
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-# ...existing code...
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 

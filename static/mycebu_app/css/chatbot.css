@@ -1,9 +1,38 @@
 .chatbot-root {
   position: fixed;
-  inset: auto 20px 20px auto;
-  z-index: 1200;
-  display: block;
-  font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  bottom: 20px;  /* Force bottom */
+  right: 20px;   /* Force right */
+  top: auto;     /* Reset top */
+  left: auto;    /* Reset left */
+  z-index: 9999;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Extra styles for New Chat Button & Input Hiding */
+.chatbot-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.chatbot-new-chat {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.chatbot-new-chat:hover {
+    background: rgba(255,255,255,0.4);
+}
+/* Hide input when this class is added to the form */
+.chatbot-input-bar.hidden {
+    display: none;
 }
 
 .chatbot-toggle {
@@ -32,26 +61,32 @@
   background: var(--primary-600, var(--primary, #1d4ed8));
 }
 
+
 .chatbot-panel {
-  width: 360px;
-  max-width: min(360px, 92vw);
-  border-radius: 18px;
-  background: var(--card, #ffffff);
-  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.35);
-  border: 1px solid var(--border, #e5e7eb);
+  position: absolute;
+  bottom: 70px;  /* Sits just above the toggle button */
+  right: 0;
+  width: 380px;
+  height: 500px; /* Fixed height */
+  max-height: 80vh; /* Don't go taller than screen */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: opacity 0.3s, transform 0.3s;
+  transform-origin: bottom right;
+  
+  /* CRITICAL: Ensure it doesn't stick to top */
+  top: auto; 
+}
+
+.chatbot-panel[aria-hidden="true"] {
   opacity: 0;
-  transform: translateY(12px) scale(0.96);
+  transform: scale(0.9);
   pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  top: 20px;
-  height: auto;
-  z-index: 1201;
+  display: none; /* Fully hide to prevent clicks */
 }
 
 .chatbot-root.is-open .chatbot-panel {
@@ -155,11 +190,15 @@
   padding: 10px 14px 8px;
   overflow-y: auto;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  overflow-x: hidden;
-  gap: 10px;
+  display: block; /* Changed from flex to block to fix scrolling */
+  scroll-behavior: smooth;
+}
+
+.chatbot-body::before {
+  content: '';
+  display: block;
+  height: auto;
+  flex-grow: 1;
 }
 
 .chatbot-body--hidden {
@@ -377,5 +416,18 @@
     right: 12px;
     bottom: 12px;
     top: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chatbot-panel {
+    width: 100vw;
+    height: 100%;
+    max-height: 100%;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+    position: fixed; /* Takes full screen on mobile */
+    z-index: 10000;
   }
 }

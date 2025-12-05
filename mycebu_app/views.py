@@ -4,6 +4,7 @@ import json
 import time
 import logging
 import re
+import google.generativeai as genai
 import requests
 from pathlib import Path
 from datetime import datetime
@@ -32,7 +33,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User as DjangoAuthUser
 
 # === MODEL IMPORTS ===
-from .models import Complaint, Ordinance, ServiceApplication, Service, Official, Department, EmergencyContact, Service
+from .models import Complaint, Ordinance, ServiceApplication, Service, Official, Department, EmergencyContact, Service, ChatHistory
 
 # Try to import the Custom User model from 'accounts' app, fallback to 'mycebu_app' if not found
 try:
@@ -47,6 +48,14 @@ except ImportError:
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
+try:
+    if settings.GEMINI_API_KEY:
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+    else:
+        logger.error("GEMINI_API_KEY not found in settings.")
+except Exception as e:
+    logger.error(f"Failed to configure Gemini: {e}")
 # ==========================================
 # CLOUDINARY UPLOAD HELPER
 # ==========================================
@@ -172,13 +181,17 @@ def landing_view(request, tab='landing'):
         # 1. Fetch Stats from DB
         total_complaints = Complaint.objects.count()
         pending_complaints = Complaint.objects.filter(status='Submitted').count()
-        total_users = DbUser.objects.count()
+        total_users = DbUser.objects.count() # Already fetching total users
 
         # 2. Fetch Data directly from DB
         all_complaints = Complaint.objects.all().order_by('-created_at')
         services_list = Service.objects.all().order_by('title')
         officials_list = Official.objects.all().order_by('name')
         ordinances_list = Ordinance.objects.all().order_by('-created_at')
+        
+        # <<< NEW: Fetch all users for the new tab >>>
+        # We fetch the custom user model (DbUser) to get role, full name, etc.
+        all_users = DbUser.objects.all().order_by('-created_at')
 
         context.update({
             "admin_stats": {
@@ -190,6 +203,7 @@ def landing_view(request, tab='landing'):
             "admin_services": services_list, 
             "admin_officials": officials_list,
             "admin_ordinances": ordinances_list,
+            "admin_users": all_users,  # <<< NEW CONTEXT DATA >>>
         })
 
     # ==========================
@@ -435,8 +449,15 @@ def admin_action_view(request, action_type):
 
         elif action_type == 'update_complaint':
             data = json.loads(request.body)
+            new_status = data['status']
+            
+            # Optional: Add validation for new statuses
+            VALID_COMPLAINT_STATUSES = ['Submitted', 'In Progress', 'Resolved', 'Cancelled']
+            if new_status not in VALID_COMPLAINT_STATUSES:
+                return JsonResponse({'success': False, 'error': f'Invalid status: {new_status}'}, status=400)
+
             Complaint.objects.filter(id=data['id']).update(
-                status=data['status'],
+                status=new_status,
                 updated_at=timezone.now()
             )
             return JsonResponse({'success': True})
@@ -551,104 +572,6 @@ def profile_view(request):
     response = render(request, "mycebu_app/pages/profile.html", {"user": user_data})
     response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
-
-@csrf_exempt
-def chat_view(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-    user = get_authed_user(request)
-    if not user:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
-
-    try:
-        data = json.loads(request.body)
-        prompt = data.get('prompt', '').strip()
-
-        if not prompt:
-            return JsonResponse({'error': 'Prompt is required'}, status=400)
-
-        context_data = []
-        q_term = prompt.strip()
-
-        services = Service.objects.filter(
-            Q(title__icontains=q_term) | 
-            Q(description__icontains=q_term)
-        )[:3]
-        for s in services:
-            context_data.append(f"[Service] {s.title}: {s.description}")
-
-        officials = Official.objects.filter(
-            Q(name__icontains=q_term) | 
-            Q(position__icontains=q_term) |
-            Q(office__icontains=q_term)
-        )[:5]
-        for o in officials:
-            context_data.append(f"[Official] {o.name} ({o.position}) - {o.office}. Phone: {o.phone}")
-
-        ordinances = Ordinance.objects.filter(
-            Q(name_or_ordinance__icontains=q_term) |
-            Q(ordinance_number__icontains=q_term)
-        )[:3]
-        for o in ordinances:
-            context_data.append(f"[Ordinance] {o.ordinance_number} - {o.name_or_ordinance} by {o.author}")
-
-        if any(x in q_term.lower() for x in ['emergency', 'hotline', 'police', 'fire', 'help']):
-            emergencies = EmergencyContact.objects.all()
-            for e in emergencies:
-                nums = ", ".join(e.numbers) if isinstance(e.numbers, list) else str(e.numbers)
-                context_data.append(f"[Emergency] {e.service}: {nums}")
-
-        context_str = "\n".join(context_data)
-        
-        if not context_str:
-            system_instruction = (
-                "You are the Cebu City AI assistant. The user asked a question, but I found NO matching records "
-                "in the database for Services, Officials, or Ordinances. "
-                "Politely tell the user you couldn't find specific information in the system records."
-            )
-        else:
-            system_instruction = (
-                "You are the Cebu City AI assistant. Answer the user's question using ONLY the following database records. "
-                "Do not make up information. If the answer is not in the records, say you don't know.\n\n"
-                f"--- DATABASE RECORDS ---\n{context_str}\n------------------------"
-            )
-
-        api_url = "https://router.huggingface.co/novita/v3/openai/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "messages": [
-                {"role": "system", "content": system_instruction},
-                {"role": "user", "content": prompt}
-            ],
-            "model": "deepseek/deepseek-v3-0324",
-            "stream": False,
-            "temperature": 0.2 
-        }
-
-        response = requests.post(api_url, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        api_response = response.json()
-
-        bot_message = api_response.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
-        
-        return JsonResponse({
-            'success': True,
-            'message': bot_message
-        })
-
-    except Exception as e:
-        logger.error(f"chat_view: Error: {str(e)}")
-        return JsonResponse({'error': f'Failed to process request: {str(e)}'}, status=500)
-
-def chatbot_page(request):
-    user = get_authed_user(request)
-    if not user:
-        return redirect("login")
-    return render(request, 'mycebu_app/test.html', {"user": user})
 
 def apply_permit_view(request, service: str):
     user = get_authed_user(request)
@@ -1111,3 +1034,108 @@ def directory_list_api(request):
     except Exception as e:
         print(f"API Error: {e}") 
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+    
+@csrf_exempt
+@require_POST
+def chat_send_view(request):
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('prompt', '').strip()
+        search_query = user_message.lower()
+
+        context_data = []
+
+        # ====================================================
+        # 1. SERVICES SEARCH (IMPROVED)
+        # ====================================================
+        # Keywords that strongly suggest a service lookup
+        service_triggers = ['permit', 'license', 'clearance', 'certificate', 'registration', 'business', 'apply', 'renew']
+        
+        # If user mentions any service trigger, we FORCE a search for services
+        if any(word in search_query for word in service_triggers):
+            # Search for specific services matching the user's text
+            services = Service.objects.filter(
+                Q(title__icontains=search_query) | 
+                Q(description__icontains=search_query) |
+                Q(title__icontains="Business") # Fallback: Ensure Business stuff always appears if "business" is typed
+            ).distinct()[:5]
+            
+            for s in services:
+                reqs = ", ".join(s.requirements) if s.requirements else "No specific requirements listed."
+                context_data.append(f"[Service Record] Title: {s.title}\nDescription: {s.description}\nRequirements: {reqs}")
+
+        # ====================================================
+        # 2. OFFICIALS SEARCH (LIMIT INCREASED)
+        # ====================================================
+        roles_to_check = ['mayor', 'vice mayor', 'councilor', 'captain', 'chief', 'director']
+        found_role = next((role for role in roles_to_check if role in search_query), None)
+        
+        if found_role:
+            # INCREASED LIMIT TO 20 to catch all councilors
+            officials = Official.objects.filter(position__icontains=found_role)[:20]
+        else:
+            officials = Official.objects.filter(
+                Q(name__icontains=search_query) | 
+                Q(position__icontains=search_query)
+            )[:5]
+
+        for o in officials:
+            context_data.append(f"[Official] {o.name} ({o.position}) - {o.office}")
+
+        # ====================================================
+        # 3. GENERATE AI RESPONSE
+        # ====================================================
+        context_str = "\n".join(context_data) if context_data else "No specific database records found."
+        
+        system_instruction = (
+            "You are 'MyCebu', the Cebu City government assistant. "
+            "Use the DATABASE RECORDS below to answer.\n"
+            "RULES:\n"
+            "1. If listing officials (like councilors), list ALL names found in the records.\n"
+            "2. If asking about a service (e.g., Business Permit), explain the 'Requirements' and 'Description' from the records.\n"
+            "3. If the user asks where to go, look at the Service Description or assume 'City Hall' if not specified.\n\n"
+            f"--- DATABASE RECORDS FOUND ---\n{context_str}\n------------------------------"
+        )
+
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        response = model.generate_content(f"{system_instruction}\n\nUser Question: {user_message}")
+        bot_reply = response.text
+
+        # Save History
+        ChatHistory.objects.create(user_id=user['id'], user_message=user_message, bot_response=bot_reply)
+
+        return JsonResponse({'success': True, 'message': bot_reply})
+
+    except Exception as e:
+        logger.error(f"Chat Error: {str(e)}")
+        return JsonResponse({'error': str(e)}, status=500)
+
+@require_GET
+def chat_history_view(request):
+    """
+    Fetches chat history for the logged-in user.
+    """
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+    
+    try:
+        # Fetch last 50 messages
+        history = ChatHistory.objects.filter(user_id=user['id']).order_by('-created_at')[:50]
+        data = []
+        for h in history:
+            data.append({
+                "id": str(h.id),
+                "user_message": h.user_message,
+                "bot_response": h.bot_response,
+                "created_at": h.created_at
+            })
+        
+        # Reverse to show oldest first in UI if needed, or handle in JS
+        return JsonResponse({'success': True, 'history': data})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
