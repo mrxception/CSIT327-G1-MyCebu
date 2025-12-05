@@ -89,7 +89,6 @@ def get_authed_user(request):
     if not request.user.is_authenticated:
         return None
 
-    # 1. Get basic info from the currently logged in session
     auth_user = request.user
     
     # 2. Find the corresponding record in your custom 'users' table
@@ -1045,97 +1044,168 @@ def chat_send_view(request):
     try:
         data = json.loads(request.body)
         user_message = data.get('prompt', '').strip()
+        conversation_id = data.get('conversation_id')
+        
+        # Create a new conversation ID if one wasn't provided
+        if not conversation_id:
+            conversation_id = str(uuid.uuid4())
+
+        if not user_message:
+            return JsonResponse({'error': 'Prompt is required'}, status=400)
+
+        # --- SMART SEARCH (RAG) ---
+        context_data = []
         search_query = user_message.lower()
 
-        context_data = []
-
-        # ====================================================
-        # 1. SERVICES SEARCH (IMPROVED)
-        # ====================================================
-        # Keywords that strongly suggest a service lookup
-        service_triggers = ['permit', 'license', 'clearance', 'certificate', 'registration', 'business', 'apply', 'renew']
+        # 1. SERVICES SEARCH
+        # Check for service intent keywords
+        service_triggers = ['permit', 'license', 'clearance', 'certificate', 'registration', 'business', 'apply', 'renew', 'how to', 'requirements']
         
-        # If user mentions any service trigger, we FORCE a search for services
-        if any(word in search_query for word in service_triggers):
-            # Search for specific services matching the user's text
+        # Also check for broad listing intents
+        list_triggers = ['available services', 'list of services', 'what services', 'show services']
+        
+        if any(t in search_query for t in list_triggers):
+             # Broad search: fetch a mix of services
+            services = Service.objects.all().order_by('title')[:10]
+            context_data.append("Here is a list of some available services:")
+            for s in services:
+                context_data.append(f"- {s.title}")
+        elif any(word in search_query for word in service_triggers):
+            # Specific search: user likely wants details on a specific permit
             services = Service.objects.filter(
                 Q(title__icontains=search_query) | 
                 Q(description__icontains=search_query) |
-                Q(title__icontains="Business") # Fallback: Ensure Business stuff always appears if "business" is typed
+                Q(title__icontains="Business") # Fallback to show business permits if vague
             ).distinct()[:5]
             
             for s in services:
                 reqs = ", ".join(s.requirements) if s.requirements else "No specific requirements listed."
-                context_data.append(f"[Service Record] Title: {s.title}\nDescription: {s.description}\nRequirements: {reqs}")
+                context_data.append(f"[Service] {s.title}: {s.description}. Requirements: {reqs}")
 
-        # ====================================================
-        # 2. OFFICIALS SEARCH (LIMIT INCREASED)
-        # ====================================================
-        roles_to_check = ['mayor', 'vice mayor', 'councilor', 'captain', 'chief', 'director']
+        # 2. OFFICIALS SEARCH
+        roles_to_check = ['mayor', 'vice mayor', 'councilor', 'captain', 'chief', 'director', 'head']
         found_role = next((role for role in roles_to_check if role in search_query), None)
         
         if found_role:
-            # INCREASED LIMIT TO 20 to catch all councilors
+            # If role is found, fetch ALL matches (limit 20 for councilors)
             officials = Official.objects.filter(position__icontains=found_role)[:20]
         else:
+            # Fallback text search
             officials = Official.objects.filter(
                 Q(name__icontains=search_query) | 
-                Q(position__icontains=search_query)
-            )[:5]
+                Q(position__icontains=search_query) |
+                Q(office__icontains=search_query)
+            )[:3]
 
         for o in officials:
             context_data.append(f"[Official] {o.name} ({o.position}) - {o.office}")
 
-        # ====================================================
-        # 3. GENERATE AI RESPONSE
-        # ====================================================
+        # 3. ORDINANCES & EMERGENCY
+        ordinances = Ordinance.objects.filter(
+            Q(name_or_ordinance__icontains=search_query) |
+            Q(ordinance_number__icontains=search_query)
+        )[:3]
+        for o in ordinances:
+            context_data.append(f"[Ordinance] {o.ordinance_number} - {o.name_or_ordinance}")
+
+        if any(x in search_query for x in ['emergency', 'hotline', 'police', 'fire', 'help']):
+            emergencies = EmergencyContact.objects.all()
+            for e in emergencies:
+                nums = str(e.numbers)
+                context_data.append(f"[Emergency] {e.service}: {nums}")
+
+        # --- GENERATE RESPONSE ---
         context_str = "\n".join(context_data) if context_data else "No specific database records found."
         
         system_instruction = (
             "You are 'MyCebu', the Cebu City government assistant. "
             "Use the DATABASE RECORDS below to answer.\n"
             "RULES:\n"
-            "1. If listing officials (like councilors), list ALL names found in the records.\n"
-            "2. If asking about a service (e.g., Business Permit), explain the 'Requirements' and 'Description' from the records.\n"
-            "3. If the user asks where to go, look at the Service Description or assume 'City Hall' if not specified.\n\n"
+            "1. Use **bold** for names of officials and titles of services.\n"
+            "2. If listing officials (like councilors), list ALL names found in the records.\n"
+            "3. If asking about a service, summarize the requirements nicely.\n"
+            "4. If the answer is NOT in the records, politely say you don't have that info.\n\n"
             f"--- DATABASE RECORDS FOUND ---\n{context_str}\n------------------------------"
         )
 
         model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(f"{system_instruction}\n\nUser Question: {user_message}")
+        full_prompt = f"{system_instruction}\n\nUser Question: {user_message}"
+        
+        response = model.generate_content(full_prompt)
         bot_reply = response.text
 
-        # Save History
-        ChatHistory.objects.create(user_id=user['id'], user_message=user_message, bot_response=bot_reply)
+        # --- SAVE HISTORY ---
+        ChatHistory.objects.create(
+            user_id=user['id'],
+            conversation_id=conversation_id,
+            user_message=user_message,
+            bot_response=bot_reply
+        )
 
-        return JsonResponse({'success': True, 'message': bot_reply})
+        return JsonResponse({
+            'success': True,
+            'message': bot_reply,
+            'conversation_id': conversation_id
+        })
 
     except Exception as e:
-        logger.error(f"Chat Error: {str(e)}")
-        return JsonResponse({'error': str(e)}, status=500)
+        logger.error(f"Gemini Chat Error: {str(e)}")
+        return JsonResponse({'error': f'Failed to process request: {str(e)}'}, status=500)
 
 @require_GET
 def chat_history_view(request):
     """
-    Fetches chat history for the logged-in user.
+    Returns unique conversation sessions for the user.
     """
     user = get_authed_user(request)
     if not user:
         return JsonResponse({'error': 'Authentication required'}, status=401)
     
     try:
-        # Fetch last 50 messages
-        history = ChatHistory.objects.filter(user_id=user['id']).order_by('-created_at')[:50]
-        data = []
-        for h in history:
-            data.append({
-                "id": str(h.id),
-                "user_message": h.user_message,
-                "bot_response": h.bot_response,
-                "created_at": h.created_at
-            })
+        # Fetch distinct conversation IDs
+        # We fetch all, group by ID manually to get the latest metadata
+        all_chats = ChatHistory.objects.filter(user_id=user['id']).order_by('-created_at')
         
-        # Reverse to show oldest first in UI if needed, or handle in JS
-        return JsonResponse({'success': True, 'history': data})
+        sessions = []
+        seen_ids = set()
+        
+        for chat in all_chats:
+            c_id = str(chat.conversation_id)
+            if c_id not in seen_ids:
+                seen_ids.add(c_id)
+                # Use the first user message as the "Title" of the chat
+                sessions.append({
+                    "conversation_id": c_id,
+                    "title": chat.user_message[:50] + "...", 
+                    "date": chat.created_at
+                })
+        
+        return JsonResponse({'success': True, 'history': sessions})
     except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@require_GET
+def chat_session_detail_view(request, conversation_id):
+    """
+    Returns all messages for a specific conversation ID.
+    """
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        # Fetch messages strictly for this conversation and user
+        messages = ChatHistory.objects.filter(
+            user_id=user['id'], 
+            conversation_id=conversation_id
+        ).order_by('created_at') # Ensure chronological order (Oldest -> Newest)
+        
+        data = []
+        for m in messages:
+            data.append({"text": m.user_message, "type": "user"})
+            data.append({"text": m.bot_response, "type": "bot"})
+
+        return JsonResponse({'success': True, 'messages': data})
+    except Exception as e:
+        logger.error(f"Session Load Error: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)

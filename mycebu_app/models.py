@@ -114,7 +114,8 @@ class Service(models.Model):
     
 class ChatHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_id = models.UUIDField() # Links to your Custom User ID
+    user_id = models.UUIDField()
+    conversation_id = models.UUIDField(default=uuid.uuid4)
     user_message = models.TextField()
     bot_response = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

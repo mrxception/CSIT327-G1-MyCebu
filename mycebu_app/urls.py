@@ -8,7 +8,7 @@ urlpatterns = [
     # Chatbot Endpoints
     path('api/chat/send/', views.chat_send_view, name='api_chat_send'),
     path('api/chat/history/', views.chat_history_view, name='api_chat_history'),
-
+    path('api/chat/session/<uuid:conversation_id>/', views.chat_session_detail_view, name='api_chat_session'),
     # Dashboard & Landing
     path('dashboard/', views.landing_view, {'tab': 'dashboard'}, name='dashboard'),
     path('landing/', views.landing_view, {'tab': 'landing'}, name='landing_default'),
