@@ -26,78 +26,163 @@
             <form action="{% url 'landing_tab' 'ordinances' %}" method="GET">
                 
                 <div class="ord-search-wrap">
-                    <span class="material-symbols-rounded ord-search-icon">search</span>
-                    <input type="text" name="q" placeholder="Search by name, position, or office" value="{{ request.GET.q }}">
+                    <span class="material-icons ord-search-icon">search</span>
+                    <input type="text" name="q" placeholder="Search by ordinance number or title" value="{{ request.GET.q }}">
                 </div>
 
-                <select name="author" class="ord-select" onchange="this.form.submit()">
-                    <option value="">All Positions</option>
-                    {% for auth in authors_list %}
-                    <option value="{{ auth }}" {% if request.GET.author == auth %}selected{% endif %}>{{ auth }}</option>
-                    {% endfor %}
-                </select>
-
                 <select name="category" class="ord-select" onchange="this.form.submit()">
-                    <option value="">All Districts</option>
+                    <option value="">All Categories</option>
                     {% for cat in categories_list %}
                     <option value="{{ cat }}" {% if request.GET.category == cat %}selected{% endif %}>{{ cat }}</option>
                     {% endfor %}
                 </select>
+
+                <button type="button" class="btn-view-toggle" id="viewToggle">
+                    <span class="material-symbols-rounded" id="viewIcon">grid_view</span>
+                    Grid View
+                </button>
+
             </form>
         </div>
 
         <div class="services-container" style="padding-top: 20px;">
-            {% if ordinances_data %}
-                {# Regroup data by Category #}
-                {% regroup ordinances_data by category as category_list %}
-
-                {% for category in category_list %}
-                    <div class="category-group">
-                        <h2 class="category-header">
-                            <span class="material-symbols-rounded" style="color: #2563eb;">folder_open</span>
-                            {{ category.grouper|default:"General" }}
-                        </h2>
-                        
-                        <div class="ord-grid">
-                            {% for ord in category.list %}
-                            <article class="ord-card">
-                                <div class="tag-badge">
-                                    <span class="material-symbols-rounded" style="font-size:14px;">label</span>
-                                    {{ ord.category }}
-                                </div>
-
-                                <h3 class="ord-title">{{ ord.name_or_ordinance }}</h3>
-
-                                <div class="ord-meta">
-                                    <div class="ord-meta-row">
-                                        <span class="material-symbols-rounded icon-sm">person</span>
-                                        <span>{{ ord.author|default:"Unknown Author" }}</span>
-                                    </div>
-                                    <div class="ord-meta-row">
-                                        <span class="material-symbols-rounded icon-sm">tag</span>
-                                        <span>No. {{ ord.ordinance_number }}</span>
-                                    </div>
-                                    <div class="ord-meta-row">
-                                        <span class="material-symbols-rounded icon-sm">calendar_month</span>
-                                        <span>{{ ord.date_of_enactment|default:"Date Pending" }}</span>
-                                    </div>
-                                </div>
-
-                                <button type="button" class="btn-preview" 
-                                        onclick="openPdfPreview('{{ ord.pdf_file_path }}', '{{ ord.name_or_ordinance|escapejs }}')">
-                                    <span class="material-symbols-rounded">visibility</span>
-                                    Preview File
-                                </button>
-                            </article>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-msg" style="display:block; text-align:center; padding: 60px;">
-                    <span class="material-symbols-rounded" style="font-size: 48px; color: #d1d5db;">search_off</span>
-                    <h3 class="h3" style="margin-top:10px;">No Ordinances Found</h3>
+            {% if view_all %}
+                {# Full View for a Category - Now ONLY uses the Card/Grid Structure for uniformity #}
+                <div class="full-view-header">
+                    <a href="?{% for key, value in request.GET.items %}{% if key != 'view_all' and key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="btn-back">
+                        <span class="material-icons">arrow_back</span>
+                        Back to Categories
+                    </a>
+                    <h1 class="full-view-title">
+                        <span class="material-icons" style="color: #2563eb;">folder_open</span>
+                        {{ view_all }}
+                    </h1>
                 </div>
+
+                <div class="ord-controls">
+                    <form action="{% url 'landing_tab' 'ordinances' %}" method="GET">
+                        <input type="hidden" name="view_all" value="{{ view_all }}">
+                        <select name="sort" class="ord-select" onchange="this.form.submit()">
+                            <option value="">Sort by</option>
+                            <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Newest</option>
+                            <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                            <option value="year" {% if request.GET.sort == 'year' %}selected{% endif %}>By Year</option>
+                        </select>
+                    </form>
+                </div>
+
+                {% if ordinances_data %}
+                    <div class="ord-container ord-grid" id="ordContainer">
+                        {% for ord in ordinances_data %}
+                        <article class="ord-card">
+                            <div class="tag-badge">
+                                <span class="material-symbols-rounded" style="font-size:14px;">label</span>
+                                {{ ord.category }}
+                            </div>
+
+                            <h3 class="ord-title">{{ ord.name_or_ordinance }}</h3>
+
+                            <div class="ord-meta">
+                                <div class="ord-meta-row">
+                                    <span class="material-symbols-rounded icon-sm">person</span>
+                                    <span class="author-name-truncate">{{ ord.author|default:"Unknown Author" }}</span>
+                                </div>
+                                <div class="ord-meta-row">
+                                    <span class="material-symbols-rounded icon-sm">tag</span>
+                                    <span>No. {{ ord.ordinance_number }}</span>
+                                </div>
+                                <div class="ord-meta-row">
+                                    <span class="material-symbols-rounded icon-sm">calendar_month</span>
+                                    <span>{{ ord.date_of_enactment|default:"Date Pending" }}</span>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-preview"
+                                    onclick="openPdfPreview('{{ ord.pdf_file_path }}', '{{ ord.name_or_ordinance|escapejs }}')">
+                                <span class="material-symbols-rounded">visibility</span>
+                                Preview File
+                            </button>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if is_paginated %}
+                    <div class="pagination-controls">
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="btn-page {% if not page_obj.has_previous %}disabled{% endif %}">
+                            <span class="material-icons">chevron_left</span>
+                        </a>
+                        <span class="page-info">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+                        <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="btn-page {% if not page_obj.has_next %}disabled{% endif %}">
+                            <span class="material-icons">chevron_right</span>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="empty-msg" style="display:block; text-align:center; padding: 60px;">
+                        <span class="material-symbols-rounded" style="font-size: 48px; color: #d1d5db;">search_off</span>
+                        <h3 class="h3" style="margin-top:10px;">No Ordinances Found</h3>
+                    </div>
+                {% endif %}
+            {% else %}
+                {# Main View: Categories with limited ordinances #}
+                {% if ordinances_data %}
+                    {# Regroup data by Category #}
+                    {% regroup ordinances_data by category as category_list %}
+
+                    {% for category in category_list %}
+                        <div class="category-group">
+                            <div class="category-header">
+                                <h2>
+                                    <span class="material-symbols-rounded" style="color: #2563eb;">folder_open</span>
+                                    {{ category.grouper|default:"General" }}
+                                </h2>
+                                <a href="?{% for key, value in request.GET.items %}{% if key != 'view_all' and key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}view_all={{ category.grouper|urlencode }}" class="btn-view-all">
+                                    <span class="material-symbols-rounded">visibility</span>
+                                    View All
+                                </a>
+                            </div>
+
+                            <div class="ord-container ord-grid" id="ordContainer-{{ category.grouper|slugify }}">
+                                {% for ord in category.list %}
+                                <article class="ord-card">
+                                    <div class="tag-badge">
+                                        <span class="material-symbols-rounded" style="font-size:14px;">label</span>
+                                        {{ ord.category }}
+                                    </div>
+
+                                    <h3 class="ord-title">{{ ord.name_or_ordinance }}</h3>
+
+                                    <div class="ord-meta">
+                                        <div class="ord-meta-row">
+                                            <span class="material-symbols-rounded icon-sm">person</span>
+                                            <span class="author-name-truncate">{{ ord.author|default:"Unknown Author" }}</span>
+                                        </div>
+                                        <div class="ord-meta-row">
+                                            <span class="material-symbols-rounded icon-sm">tag</span>
+                                            <span>No. {{ ord.ordinance_number }}</span>
+                                        </div>
+                                        <div class="ord-meta-row">
+                                            <span class="material-symbols-rounded icon-sm">calendar_month</span>
+                                            <span>{{ ord.date_of_enactment|default:"Date Pending" }}</span>
+                                        </div>
+                                    </div>
+
+                                    <button type="button" class="btn-preview"
+                                            onclick="openPdfPreview('{{ ord.pdf_file_path }}', '{{ ord.name_or_ordinance|escapejs }}')">
+                                        <span class="material-symbols-rounded">visibility</span>
+                                        Preview File
+                                    </button>
+                                </article>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-msg" style="display:block; text-align:center; padding: 60px;">
+                        <span class="material-symbols-rounded" style="font-size: 48px; color: #d1d5db;">search_off</span>
+                        <h3 class="h3" style="margin-top:10px;">No Ordinances Found</h3>
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>

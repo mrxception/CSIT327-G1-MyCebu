@@ -16,7 +16,7 @@ import cloudinary.api
 
 # Django Imports
 from django.db import connection
-from django.db.models import Q
+from django.db.models import Q, F
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -27,6 +27,8 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
+from django.core.paginator import Paginator
+from collections import defaultdict
 
 # Auth Imports
 from django.contrib.auth import authenticate, login, logout
@@ -300,8 +302,10 @@ def landing_view(request, tab='landing'):
         query = request.GET.get("q", "").strip()
         category_filter = request.GET.get("category", "")
         author_filter = request.GET.get("author", "")
+        view_all = request.GET.get("view_all", "").strip()
+        page = request.GET.get("page", 1)
 
-        qs = Ordinance.objects.all().order_by('-date_of_enactment', '-created_at')
+        qs = Ordinance.objects.all().order_by('name_or_ordinance')  # Alphabetical order
 
         if query:
             qs = qs.filter(
@@ -309,20 +313,55 @@ def landing_view(request, tab='landing'):
                 Q(author__icontains=query) |
                 Q(ordinance_number__icontains=query)
             )
-        
+
         if category_filter:
             qs = qs.filter(category=category_filter)
-        
+
         if author_filter:
             qs = qs.filter(author=author_filter)
 
-        ordinances_data = list(qs.values())
+        if view_all:
+            # Full view for specific category
+            qs = qs.filter(category=view_all)
+            sort = request.GET.get("sort", "")
+            if sort == 'newest':
+                qs = qs.order_by(F('date_of_enactment').desc(nulls_last=True))
+            elif sort == 'oldest':
+                qs = qs.order_by(F('date_of_enactment').asc(nulls_last=True))
+            elif sort == 'year':
+                qs = qs.order_by(F('date_of_enactment__year').desc(nulls_last=True), F('date_of_enactment').desc(nulls_last=True))
+            paginator = Paginator(qs, 9)  # 9 per page
+            ordinances_page = paginator.get_page(page)
+            ordinances_data = list(ordinances_page.object_list.values())
+
+            context.update({
+                "ordinances_data": ordinances_data,
+                "view_all": view_all,
+                "paginator": paginator,
+                "page_obj": ordinances_page,
+                "is_paginated": paginator.num_pages > 1,
+            })
+        else:
+            # Main view: limit to 3 per category
+            all_ordinances = list(qs.values())
+            categories = defaultdict(list)
+            for ord in all_ordinances:
+                cat = ord['category'] or 'General'
+                if len(categories[cat]) < 3:
+                    categories[cat].append(ord)
+            ordinances_data = []
+            for cat, ords in categories.items():
+                ordinances_data.extend(ords)
+
+            context.update({
+                "ordinances_data": ordinances_data,
+                "view_all": None,
+            })
 
         categories_list = sorted(list(Ordinance.objects.exclude(category__isnull=True).values_list('category', flat=True).distinct()))
         authors_list = sorted(list(Ordinance.objects.exclude(author__isnull=True).values_list('author', flat=True).distinct()))
 
         context.update({
-            "ordinances_data": ordinances_data,
             "categories_list": categories_list,
             "authors_list": authors_list,
         })
