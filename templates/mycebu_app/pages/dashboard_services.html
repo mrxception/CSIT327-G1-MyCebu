@@ -754,44 +754,44 @@
     });
 
     // --- SUBMISSION ---
-    form.addEventListener("submit", async e => {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting…";
-      const payload = {
-        category: document.getElementById("cmp-category").value.trim(),
-        subcategory: document.getElementById("cmp-subcategory")?.value.trim() || null,
-        subject: document.getElementById("cmp-subject").value.trim(),
-        location: document.getElementById("cmp-location").value.trim(),
-        description: document.getElementById("cmp-description").value.trim(),
-        is_anonymous: document.getElementById("cmp-anon").checked,
-        attachments: uploadedFiles.map(f => ({ name: f.name, url: f.url, size: f.size }))
-      };
-      if (!payload.is_anonymous) {
-        payload.name = document.getElementById("cmp-name").value.trim();
-        payload.email = document.getElementById("cmp-email").value.trim();
-        payload.phone = document.getElementById("cmp-phone").value.trim();
-      }
+    // form.addEventListener("submit", async e => {
+    //   e.preventDefault();
+    //   submitBtn.disabled = true;
+    //   submitBtn.textContent = "Submitting…";
+    //   const payload = {
+    //     category: document.getElementById("cmp-category").value.trim(),
+    //     subcategory: document.getElementById("cmp-subcategory")?.value.trim() || null,
+    //     subject: document.getElementById("cmp-subject").value.trim(),
+    //     location: document.getElementById("cmp-location").value.trim(),
+    //     description: document.getElementById("cmp-description").value.trim(),
+    //     is_anonymous: document.getElementById("cmp-anon").checked,
+    //     attachments: uploadedFiles.map(f => ({ name: f.name, url: f.url, size: f.size }))
+    //   };
+    //   if (!payload.is_anonymous) {
+    //     payload.name = document.getElementById("cmp-name").value.trim();
+    //     payload.email = document.getElementById("cmp-email").value.trim();
+    //     payload.phone = document.getElementById("cmp-phone").value.trim();
+    //   }
 
-      try {
-        const res = await fetch(SUBMIT_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error || "Server error");
-        form.reset();
-        uploadedFiles = [];
-        renderFileList();
-        successPanel.style.display = "block";
-        successPanel.scrollIntoView({ behavior: "smooth" });
-        loadStats();
-        // If track tab is active, reload list
-        if (panel.querySelector('[data-subtab="track"]').classList.contains("is-active")) loadList();
-      } catch (err) {
-        alert("Submission failed: " + err.message);
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Complaint";
-      }
-    });
+    //   try {
+    //     const res = await fetch(SUBMIT_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    //     const data = await res.json();
+    //     if (!data.success) throw new Error(data.error || "Server error");
+    //     form.reset();
+    //     uploadedFiles = [];
+    //     renderFileList();
+    //     successPanel.style.display = "block";
+    //     successPanel.scrollIntoView({ behavior: "smooth" });
+    //     loadStats();
+    //     // If track tab is active, reload list
+    //     if (panel.querySelector('[data-subtab="track"]').classList.contains("is-active")) loadList();
+    //   } catch (err) {
+    //     alert("Submission failed: " + err.message);
+    //   } finally {
+    //     submitBtn.disabled = false;
+    //     submitBtn.textContent = "Submit Complaint";
+    //   }
+    // });
 
     newBtn.onclick = () => {
       successPanel.style.display = "none";

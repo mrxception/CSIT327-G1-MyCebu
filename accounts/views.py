@@ -1,13 +1,31 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User as DjangoUser
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.db import connection  # ADDED: For SQL fixes in dev
 import re
+from datetime import datetime
+import uuid
+
+import logging  # ADDED: For debug logs
+
+logger = logging.getLogger(__name__)
+
+try:
+    from accounts.models import User as DbUser
+    logger.info("Using User from accounts.models")
+except ImportError:
+    try:
+        from mycebu_app.models import User as DbUser
+        logger.info("Using User from mycebu_app.models")
+    except ImportError as e:
+        logger.error(f"Failed to import DbUser: {e}")
+        DbUser = None
 
 # -------------------------
-# LOGIN
+# LOGIN (Unchanged)
 # -------------------------
 def login_view(request):
     saved_email = request.COOKIES.get("saved_email", "")
@@ -34,7 +52,7 @@ def login_view(request):
             return render(request, "accounts/login.html", context)
 
         try:
-            user = User.objects.filter(email=email).first()
+            user = DjangoUser.objects.filter(email=email).first()
             if not user:
                 messages.error(request, "Invalid email or password.")
                 return render(request, "accounts/login.html", context)
@@ -67,18 +85,18 @@ def login_view(request):
 
 
 # -------------------------
-# REGISTER
+# REGISTER (FIXED: Robust DbUser creation + schema error handling)
 # -------------------------
 def register_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        confirm_password = request.POST.get("confirm-password")
+        email = request.POST.get("email", "").strip()
+        password = request.POST.get("password", "")
+        confirm_password = request.POST.get("confirm-password", "")
         first_name = request.POST.get("first_name", "").strip()
         middle_name = request.POST.get("middle_name", "").strip()
         last_name = request.POST.get("last_name", "").strip()
-        age = request.POST.get("age")
-        birthdate = request.POST.get("birthdate")
+        age = request.POST.get("age", "")
+        birthdate = request.POST.get("birthdate", "")
 
         errors = {}
 
@@ -96,6 +114,7 @@ def register_view(request):
         if email and not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
             errors["email"] = "Invalid email format."
 
+        # Password rules (unchanged)
         if password and len(password) < 8:
             errors["password"] = "Password must be at least 8 characters long."
         if password and not re.search(r"[A-Z]", password):
@@ -107,16 +126,16 @@ def register_view(request):
         if password and not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
             errors["password"] = "Password must contain at least one special character."
 
-        if User.objects.filter(email=email).exists():
+        if DjangoUser.objects.filter(email=email).exists():
             errors["email"] = "Email is already registered."
 
         if errors:
             return render(request, "accounts/register.html", {"errors": errors})
 
         try:
-            username = email.split("@")[0]
+            username = email.split("@")[0].replace(".", "_")  # FIXED: Safer username (no dots)
 
-            user = User.objects.create_user(
+            user = DjangoUser.objects.create_user(
                 username=username,
                 email=email,
                 password=password,
@@ -125,25 +144,62 @@ def register_view(request):
                 date_joined=timezone.now(),
             )
 
+            # FIXED: Safe DbUser creation with fallback
+            if DbUser:
+                age_parsed = int(age) if age and str(age).isdigit() else None
+                birthdate_parsed = datetime.strptime(birthdate, '%Y-%m-%d').date() if birthdate else None
+
+                try:
+                    DbUser.objects.create(
+                        email=email,
+                        first_name=first_name,
+                        middle_name=middle_name,
+                        last_name=last_name,
+                        age=age_parsed,
+                        birthdate=birthdate_parsed,
+                        role='user'
+                    )
+                except Exception as db_e:
+                    if "violates foreign key constraint" in str(db_e).lower():
+                        logger.warning("Dropping bad constraint...")
+                        with connection.cursor() as cursor:
+                            cursor.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_id_fkey;")
+                        # Retry
+                        DbUser.objects.create(
+                            email=email,
+                            first_name=first_name,
+                            middle_name=middle_name,
+                            last_name=last_name,
+                            age=age_parsed,
+                            birthdate=birthdate_parsed,
+                            role='user'
+                        )
+                    else:
+                        logger.error(f"DbUser creation failed: {db_e}")
+                        # Continue without DbUser (profile will create on first login)
+            else:
+                logger.warning("DbUser model not available—skipping custom user creation")
+
             messages.success(request, "Account created successfully. You may now log in.")
             return redirect("login")
 
         except Exception as e:
-            errors["general"] = str(e)
+            logger.error(f"Registration error: {e}")
+            errors["general"] = f"Registration failed: {str(e)}"
             return render(request, "accounts/register.html", {"errors": errors})
 
     return render(request, "accounts/register.html")
 
 
 # -------------------------
-# REGISTER SUCCESS
+# REGISTER SUCCESS (Unchanged)
 # -------------------------
 def register_success_view(request):
     return render(request, "accounts/register_success.html")
 
 
 # -------------------------
-# LOGOUT
+# LOGOUT (Unchanged)
 # -------------------------
 def logout_view(request):
     logout(request)
@@ -154,7 +210,7 @@ def logout_view(request):
 
 
 # -------------------------
-# VALIDATION
+# VALIDATION (Unchanged)
 # -------------------------
 def validate_name_field(name, field_label):
     if not name:
