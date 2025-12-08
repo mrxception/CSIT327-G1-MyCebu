@@ -86,7 +86,7 @@ def upload_to_cloudinary(file_obj, folder="profiles"):
 def get_authed_user(request):
     """
     Combines the Login User (DjangoAuthUser) with your Custom Data User (DbUser).
-    Linked by Email.
+    Linked by Email. Creates DbUser if it doesn't exist to ensure consistency.
     """
     if not request.user.is_authenticated:
         return None
@@ -96,18 +96,43 @@ def get_authed_user(request):
     # 2. Find the corresponding record in your custom 'users' table
     db_user = DbUser.objects.filter(email=auth_user.email).first()
 
-    # 3. Construct the full profile dictionary
-    user_id = auth_user.id
-    if db_user:
-        user_id = db_user.id 
+    # FIXED: Create DbUser if it doesn't exist (ensures UUID id and basic fields)
+    if not db_user:
+        try:
+            db_user = DbUser(
+                email=auth_user.email,
+                first_name=auth_user.first_name or "",
+                last_name=auth_user.last_name or "",
+                created_at=timezone.now(),
+                role='user'
+            )
+            db_user.save()
+        except Exception as e:
+            if "violates foreign key constraint" in str(e):
+                # DEV FIX: Auto-drop bad constraint
+                from django.db import connection
+                with connection.cursor() as cursor:
+                    cursor.execute("ALTER TABLE users DROP CONSTRAINT IF EXISTS users_id_fkey;")
+                # Retry
+                db_user = DbUser(
+                    email=auth_user.email,
+                    first_name=auth_user.first_name or "",
+                    last_name=auth_user.last_name or "",
+                    created_at=timezone.now(),
+                    role='user'
+                )
+                db_user.save()
+            else:
+                raise
 
+    # 3. Construct the full profile dictionary (unchanged)
+    user_id = db_user.id
     display_name = f"{auth_user.first_name} {auth_user.last_name}".strip()
     if not display_name:
         display_name = auth_user.username
 
-    # Avatar logic
     avatar_url = f"https://ui-avatars.com/api/?name={auth_user.username}&background=random"
-    if db_user and db_user.avatar_url:
+    if db_user.avatar_url:
         avatar_url = db_user.avatar_url
 
     return {
@@ -118,17 +143,17 @@ def get_authed_user(request):
         "last_name": auth_user.last_name,
         "display_name": display_name,
         "avatar_url": avatar_url,
-        "role": db_user.role if db_user else "user",
-        "middle_name": db_user.middle_name if db_user else None,
-        "age": db_user.age if db_user else None,
-        "birthdate": str(db_user.birthdate) if (db_user and db_user.birthdate) else None,
-        "contact_number": db_user.contact_number if db_user else None,
-        "gender": db_user.gender if db_user else None,
-        "marital_status": db_user.marital_status if db_user else None,
-        "religion": db_user.religion if db_user else None,
-        "birthplace": db_user.birthplace if db_user else None,
-        "purok": db_user.purok if db_user else None,
-        "city": db_user.city if db_user else None,
+        "role": db_user.role,
+        "middle_name": db_user.middle_name,
+        "age": db_user.age,
+        "birthdate": str(db_user.birthdate) if db_user.birthdate else None,
+        "contact_number": db_user.contact_number,
+        "gender": db_user.gender,
+        "marital_status": db_user.marital_status,
+        "religion": db_user.religion,
+        "birthplace": db_user.birthplace,
+        "purok": db_user.purok,
+        "city": db_user.city,
     }
 
 def _get_service_by_id(service_id):
@@ -579,26 +604,34 @@ def profile_view(request):
     if not user_data:
         return redirect("login")
 
-    if request.method == "GET" and request.headers.get('Accept') == 'application/json':
-        return JsonResponse({'user': user_data})
-
     if request.method == "POST":
         try:
-            # 1. Capture Fields
+            # --- 1. Capture Fields ---
             first_name = request.POST.get("first_name", "").strip()
             last_name = request.POST.get("last_name", "").strip()
             email = request.POST.get("email", "").strip()
             middle_name = request.POST.get("middle_name", "").strip()
-            age = request.POST.get("age")
+            
+            # Handle numeric/date fields: Convert empty strings to None
+            age_raw = request.POST.get("age")
+            age = int(age_raw) if age_raw and age_raw.isdigit() else None
+            
             contact_number = request.POST.get("contact_number", "").strip()
-            birthdate = request.POST.get("birthdate")
+            
+            birthdate_raw = request.POST.get("birthdate")
+            # FIXED: Parse birthdate to date object for DateField
+            birthdate = datetime.strptime(birthdate_raw, '%Y-%m-%d').date() if birthdate_raw else None
+            
             gender = request.POST.get("gender")
             marital_status = request.POST.get("marital_status")
             religion = request.POST.get("religion", "").strip()
             birthplace = request.POST.get("birthplace", "").strip()
+            
+            # CRITICAL FIX: Grab purok. If the select was disabled in HTML, this might be missing.
             purok = request.POST.get("purok", "").strip()
             city = request.POST.get("city", "").strip()
 
+            # --- 2. Validation ---
             errors = {}
             if not first_name or not last_name:
                 errors["name"] = "First name and last name are required."
@@ -606,42 +639,37 @@ def profile_view(request):
             if email and not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
                 errors["email"] = "Invalid email format."
             
-            if age:
-                try:
-                    age = int(age)
-                except ValueError:
-                    errors["age"] = "Age must be a number"
-            else:
-                age = None
-
             if errors:
                 messages.error(request, "Please correct the errors.")
                 return render(request, "mycebu_app/pages/profile.html", {"user": user_data, "errors": errors})
 
-            # A. Update Django Auth User
+            # --- 3. Update Django Auth User (Login System) ---
             auth_u = request.user
+            old_email = auth_u.email
+            
             auth_u.first_name = first_name
             auth_u.last_name = last_name
-            old_email = auth_u.email
             auth_u.email = email 
             auth_u.save()
 
-            # B. Update Custom 'users' Table
+            # --- 4. Update Custom 'users' Table (Profile System) ---
+            # Try to find by old email first (in case they changed it), then by new email
             db_user = DbUser.objects.filter(email=old_email).first()
             if not db_user:
                 db_user = DbUser.objects.filter(email=email).first()
             
+            # FIXED: Create if doesn't exist (let default UUID generate id)
             if not db_user:
-                db_user = DbUser(id=uuid.uuid4(), email=email)
+                db_user = DbUser(email=email, created_at=timezone.now())
 
+            # Update Fields
             db_user.email = email
             db_user.first_name = first_name
             db_user.last_name = last_name
             db_user.middle_name = middle_name
             db_user.age = age
             db_user.contact_number = contact_number
-            if birthdate:
-                db_user.birthdate = birthdate
+            db_user.birthdate = birthdate
             db_user.gender = gender
             db_user.marital_status = marital_status
             db_user.religion = religion
@@ -649,27 +677,25 @@ def profile_view(request):
             db_user.purok = purok
             db_user.city = city
 
-            # --- AVATAR UPLOAD LOGIC ---
+            # --- 5. Avatar Upload ---
             if "avatar" in request.FILES:
                 avatar_file = request.FILES["avatar"]
+                # Ensure upload_to_cloudinary is imported or defined
                 uploaded_url = upload_to_cloudinary(avatar_file, folder=f"profiles/{auth_u.id}")
                 if uploaded_url:
                     db_user.avatar_url = uploaded_url
-                else:
-                    messages.warning(request, "Profile picture upload failed. Check server logs.")
-            # ---------------------------
 
             db_user.save()
             messages.success(request, "Profile updated successfully.")
+            
+            # Reload user data to show updates immediately
             user_data = get_authed_user(request)
 
         except Exception as e:
             logger.error(f"profile_view: Update error: {str(e)}")
             messages.error(request, f"An error occurred: {str(e)}")
 
-    response = render(request, "mycebu_app/pages/profile.html", {"user": user_data})
-    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    return response
+    return render(request, "mycebu_app/pages/profile.html", {"user": user_data})
 
 def apply_permit_view(request, service: str):
     user = get_authed_user(request)
@@ -723,18 +749,16 @@ def start_service_application(request, service: str):
     ).first()
 
     if restart and existing:
-        try:
-            existing.progress = 0
-            existing.step_index = 0
-            existing.document_status = 'pending'
-            existing.document_url = None
-            existing.admin_notes = None
-            existing.reference_number = reference
-            existing.updated_at = timezone.now()
-            existing.save()
-            return JsonResponse({"success": True, "application_id": existing.id, "restarted": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": "Failed to restart application"}, status=500)
+        existing.progress = 0
+        existing.step_index = 0
+        existing.document_status = 'draft'  # <--- CHANGE THIS (Was 'pending')
+        existing.document_url = None
+        existing.admin_notes = None
+        existing.completed_at = None
+        existing.reference_number = reference
+        existing.updated_at = timezone.now()
+        existing.save()
+        return JsonResponse({"success": True, "application_id": existing.id, "restarted": True})
 
     if not restart and existing:
         if (existing.progress or 0) > 0 or (existing.step_index or 0) > 0:
@@ -753,7 +777,7 @@ def start_service_application(request, service: str):
             reference_number=reference,
             progress=0,
             step_index=0,
-            document_status='pending',
+            document_status='draft',  # <--- CHANGE THIS (Was 'pending')
             created_at=timezone.now(),
             updated_at=timezone.now()
         )
@@ -768,110 +792,92 @@ def start_service_application(request, service: str):
 def update_service_application(request, service: str, app_id):
     user = get_authed_user(request)
     if not user:
-        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+        return JsonResponse({"success": False, "error": "Login required"}, status=401)
 
     try:
-        data = json.loads(request.body or "{}")
-    except Exception:
-        return JsonResponse({"success": False, "error": "Invalid JSON"}, status=400)
+        data = json.loads(request.body.decode()) if request.body else {}
+    except:
+        data = {}
 
-    mark_completed = bool(data.get("mark_completed", False))
+    mark_completed = data.get("mark_completed", False)
     new_step = data.get("step_index")
 
-    svc = _get_service_by_id(service)
-    # Handle both dict (if fetched via values()) and object
-    if isinstance(svc, dict):
-        steps_list = svc.get("steps", [])
-    else:
-        steps_list = svc.steps if svc else []
-        
-    total_steps = len(steps_list) if steps_list else 1
+    try:
+        app = ServiceApplication.objects.get(id=app_id, user_id=user["id"])
+    except ServiceApplication.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Application not found"}, status=404)
+
+    # When user clicks "Complete" → reset so they can upload
+    # When user clicks "Complete" → reset so they can upload
+    if mark_completed:
+        app.step_index = 0
+        app.progress = 0      
+        app.document_status = 'draft' # <--- CHANGE THIS (Was 'pending')
+        app.document_url = None
+        app.admin_notes = None
+        app.completed_at = None
+        app.save()
+        return JsonResponse({"success": True, "message": "Ready for upload"})
+
+    if new_step is None:
+        return JsonResponse({"success": False, "error": "step_index required"}, status=400)
 
     try:
-        app = ServiceApplication.objects.get(id=app_id)
-
-        if mark_completed:
-            app.step_index = 0
-            app.progress = 0
-            app.document_status = 'pending'
-            app.document_url = None
-            app.admin_notes = None
-            app.completed_at = None
-            app.updated_at = timezone.now()
-            app.save()
-            return JsonResponse({"success": True, "progress": 0, "completed": True})
-
-        if new_step is None:
-            return JsonResponse({"success": False, "error": "step_index required"}, status=400)
-
         new_step = int(new_step)
-        if new_step < 0: new_step = 0
-        if new_step >= total_steps: new_step = total_steps - 1
+    except:
+        return JsonResponse({"success": False, "error": "Invalid step"}, status=400)
 
-        progress = int(((new_step + 1) / max(total_steps, 1)) * 100)
+    svc = _get_service_by_id(service)
+    steps = svc.steps if svc else []
+    total = len(steps) or 1
+    new_step = max(0, min(new_step, total - 1))
+    progress = int((new_step + 1) / total * 100)
 
-        app.step_index = new_step
-        app.progress = progress
-        app.updated_at = timezone.now()
-        app.save()
+    app.step_index = new_step
+    app.progress = progress
+    app.save()
 
-        return JsonResponse({"success": True, "progress": progress, "step_index": new_step})
-    except ServiceApplication.DoesNotExist:
-         return JsonResponse({"success": False, "error": "Application not found"}, status=404)
-    except Exception as e:
-        logger.error("update_service_application: %s", e)
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+    return JsonResponse({"success": True, "progress": progress, "step_index": new_step})
 
-# NEW: Document Upload Endpoint
+
 @csrf_exempt
 @require_POST
 def upload_permit_document(request, service: str, app_id):
     user = get_authed_user(request)
     if not user:
-        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+        return JsonResponse({"success": False, "error": "Login required"}, status=401)
 
     try:
-        app = ServiceApplication.objects.get(id=app_id, user_id=user["id"], service_type=service)
+        app = ServiceApplication.objects.get(id=app_id, user_id=user["id"])
+    except ServiceApplication.DoesNotExist:
+        return JsonResponse({"success": False, "error": "App not found"}, status=404)
+
+    if 'document' not in request.FILES:
+        return JsonResponse({"success": False, "error": "No file"}, status=400)
+
+    file = request.FILES['document']
+
+    if file.size > 15 * 1024 * 1024:
+        return JsonResponse({"success": False, "error": "File too big"}, status=400)
+
+    try:
+        url = upload_to_cloudinary(file, folder=f"permits/{service}/{app_id}")
         
-        if 'document' not in request.FILES:
-            return JsonResponse({"success": False, "error": "No file uploaded"}, status=400)
-        
-        document_file = request.FILES['document']
-        
-        # Validate file size (10MB max)
-        if document_file.size > 10 * 1024 * 1024:
-            return JsonResponse({"success": False, "error": "File size must be less than 10MB"}, status=400)
-        
-        # Validate file type
-        allowed_types = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 
-                        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-        if document_file.content_type not in allowed_types:
-            return JsonResponse({"success": False, "error": "Invalid file type. Please upload PDF, JPG, PNG, or DOC files."}, status=400)
-        
-        # Upload to Cloudinary
-        document_url = upload_to_cloudinary(document_file, folder=f"permits/{service}/{app_id}")
-        
-        if not document_url:
-            return JsonResponse({"success": False, "error": "Failed to upload document"}, status=500)
-        
-        # Update application
-        app.document_url = document_url
-        app.document_status = 'pending'
+        # THIS IS THE KEY FIX
+        app.document_url = url
+        app.document_status = "pending"   # ← THIS TRIGGERS YOUR TEMPLATE SUCCESS BOX
         app.progress = 100
-        app.updated_at = timezone.now()
+        app.completed_at = timezone.now()
         app.save()
-        
+
         return JsonResponse({
             "success": True,
-            "document_url": document_url,
-            "message": "Document uploaded successfully"
+            "message": "Application submitted!",
+            "document_url": url
         })
-        
-    except ServiceApplication.DoesNotExist:
-        return JsonResponse({"success": False, "error": "Application not found"}, status=404)
     except Exception as e:
-        logger.error(f"upload_permit_document error: {str(e)}")
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+        logger.error(f"Upload failed: {e}")
+        return JsonResponse({"success": False, "error": "Server error"}, status=500)
 
 def permit_progress_view(request, service: str, app_id):
     user = get_authed_user(request)

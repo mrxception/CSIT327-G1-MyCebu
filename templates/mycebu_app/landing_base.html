@@ -6,7 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyCebu - Government Services</title>
-    
+    <link rel="icon" type="image/png" href="{% static 'mycebu_app/icons/mycebu-logo.png' %}">
+
     <link rel="stylesheet" href="{% static 'mycebu_app/css/globals.css' %}">
     <link rel="stylesheet" href="{% static 'mycebu_app/css/header.css' %}">
     
@@ -90,11 +91,25 @@
                     <strong>{{ authed_user.display_name|default:authed_user.email }}</strong>
                     <span>{{ authed_user.email }}</span>
                 </div>
-                <a href="{% url 'landing_tab' tab='profile' %}" class="avatar-link" aria-label="Profile">
-                    <img class="avatar"
-                        src="{% if authed_user and authed_user.avatar_url %}{{ authed_user.avatar_url }}{% else %}{% static 'mycebu_app/icons/blank.png' %}{% endif %}"
-                        alt="Profile">
-                </a>
+                <div class="profile-dropdown">
+                    <button class="avatar-button" aria-label="Profile menu">
+                        <img class="avatar"
+                            src="{% if authed_user and authed_user.avatar_url %}{{ authed_user.avatar_url }}{% else %}{% static 'mycebu_app/icons/blank.png' %}{% endif %}"
+                            alt="Profile">
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'landing_tab' tab='profile' %}">
+                            <span class="material-icons">person</span>
+                            <span>Profile</span>
+                        </a>
+                        {% if current_tab != 'profile' %}
+                        <a href="{% url 'logout' %}">
+                            <span class="material-icons">logout</span>
+                            <span>Log Out</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
                 {% else %}
                 <a href="{% url 'login' %}" class="sign-in">Sign in</a>
                 <a href="{% url 'register' %}" class="dashboard">Sign Up</a>

@@ -70,4 +70,47 @@ document.addEventListener("DOMContentLoaded", () => {
       if (window.innerWidth > 768) close();
     });
   }
+
+  // Profile dropdown functionality
+  const profileDropdown = document.querySelector('.profile-dropdown');
+  const avatarButton = document.querySelector('.avatar-button');
+
+  if (profileDropdown && avatarButton) {
+    const toggleDropdown = () => {
+      profileDropdown.classList.toggle('active');
+    };
+
+    const closeDropdown = () => {
+      profileDropdown.classList.remove('active');
+    };
+
+    avatarButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!profileDropdown.contains(e.target)) {
+        closeDropdown();
+      }
+    });
+
+    // Close dropdown when clicking on menu items
+    const dropdownMenu = profileDropdown.querySelector('.dropdown-menu');
+    if (dropdownMenu) {
+      dropdownMenu.addEventListener('click', (e) => {
+        if (e.target.tagName === 'A') {
+          closeDropdown();
+        }
+      });
+    }
+
+    // Close dropdown on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeDropdown();
+      }
+    });
+  }
 });

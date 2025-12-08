@@ -2,21 +2,26 @@
 {% load static %}
 
 {% block content %}
-<section class="dashboard-hero">
+<style>
+.dir-hero{background:linear-gradient(165deg,var(--secondary) 0%,var(--secondary-600) 50%,var(--primary) 100%);color:#fff;padding:48px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.dir-hero::before{content:"";position:absolute;inset:auto -80px -120px auto;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.22) 0,transparent 60%);opacity:.9}
+.dir-hero::after{content:"";position:absolute;inset:10% auto auto -120px;width:220px;height:220px;border-radius:999px;background:radial-gradient(circle at 70% 70%,rgba(255,255,255,.18) 0,transparent 60%)}
+.dir-hero__badge{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(6px);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.dir-hero__title{font-size:2.25rem;margin:0 0 8px}
+.dir-hero__desc{opacity:.95;margin:0}
+</style>
+<header class="dir-hero">
   <div class="container">
-    <div class="dashboard-hero-content">
-      <h4>WELCOME to MyCebu</h4>
-      <h2>{{ user.first_name }}</h2>
+    <div class="dir-hero__badge">
+      <i class="material-icons">account_balance</i> Cebu City Government Services
     </div>
+    <h1 class="dir-hero__title">Welcome to MyCebu's Dashboard, {{ user.first_name }}!</h1>
+    <p class="dir-hero__desc">Manage your service applications, track permit progress, submit complaints, and access all Cebu City government services from your personalized dashboard.</p>
   </div>
-</section>
+</header>
 
 <section class="tab-content-section" data-loading="false">
   <div class="container">
-    <header class="dash-head">
-      <h1 class="h2">Dashboard</h1>
-      <p class="muted">Welcome back to your MyCebu account</p>
-    </header>
 
     <nav class="dash-tabs">
       <button class="dash-tab is-active" data-tab="services">Services</button>
@@ -27,6 +32,4 @@
     {% include 'mycebu_app/pages/dashboard_feedback.html' %}
   </div>
 </section>
-
-<button class="fab-ai">ai</button>
 {% endblock content %}

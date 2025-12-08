@@ -15,6 +15,72 @@
   object-fit: cover;
   margin-bottom: -10px;
 }
+.profile-dropdown {
+  position: relative;
+}
+.avatar-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+.avatar-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+  display: none;
+  transform: translateY(-10px);
+  transition: transform 0.2s ease;
+  z-index: 1000;
+}
+.dropdown-menu a {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+}
+.dropdown-menu a:hover {
+  background-color: #f5f6f7;
+}
+.dropdown-menu a:first-child {
+  border-radius: 8px 8px 0 0;
+}
+.dropdown-menu a:last-child {
+  border-radius: 0 0 8px 8px;
+}
+.dropdown-menu a .material-icons {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  font-size: 20px;
+}
+.dropdown-menu a[href*="profile"] {
+  color: var(--secondary);
+}
+.dropdown-menu a[href*="logout"] {
+  color: var(--danger);
+}
+.profile-dropdown.active .dropdown-menu {
+  display: block;
+  transform: translateY(0);
+}
 .topnav .account .who {
   display: flex;
   flex-direction: column;
