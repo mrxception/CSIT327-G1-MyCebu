@@ -11,14 +11,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'mycebu_app/css/ordinances.css' %}">
-    <link rel="stylesheet" href="{% static 'mycebu_app/css/profile.css' %}?v=1.5">
-    <script defer src="{% static 'mycebu_app/js/profile.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'mycebu_app/css/profile.css' %}?v=1.6">
 </head>
 
 <body class="bg-gradient-to-r from-blue-100 to-white min-h-screen p-4 sm:p-6 md:p-8">
     {% if messages %}
     {% for message in messages %}
-    <div class="fixed top-5 right-5 z-50 bg-gray-900 text-white py-2 px-5 rounded-lg shadow-lg opacity-100 transform translate-y-0 transition-all duration-300">
+    <div
+        class="fixed top-5 right-5 z-50 bg-gray-900 text-white py-2 px-5 rounded-lg shadow-lg opacity-100 transform translate-y-0 transition-all duration-300">
         {{ message }}
     </div>
     {% endfor %}
@@ -29,20 +29,22 @@
         <div class="container">
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-                <!-- Profile Header -->
                 <div class="profile-header">
                     <div class="header-top">
-                        <a href="#" id="back-button">
+                        <a href="{% url 'landing_tab' tab='dashboard' %}" id="back-button">
                             <span class="material-icons" style="font-size: 20px;">arrow_back</span>
                             Back to Home
                         </a>
                     </div>
                     <div class="avatar-section">
                         <div class="main-avatar-container">
-                            <img id="main-avatar" src="{{ user.avatar_url|default:'https://placehold.co/120x120/E2E8F0/4A5568?text=US' }}?v={% now 'U' %}" alt="User Avatar">
+                            <img id="main-avatar"
+                                src="{{ user.avatar_url|default:'https://placehold.co/120x120/E2E8F0/4A5568?text=US' }}?v={% now 'U' %}"
+                                alt="User Avatar">
                             <label for="avatar-upload" class="avatar-edit-label">
                                 <span class="material-icons" style="font-size: 20px;">edit</span>
-                                <input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/*" form="profile-form">
+                                <input type="file" id="avatar-upload" name="avatar" class="hidden" accept="image/*"
+                                    form="profile-form">
                             </label>
                         </div>
                         <div>
@@ -68,231 +70,357 @@
                         </div>
                         {% endif %}
 
-                    <!-- Personal Information Section -->
-                    <div class="form-section">
-                        <h2 class="section-title">
-                            <span class="material-icons">person</span>
-                            Personal Information
-                        </h2>
-                        <div class="form-grid">
-                            <div class="form-field">
-                                <label for="first_name" class="field-label">
-                                    <span class="material-icons">person</span>
-                                    First Name
-                                </label>
-                                <span data-value="{{ user.first_name|default:'' }}" class="profile-view-field">{{ user.first_name|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name|default:'' }}" required>
+                        <div class="form-section">
+                            <h2 class="section-title">
+                                <span class="material-icons">person</span>
+                                Personal Information
+                            </h2>
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="first_name" class="field-label">
+                                        <span class="material-icons">person</span>
+                                        First Name
+                                    </label>
+                                    <span data-value="{{ user.first_name|default:'' }}" class="profile-view-field">{{
+                                        user.first_name|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="text" id="first_name" name="first_name"
+                                            value="{{ user.first_name|default:'' }}" required>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="last_name" class="field-label">
-                                    <span class="material-icons">person</span>
-                                    Last Name
-                                </label>
-                                <span data-value="{{ user.last_name|default:'' }}" class="profile-view-field">{{ user.last_name|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name|default:'' }}" required>
+                                <div class="form-field">
+                                    <label for="last_name" class="field-label">
+                                        <span class="material-icons">person</span>
+                                        Last Name
+                                    </label>
+                                    <span data-value="{{ user.last_name|default:'' }}" class="profile-view-field">{{
+                                        user.last_name|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="text" id="last_name" name="last_name"
+                                            value="{{ user.last_name|default:'' }}" required>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="email" class="field-label">
-                                    <span class="material-icons">email</span>
-                                    Email Address
-                                </label>
-                                <span data-value="{{ user.email }}" class="profile-view-field">{{ user.email }}</span>
-                                <div class="profile-edit-field">
-                                    <input type="email" id="email" name="email" value="{{ user.email }}">
+                                <div class="form-field">
+                                    <label for="email" class="field-label">
+                                        <span class="material-icons">email</span>
+                                        Email Address
+                                    </label>
+                                    <span data-value="{{ user.email }}" class="profile-view-field">{{ user.email
+                                        }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="email" id="email" name="email" value="{{ user.email }}">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="contact_number" class="field-label">
-                                    <span class="material-icons">phone</span>
-                                    Contact Number
-                                </label>
-                                <span data-value="{{ user.contact_number|default:'' }}" class="profile-view-field">{{ user.contact_number|default:'Not set' }}</span>
-                                <div class="profile-edit-field contact-input-container">
-                                    <span class="contact-prefix">+63</span>
-                                    <input type="tel" id="contact_number" name="contact_number" value="{{ user.contact_number|default:'' }}" maxlength="10" pattern="[0-9]{10}">
+                                <div class="form-field">
+                                    <label for="contact_number" class="field-label">
+                                        <span class="material-icons">phone</span>
+                                        Contact Number
+                                    </label>
+                                    <span data-value="{{ user.contact_number|default:'' }}"
+                                        class="profile-view-field">{{ user.contact_number|default:'Not set' }}</span>
+                                    <div class="profile-edit-field contact-input-container">
+                                        <span class="contact-prefix">+63</span>
+                                        <input type="tel" id="contact_number" name="contact_number"
+                                            value="{{ user.contact_number|default:'' }}" maxlength="10"
+                                            pattern="[0-9]{10}">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="birthdate" class="field-label">
-                                    <span class="material-icons">cake</span>
-                                    Birthday
-                                </label>
-                                <span data-value="{{ user.birthdate|default:'' }}" class="profile-view-field">{{ user.birthdate|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <input type="date" id="birthdate" name="birthdate" value="{{ user.birthdate|default:'' }}">
+                                <div class="form-field">
+                                    <label for="birthdate" class="field-label">
+                                        <span class="material-icons">cake</span>
+                                        Birthday
+                                    </label>
+                                    <span data-value="{{ user.birthdate|default:'' }}" class="profile-view-field">{{
+                                        user.birthdate|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="date" id="birthdate" name="birthdate"
+                                            value="{{ user.birthdate|default:'' }}">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="age" class="field-label">
-                                    <span class="material-icons">schedule</span>
-                                    Age
-                                </label>
-                                <span data-value="{{ user.age|default:'' }}" class="profile-view-field">{{ user.age|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <input type="number" id="age" name="age" value="{{ user.age|default:'' }}" min="0" max="120">
+                                <div class="form-field">
+                                    <label for="age" class="field-label">
+                                        <span class="material-icons">schedule</span>
+                                        Age
+                                    </label>
+                                    <span data-value="{{ user.age|default:'' }}" class="profile-view-field">{{
+                                        user.age|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="number" id="age" name="age" value="{{ user.age|default:'' }}"
+                                            min="0" max="120">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="gender" class="field-label">
-                                    <span class="material-icons">wc</span>
-                                    Gender
-                                </label>
-                                <span data-value="{{ user.gender|default:'' }}" class="profile-view-field">{{ user.gender|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <select id="gender" name="gender">
-                                        <option value="" {% if not user.gender %}selected{% endif %}>Select Gender</option>
-                                        <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
-                                        <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
-                                        <option value="Prefer not to say" {% if user.gender == 'Prefer not to say' %}selected{% endif %}>Prefer not to say</option>
-                                    </select>
+                                <div class="form-field">
+                                    <label for="gender" class="field-label">
+                                        <span class="material-icons">wc</span>
+                                        Gender
+                                    </label>
+                                    <span data-value="{{ user.gender|default:'' }}" class="profile-view-field">{{
+                                        user.gender|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <select id="gender" name="gender">
+                                            <option value="" {% if not user.gender %}selected{% endif %}>Select Gender</option>
+
+                                            <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
+
+                                            <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
+
+                                            <option value="Prefer not to say"
+                                                    {% if user.gender == 'Prefer not to say' %}selected{% endif %}>
+                                                Prefer not to say
+                                            </option>
+
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="marital_status" class="field-label">
-                                    <span class="material-icons">favorite</span>
-                                    Marital Status
-                                </label>
-                                <span data-value="{{ user.marital_status|default:'' }}" class="profile-view-field">{{ user.marital_status|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <select id="marital_status" name="marital_status">
-                                        <option value="" {% if not user.marital_status %}selected{% endif %}>Select Status</option>
-                                        <option value="Single" {% if user.marital_status == 'Single' %}selected{% endif %}>Single</option>
-                                        <option value="Married" {% if user.marital_status == 'Married' %}selected{% endif %}>Married</option>
-                                        <option value="Widowed" {% if user.marital_status == 'Widowed' %}selected{% endif %}>Widowed</option>
-                                        <option value="Separated" {% if user.marital_status == 'Separated' %}selected{% endif %}>Separated</option>
-                                    </select>
+                                <div class="form-field">
+                                    <label for="marital_status" class="field-label">
+                                        <span class="material-icons">favorite</span>
+                                        Marital Status
+                                    </label>
+                                    <span data-value="{{ user.marital_status|default:'' }}"
+                                        class="profile-view-field">{{ user.marital_status|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <select id="marital_status" name="marital_status">
+                                            <option value="" {% if not user.marital_status %}selected{% endif %}>Select Status</option>
+                                            <option value="Single" {% if user.marital_status == 'Single' %}selected{% endif %}>Single</option>
+                                            <option value="Married" {% if user.marital_status == 'Married' %}selected{% endif %}>Married</option>
+                                            <option value="Widowed" {% if user.marital_status == 'Widowed' %}selected{% endif %}>Widowed</option>
+                                            <option value="Separated" {% if user.marital_status == 'Separated' %}selected{% endif %}>Separated</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="form-field">
-                                <label for="religion" class="field-label">
-                                    <span class="material-icons">church</span>
-                                    Religion
-                                </label>
-                                <span data-value="{{ user.religion|default:'' }}" class="profile-view-field">{{ user.religion|default:'Not set' }}</span>
-                                <div class="profile-edit-field">
-                                    <input type="text" id="religion" name="religion" value="{{ user.religion|default:'' }}" list="religion-list">
-                                    <datalist id="religion-list">
-                                        <option value="Roman Catholic">
-                                        <option value="Islam">
-                                        <option value="Iglesia ni Cristo">
-                                        <option value="Philippine Independent Church">
-                                        <option value="Seventh-day Adventist">
-                                        <option value="Jehovah's Witnesses">
-                                        <option value="Born Again Christian">
-                                        <option value="Protestant">
-                                        <option value="Buddhist">
-                                        <option value="Hindu">
-                                        <option value="Atheist">
-                                        <option value="Agnostic">
-                                        <option value="Other">
-                                    </datalist>
+                                <div class="form-field">
+                                    <label for="religion" class="field-label">
+                                        <span class="material-icons">church</span>
+                                        Religion
+                                    </label>
+                                    <span data-value="{{ user.religion|default:'' }}" class="profile-view-field">{{
+                                        user.religion|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="text" id="religion" name="religion"
+                                            value="{{ user.religion|default:'' }}" list="religion-list">
+                                        <datalist id="religion-list">
+                                            <option value="Roman Catholic">
+                                            <option value="Islam">
+                                            <option value="Iglesia ni Cristo">
+                                            <option value="Philippine Independent Church">
+                                            <option value="Seventh-day Adventist">
+                                            <option value="Jehovah's Witnesses">
+                                            <option value="Born Again Christian">
+                                            <option value="Protestant">
+                                            <option value="Buddhist">
+                                            <option value="Hindu">
+                                            <option value="Atheist">
+                                            <option value="Agnostic">
+                                            <option value="Other">
+                                        </datalist>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                   <!-- Address Information Section -->
-                   <div class="form-section">
-                       <h2 class="section-title">
-                           <span class="material-icons">location_on</span>
-                           Address Information
-                       </h2>
-                       <div class="form-grid">
-                           <div class="form-field">
-                               <label for="birthplace" class="field-label">
-                                   <span class="material-icons">location_on</span>
-                                   Birthplace
-                               </label>
-                               <span data-value="{{ user.birthplace|default:'' }}" class="profile-view-field">{{ user.birthplace|default:'Not set' }}</span>
-                               <div class="profile-edit-field">
-                                   <input type="text" id="birthplace" name="birthplace" value="{{ user.birthplace|default:'' }}">
-                               </div>
-                           </div>
-                           <div class="form-field">
-                               <label for="city" class="field-label">
-                                   <span class="material-icons">location_city</span>
-                                   City
-                               </label>
-                               <span data-value="{{ user.city|default:'' }}" class="profile-view-field">{{ user.city|default:'Not set' }}</span>
-                               <div class="profile-edit-field">
-                                   <select id="city" name="city">
-                                       <option value="">Select City</option>
-                                       <option value="Cebu City" {% if user.city == 'Cebu City' %}selected{% endif %}>Cebu City</option>
-                                       <option value="Mandaue City" {% if user.city == 'Mandaue City' %}selected{% endif %}>Mandaue City</option>
-                                       <option value="Lapu-Lapu City" {% if user.city == 'Lapu-Lapu City' %}selected{% endif %}>Lapu-Lapu City</option>
-                                       <option value="Talisay City" {% if user.city == 'Talisay City' %}selected{% endif %}>Talisay City</option>
-                                       <option value="Consolacion" {% if user.city == 'Consolacion' %}selected{% endif %}>Consolacion</option>
-                                       <option value="Cordova" {% if user.city == 'Cordova' %}selected{% endif %}>Cordova</option>
-                                       <option value="Compostela" {% if user.city == 'Compostela' %}selected{% endif %}>Compostela</option>
-                                       <option value="Daanbantayan" {% if user.city == 'Daanbantayan' %}selected{% endif %}>Daanbantayan</option>
-                                       <option value="Other">Other</option>
-                                   </select>
-                               </div>
-                           </div>
-                           <div class="form-field">
-                               <label for="purok" class="field-label">
-                                   <span class="material-icons">home</span>
-                                   Barangay
-                               </label>
-                               <span data-value="{{ user.purok|default:'' }}" class="profile-view-field">{{ user.purok|default:'Not set' }}</span>
-                               <div class="profile-edit-field">
-                                   <select id="purok" name="purok" disabled>
-                                       <option value="">Select Barangay (Choose city first)</option>
-                                   </select>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
+                        <div class="form-section">
+                            <h2 class="section-title">
+                                <span class="material-icons">location_on</span>
+                                Address Information
+                            </h2>
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="birthplace" class="field-label">
+                                        <span class="material-icons">location_on</span>
+                                        Birthplace
+                                    </label>
+                                    <span data-value="{{ user.birthplace|default:'' }}" class="profile-view-field">{{
+                                        user.birthplace|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <input type="text" id="birthplace" name="birthplace"
+                                            value="{{ user.birthplace|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="form-field">
+                                    <label for="city" class="field-label">
+                                        <span class="material-icons">location_city</span>
+                                        City
+                                    </label>
+                                    <!-- FIXED: Use data-value, not data-field -->
+                                    <span data-value="{{ user.city|default:'' }}" class="profile-view-field">{{
+                                        user.city|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <select id="city" name="city">
+                                            <option value="">Select City</option>
+                                            <option value="Cebu City" {% if user.city == 'Cebu City' %}selected{% endif %}>Cebu City</option>
+                                            <option value="Mandaue City" {% if user.city == 'Mandaue City' %}selected{% endif %}>Mandaue City</option>
+                                            <option value="Lapu-Lapu City" {% if user.city == 'Lapu-Lapu City' %}selected{% endif %}>Lapu-Lapu City</option>
+                                            <option value="Talisay City" {% if user.city == 'Talisay City' %}selected{% endif %}>Talisay City</option>
+                                            <option value="Consolacion" {% if user.city == 'Consolacion' %}selected{% endif %}>Consolacion</option>
+                                            <option value="Cordova" {% if user.city == 'Cordova' %}selected{% endif %}>Cordova</option>
+                                            <option value="Other" {% if user.city == 'Other' or not user.city %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                   <!-- Form Actions -->
-                   <div class="form-actions">
-                       <button type="button" id="edit-button" class="btn btn-primary">
-                           <span class="material-icons" style="font-size: 18px;">edit</span>
-                           Edit Profile
-                       </button>
-                       <button type="button" id="cancel-button" class="btn btn-secondary">
-                           <span class="material-icons" style="font-size: 18px;">close</span>
-                           Cancel
-                       </button>
-                       <button type="submit" id="save-button" class="btn btn-primary">
-                           <span class="material-icons" style="font-size: 18px;">save</span>
-                           Save Changes
-                       </button>
-                   </div>
+                                <div class="form-field">
+                                    <label for="purok" class="field-label">
+                                        <span class="material-icons">home</span>
+                                        Barangay (Purok/Zone/Sitio)
+                                    </label>
+                                    <!-- FIXED: data-value attribute -->
+                                    <span data-value="{{ user.purok|default:'' }}" class="profile-view-field">{{
+                                        user.purok|default:'Not set' }}</span>
+                                    <div class="profile-edit-field">
+                                        <select id="purok" name="purok">
+                                            <option value="">Select Barangay first</option>
+                                            <!-- Filled by JS -->
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="edit-button" class="btn btn-primary">
+                                <span class="material-icons" style="font-size: 18px;">edit</span>
+                                Edit Profile
+                            </button>
+                            <button type="button" id="cancel-button" class="btn btn-secondary" style="display:none;">
+                                <span class="material-icons" style="font-size: 18px;">close</span>
+                                Cancel
+                            </button>
+                            <button type="submit" id="save-button" class="btn btn-primary" style="display:none;">
+                                <span class="material-icons" style="font-size: 18px;">save</span>
+                                Save Changes
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
-    <div id="toast" class="toast" style="display: none;">
-        <span class="material-icons" style="font-size: 20px; margin-right: 8px;">check_circle</span>
-        Profile saved successfully!
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // 1. DATA: Cebu Barangay List
+            const cebuBarangays = {
+                "Cebu City": ["Adlaon", "Apas", "Babag", "Bacayan", "Banilad", "Basak Pardo", "Basak San Nicolas", "Bonbon", "Budlaan", "Buhisan", "Bulacao", "Busay", "Calamba", "Cambinocot", "Capitol Site", "Carreta", "Cogon Pardo", "Cogon Ramos", "Day-as", "Duljo Fatima", "Ermita", "Guadalupe", "Guba", "Hipodromo", "Inayawan", "Kalubihan", "Kalunasan", "Kamagayan", "Kamputhaw", "Kasambagan", "Kinasang-an Pardo", "Labangon", "Lahug", "Lorega San Miguel", "Lusaran", "Luz", "Mabini", "Mambaling", "Pahina Central", "Pahina San Nicolas", "Pamutan", "Pari-an", "Paril", "Pasil", "Pit-os", "Poblacion Pardo", "Pulangbato", "Pung-ol Sibugay", "Punta Princesa", "Quiot", "Sambag I", "Sambag II", "San Antonio", "San Jose", "San Nicolas Proper", "San Roque", "Santa Cruz", "Santo Niño", "Sapangdaku", "Sawang Calero", "Sinsin", "Sirao", "Suba", "Sudlon I", "Sudlon II", "T. Padilla", "Tabunan", "Tagbao", "Talamban", "Taptap", "Tejero", "Tinago", "Tisa", "Toong", "Zapatera"],
+                "Mandaue City": ["Alang-alang", "Bakilid", "Banilad", "Basak", "Cabancalan", "Cambaro", "Canduman", "Casanting", "Centro", "Cubacub", "Guizo", "Ibabao-Estancia", "Jagobiao", "Labogon", "Looc", "Maguikay", "Mantuyong", "Opao", "Paknaan", "Pagsabungan", "Subangdaku", "Tabok", "Tawason", "Tingub", "Tipolo", "Umapad"],
+                "Lapu-Lapu City": ["Agus", "Babag", "Bankal", "Baring", "Basak", "Buaya", "Calawisan", "Canjulao", "Caw-oy", "Caubian", "Caohagan", "Gun-ob", "Ibo", "Looc", "Mactan", "Maribago", "Marigondon", "Pajac", "Pajo", "Pangan-an", "Poblacion", "Punta Engaño", "Pusok", "Sabang", "San Vicente", "Santa Rosa", "Subabasbas", "Talima", "Tingo", "Tungasan"],
+                "Talisay City": ["Biasong", "Bulacao", "Cadulawan", "Camp IV", "Cansojong", "Dumlog", "Jaclupan", "Lagtang", "Lawaan I", "Lawaan II", "Linao", "Maghaway", "Manipis", "Mohon", "Poblacion", "Pooc", "San Isidro", "San Roque", "Tabunok", "Tangke", "Tapul", "Tubod"],
+                "Consolacion": ["Cabangahan", "Cansaga", "Casili", "Danglag", "Garing", "Jugan", "Lamac", "Lanipga", "Nangka", "Panas", "Panoypoy", "Pitogo", "Poblacion Occidental", "Poblacion Oriental", "Polog", "Pulpogan", "Sacsac", "Tayud", "Tolo-tolo", "Tugbongan"],
+                "Cordova": ["Alegria", "Bangbang", "Buagsong", "Catarman", "Cogon", "Dapitan", "Day-as", "Gabi", "Gilutongan", "Ibabao", "Pilipog", "Poblacion", "San Miguel"],
+                "Other": ["Other"]
+            };
+
+            // 2. REFERENCES
+            const editBtn = document.getElementById('edit-button');
+            const saveBtn = document.getElementById('save-button');
+            const cancelBtn = document.getElementById('cancel-button');
+            const form = document.getElementById('profile-form');
+
+            const viewFields = document.querySelectorAll('.profile-view-field');
+            const editFields = document.querySelectorAll('.profile-edit-field');
+
+            const citySelect = document.getElementById('city');
+            const purokSelect = document.getElementById('purok');
+            const avatarUpload = document.getElementById('avatar-upload');
+            const mainAvatar = document.getElementById('main-avatar');
+
+            // 3. LOGIC: Populate Barangays
+            function populateBarangays(selectedCity, selectedPurok = null) {
+                purokSelect.innerHTML = '<option value="">Select Barangay</option>';
+
+                if (selectedCity && cebuBarangays[selectedCity]) {
+                    cebuBarangays[selectedCity].forEach(brgy => {
+                        const option = document.createElement('option');
+                        option.value = brgy;
+                        option.textContent = brgy;
+                        if (selectedPurok && brgy === selectedPurok) {
+                            option.selected = true;
+                        }
+                        purokSelect.appendChild(option);
+                    });
+                    purokSelect.disabled = false;
+                } else {
+                    const option = document.createElement('option');
+                    option.value = "Other";
+                    option.textContent = "Other/Not Listed";
+                    purokSelect.appendChild(option);
+                    purokSelect.disabled = selectedCity ? false : true;
+                }
+            }
+
+            // 4. INITIALIZATION: Restore saved values
+            const currentCity = document.querySelector('[data-field="city"]')?.dataset.value;
+            const currentPurok = document.querySelector('[data-field="purok"]')?.dataset.value;
+
+            if (currentCity && citySelect) {
+                citySelect.value = currentCity;
+                populateBarangays(currentCity, currentPurok);
+                if (currentPurok) purokSelect.value = currentPurok;
+            }
+
+            if (citySelect) {
+                citySelect.addEventListener('change', function () {
+                    populateBarangays(this.value);
+                });
+            }
+
+            // 5. LOGIC: Toggle Edit Mode
+            function toggleEditMode(isEditing) {
+                if (isEditing) {
+                    viewFields.forEach(el => el.style.display = 'none');
+                    editFields.forEach(el => el.style.display = 'block');
+
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-flex';
+                    cancelBtn.style.display = 'inline-flex';
+
+                    if (citySelect && citySelect.value) purokSelect.disabled = false;
+                } else {
+                    viewFields.forEach(el => el.style.display = 'inline-block');
+                    editFields.forEach(el => el.style.display = 'none');
+
+                    editBtn.style.display = 'inline-flex';
+                    saveBtn.style.display = 'none';
+                    cancelBtn.style.display = 'none';
+                }
+            }
+
+            toggleEditMode(false);
+
+            if (editBtn) editBtn.addEventListener('click', () => toggleEditMode(true));
+            if (cancelBtn) cancelBtn.addEventListener('click', () => location.reload());
+
+            // 6. Image Preview
+            if (avatarUpload && mainAvatar) {
+                avatarUpload.addEventListener('change', function (e) {
+                    if (this.files && this.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) { mainAvatar.src = e.target.result; }
+                        reader.readAsDataURL(this.files[0]);
+                        toggleEditMode(true);
+                    }
+                });
+            }
+
+            // 7. CRITICAL: ENABLE FIELDS ON SUBMIT
+            if (form) {
+                form.addEventListener('submit', function () {
+                    // FORCE ENABLE or data won't send
+                    if (purokSelect) purokSelect.disabled = false;
+                    if (citySelect) citySelect.disabled = false;
+                });
+            }
+
+            // Flash Message Fade Out
             const messageElements = document.querySelectorAll('.fixed.top-5.right-5');
             messageElements.forEach(msg => {
                 setTimeout(() => {
-                    msg.classList.remove('opacity-100', 'translate-y-0');
-                    msg.classList.add('opacity-0', 'translate-y-10');
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.remove(), 500);
                 }, 3000);
             });
-
-            const avatar = document.querySelector('#sidebar-avatar, #main-avatar');
-            const displayName = "{{ user.display_name }}";
-            if (displayName && avatar && !avatar.src.includes('placehold.co') && !avatar.src.includes('cloudinary')) {
-                const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-                if (!avatar.src || avatar.src.includes('US')) {
-                    avatar.src = `https://placehold.co/100x100/E2E8F0/4A5568?text=${initials}`;
-                }
-            }
         });
     </script>
 </body>
+
 </html>

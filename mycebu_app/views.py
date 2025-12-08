@@ -606,94 +606,66 @@ def profile_view(request):
 
     if request.method == "POST":
         try:
-            # --- 1. Capture Fields ---
+            # Get values safely
             first_name = request.POST.get("first_name", "").strip()
             last_name = request.POST.get("last_name", "").strip()
             email = request.POST.get("email", "").strip()
-            middle_name = request.POST.get("middle_name", "").strip()
-            
-            # Handle numeric/date fields: Convert empty strings to None
-            age_raw = request.POST.get("age")
-            age = int(age_raw) if age_raw and age_raw.isdigit() else None
-            
-            contact_number = request.POST.get("contact_number", "").strip()
-            
-            birthdate_raw = request.POST.get("birthdate")
-            # FIXED: Parse birthdate to date object for DateField
-            birthdate = datetime.strptime(birthdate_raw, '%Y-%m-%d').date() if birthdate_raw else None
-            
-            gender = request.POST.get("gender")
-            marital_status = request.POST.get("marital_status")
-            religion = request.POST.get("religion", "").strip()
-            birthplace = request.POST.get("birthplace", "").strip()
-            
-            # CRITICAL FIX: Grab purok. If the select was disabled in HTML, this might be missing.
-            purok = request.POST.get("purok", "").strip()
+
+            # THESE WERE MISSING OR EMPTY BECAUSE OF DISABLED FIELD
             city = request.POST.get("city", "").strip()
+            purok = request.POST.get("purok", "").strip()
 
-            # --- 2. Validation ---
-            errors = {}
-            if not first_name or not last_name:
-                errors["name"] = "First name and last name are required."
-            
-            if email and not re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
-                errors["email"] = "Invalid email format."
-            
-            if errors:
-                messages.error(request, "Please correct the errors.")
-                return render(request, "mycebu_app/pages/profile.html", {"user": user_data, "errors": errors})
+            # Update Django Auth User
+            auth_user = request.user
+            auth_user.first_name = first_name
+            auth_user.last_name = last_name
+            auth_user.email = email
+            auth_user.save()
 
-            # --- 3. Update Django Auth User (Login System) ---
-            auth_u = request.user
-            old_email = auth_u.email
-            
-            auth_u.first_name = first_name
-            auth_u.last_name = last_name
-            auth_u.email = email 
-            auth_u.save()
+            # Update Custom DbUser
+            db_user = DbUser.objects.filter(email=auth_user.email).first()
+            if db_user:
+                db_user.first_name = first_name
+                db_user.last_name = last_name
+                db_user.email = email
+                db_user.city = city or None
+                db_user.purok = purok or None
 
-            # --- 4. Update Custom 'users' Table (Profile System) ---
-            # Try to find by old email first (in case they changed it), then by new email
-            db_user = DbUser.objects.filter(email=old_email).first()
-            if not db_user:
-                db_user = DbUser.objects.filter(email=email).first()
-            
-            # FIXED: Create if doesn't exist (let default UUID generate id)
-            if not db_user:
-                db_user = DbUser(email=email, created_at=timezone.now())
+                db_user.contact_number = request.POST.get("contact_number", "").strip()
+                db_user.gender = request.POST.get("gender")
+                db_user.marital_status = request.POST.get("marital_status")
+                db_user.religion = request.POST.get("religion", "").strip()
+                db_user.birthplace = request.POST.get("birthplace", "").strip()
 
-            # Update Fields
-            db_user.email = email
-            db_user.first_name = first_name
-            db_user.last_name = last_name
-            db_user.middle_name = middle_name
-            db_user.age = age
-            db_user.contact_number = contact_number
-            db_user.birthdate = birthdate
-            db_user.gender = gender
-            db_user.marital_status = marital_status
-            db_user.religion = religion
-            db_user.birthplace = birthplace
-            db_user.purok = purok
-            db_user.city = city
+                age = request.POST.get("age")
+                if age and age.isdigit():
+                    db_user.age = int(age)
+                else:
+                    db_user.age = None
 
-            # --- 5. Avatar Upload ---
-            if "avatar" in request.FILES:
-                avatar_file = request.FILES["avatar"]
-                # Ensure upload_to_cloudinary is imported or defined
-                uploaded_url = upload_to_cloudinary(avatar_file, folder=f"profiles/{auth_u.id}")
-                if uploaded_url:
-                    db_user.avatar_url = uploaded_url
+                bday = request.POST.get("birthdate")
+                if bday:
+                    try:
+                        db_user.birthdate = datetime.strptime(bday, '%Y-%m-%d').date()
+                    except:
+                        pass
 
-            db_user.save()
-            messages.success(request, "Profile updated successfully.")
-            
-            # Reload user data to show updates immediately
+                # Avatar upload
+                if "avatar" in request.FILES:
+                    file = request.FILES["avatar"]
+                    url = upload_to_cloudinary(file, folder=f"profiles/{auth_user.id}")
+                    if url:
+                        db_user.avatar_url = url
+
+                db_user.save()
+
+            messages.success(request, "Profile updated successfully!")
+            # Force refresh user data
             user_data = get_authed_user(request)
 
         except Exception as e:
-            logger.error(f"profile_view: Update error: {str(e)}")
-            messages.error(request, f"An error occurred: {str(e)}")
+            logger.error(f"Profile update failed: {e}")
+            messages.error(request, f"Update failed: {e}")
 
     return render(request, "mycebu_app/pages/profile.html", {"user": user_data})
 
