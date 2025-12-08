@@ -608,6 +608,7 @@ def profile_view(request):
         try:
             # Get values safely
             first_name = request.POST.get("first_name", "").strip()
+            middle_name = request.POST.get("middle_name", "").strip()
             last_name = request.POST.get("last_name", "").strip()
             email = request.POST.get("email", "").strip()
 
@@ -615,17 +616,20 @@ def profile_view(request):
             city = request.POST.get("city", "").strip()
             purok = request.POST.get("purok", "").strip()
 
-            # Update Django Auth User
+            # Get current auth user and db user
             auth_user = request.user
+            db_user = DbUser.objects.filter(email=auth_user.email).first()
+
+            # Update Django Auth User
             auth_user.first_name = first_name
             auth_user.last_name = last_name
             auth_user.email = email
             auth_user.save()
 
             # Update Custom DbUser
-            db_user = DbUser.objects.filter(email=auth_user.email).first()
             if db_user:
                 db_user.first_name = first_name
+                db_user.middle_name = middle_name
                 db_user.last_name = last_name
                 db_user.email = email
                 db_user.city = city or None
