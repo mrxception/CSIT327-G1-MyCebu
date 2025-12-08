@@ -16,430 +16,313 @@
 
   <section class="detail-card" style="margin:48px auto; max-width:800px; padding:48px;">
     
-    <!-- Document Status Alert -->
-    {% if app.document_status == 'submitted' %}
-    <div class="svc-block" style="margin-bottom:24px; background:#e0f2fe; padding:16px; border-radius:8px; border-left:4px solid #0369a1;">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <svg style="width:20px; height:20px; color:#0369a1;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div>
-          <p style="margin:0; font-weight:600; color:#0369a1;">Document Submitted</p>
-          <p style="margin:4px 0 0 0; font-size:0.875rem; color:#0c4a6e;">Your document has been uploaded and is awaiting verification by our team.</p>
-        </div>
-      </div>
-    </div>
-    {% elif app.document_status == 'verified' %}
-    <div class="svc-block" style="margin-bottom:24px; background:#d1fae5; padding:16px; border-radius:8px; border-left:4px solid #059669;">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <svg style="width:20px; height:20px; color:#059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-        <div>
-          <p style="margin:0; font-weight:600; color:#059669;">Document Verified ✓</p>
-          <p style="margin:4px 0 0 0; font-size:0.875rem; color:#065f46;">Your document has been verified and approved!</p>
-        </div>
-      </div>
-    </div>
-    {% elif app.document_status == 'rejected' %}
-    <div class="svc-block" style="margin-bottom:24px; background:#fee2e2; padding:16px; border-radius:8px; border-left:4px solid #dc2626;">
-      <div style="display:flex; align-items:center; gap:12px;">
-        <svg style="width:20px; height:20px; color:#dc2626;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-        <div>
-          <p style="margin:0; font-weight:600; color:#dc2626;">Document Rejected</p>
-          <p style="margin:4px 0 0 0; font-size:0.875rem; color:#991b1b;">{{ app.admin_notes|default:"Please check the requirements and resubmit." }}</p>
-        </div>
-      </div>
+    <!-- SUCCESS: Document Submitted or Verified -->
+    {% if app.document_status == "pending" or app.document_status == "verified" %}
+    <div class="svc-block" style="margin-bottom:24px; background:#d1fae5; padding:20px; border-radius:12px; border-left:5px solid #059669; text-align:center;">
+      <svg style="width:32px; height:32px; color:#059669; margin-bottom:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 style="margin:0 0 8px; font-size:1.3rem; color:#065f46;">
+        {% if app.document_status == "verified" %}
+          Document Verified - Approved!
+        {% else %}
+          Document Successfully Submitted!
+        {% endif %}
+      </h3>
+      <p style="margin:0; color:#065f46;">
+        {% if app.document_status == "verified" %}
+          Your application has been approved. You will be notified soon.
+        {% else %}
+          Your document is under review. We'll notify you once verified.
+        {% endif %}
+      </p>
     </div>
     {% endif %}
 
-    <div class="svc-block">
-      <h2 class="h3" style="margin-bottom:16px;">Application Progress</h2>
-      <div style="margin-bottom:24px;">
-        <p class="muted" style="font-size:0.875rem; margin-bottom:8px;">Overall Progress</p>
-        <progress value="{{ app.progress }}" max="100" style="width:100%; height:8px; border-radius:4px;"></progress>
-        <p style="margin:8px 0 0 0; font-weight:600; color:#0d9488;">{{ app.progress }}% Complete</p>
+    <!-- REJECTED -->
+    {% if app.document_status == "rejected" %}
+    %}
+    <div class="svc-block" style="margin-bottom:24px; background:#fee2e2; padding:20px; border-radius:12px; border-left:5px solid #dc2626;">
+      <svg style="width:32px; height:32px; color:#dc2626; margin-bottom:12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <h3 style="margin:0 0 8px; color:#991b1b;">Document Rejected</h3>
+      <p style="margin:0; color:#991b1b;">{{ app.admin_notes|default:"Please check requirements and resubmit." }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Progress Bar -->
+    <div class="svc-block" style="margin-bottom:32px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span style="font-weight:600;">Progress</span>
+        <span style="font-weight:700; color:#0d9488;">{{ app.progress }}%</span>
+      </div>
+      <div style="width:100%; height:12px; background:#e5e7eb; border-radius:6px; overflow:hidden;">
+        <div style="height:100%; width:{{ app.progress }}%; background:#0d9488; transition:width 0.6s ease;"></div>
       </div>
     </div>
 
-    <!-- Document Upload Section (only show on last step) -->
-    {% if app.step_index >= service.steps|length|add:"-1" and app.document_status != 'verified' %}
-    <div class="svc-block" style="margin-top:32px; background:#f8fafc; padding:24px; border-radius:8px; border:2px dashed #cbd5e1;">
-      <h3 style="margin:0 0 16px 0; font-size:1.25rem; color:#1e293b;">Upload Required Document</h3>
-      <p style="margin:0 0 20px 0; color:#475569; font-size:0.9375rem;">
-        Please upload the required document to complete your application. Supported formats: PDF, JPG, PNG (Max 10MB)
-      </p>
-      
-      <div id="upload-area" style="border:2px dashed #94a3b8; border-radius:8px; padding:32px; text-align:center; cursor:pointer; background:white; transition:all 0.2s;">
+    <!-- UPLOAD BOX - Only show if NOT submitted or verified -->
+    {% if app.document_status != "pending" and app.document_status != "verified" and app.step_index >= service.steps|length|add:"-1" %}
+    <div class="svc-block" style="background:#f8fafc; padding:32px; border:2px dashed #94a3b8; border-radius:12px; text-align:center;">
+      <h3 style="margin:0 0 16px; color:#1e293b;">Upload Final Document</h3>
+      <p style="color:#64748b; margin-bottom:24px;">PDF, JPG, PNG, DOC/DOCX • Max 15MB</p>
+
+      <div id="upload-area" style="border:2px solid #cbd5e1; border-radius:12px; padding:40px; background:white; cursor:pointer; transition:all 0.3s;">
         <div id="upload-placeholder">
-          <svg style="width:48px; height:48px; color:#94a3b8; margin:0 auto 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          <svg style="width:56px; height:56px; color:#94a3b8; margin-bottom:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5.5 5.5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
           </svg>
-          <p style="margin:0; font-weight:600; color:#475569;">Click to upload document</p>
-          <p style="margin:8px 0 0 0; font-size:0.875rem; color:#64748b;">or drag and drop</p>
+          <p style="margin:0; font-weight:600; color:#475569;">Click to upload or drag & drop</p>
         </div>
         <div id="upload-preview" style="display:none;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div style="width:48px; height:48px; background:#e2e8f0; border-radius:6px; display:flex; align-items:center; justify-content:center;">
-              <svg style="width:24px; height:24px; color:#475569;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-              </svg>
-            </div>
-            <div style="flex:1;">
-              <p id="file-name" style="margin:0; font-weight:600; color:#1e293b;"></p>
-              <p id="file-size" style="margin:4px 0 0 0; font-size:0.875rem; color:#64748b;"></p>
-            </div>
-            <button type="button" id="remove-file" style="color:#64748b; background:none; border:none; cursor:pointer; padding:4px;">
-              <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
+          <p id="file-name" style="font-weight:600; margin:12px 0;"></p>
+          <p id="file-size" style="color:#64748b; font-size:0.9rem;"></p>
+          <button type="button" id="remove-file" style="margin-top:12px; color:#dc2626; background:none; border:none; cursor:pointer;">Remove file</button>
         </div>
       </div>
-      
+
       <input type="file" id="document-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;">
-      
-      <div style="margin-top:20px;">
-        <button id="submit-document" style="background:#0d9488; color:#fff; border:none; padding:10px 24px; border-radius:8px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px;" disabled>
+
+      <div style="margin-top:24px;">
+        <button id="submit-document" disabled style="background:#0d9488; color:white; padding:12px 32px; border:none; border-radius:8px; font-weight:600; cursor:not-allowed; opacity:0.6;">
           <span id="submit-text">Submit Document</span>
-          <span id="submit-loader" style="display:none; width:16px; height:16px; border:2px solid #ffffff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span>
+          <span id="submit-loader" style="display:none;">Loading...</span>
         </button>
-        <p id="upload-error" style="margin:12px 0 0 0; color:#dc2626; font-size:0.875rem; display:none;"></p>
+        <p id="upload-error" style="color:#dc2626; margin-top:12px; display:none;"></p>
       </div>
     </div>
     {% endif %}
 
-    <div class="svc-block" style="margin-top:32px; background:#f3f4f6; padding:20px; border-radius:8px; border-left:4px solid #0d9488;">
-      <p class="muted" style="font-size:0.875rem; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Current Step</p>
-      
-      <h3 style="margin:0; font-size:1.25rem;">
-        Step {{ app.step_index|add:1 }}:
-        {% for step in service.steps %}
-            {% if forloop.counter0 == app.step_index %}
-                {{ step }}
-            {% endif %}
-        {% endfor %}
-      </h3>
-
-      {% if service.step_details %}
-        {% for detail in service.step_details %}
-          {% if forloop.counter0 == app.step_index %}
-            <div class="step-detail" style="margin-top:16px; background:#ffffff; padding:18px; border-radius:8px; border:1px solid #e6eef0; color:#374151; line-height:1.6;">
-              {{ detail|safe }}
+    <!-- Current Step -->
+    <div class="svc-block" style="margin-top:32px;">
+      <h3 style="margin-bottom:16px;">Current Step</h3>
+      <div style="background:white; padding:20px; border-radius:10px; border:1px solid #e2e8f0;">
+        <p style="margin:0 0 8px; font-weight:600; color:#0d9488;">
+          Step {{ app.step_index|add:1 }} of {{ service.steps|length }}
+        </p>
+        {% with step_index=app.step_index %}
+          <h4 style="margin:8px 0;">{{ service.steps|slice:"::"|slice:step_index|slice:":1"|join:"" }}</h4>
+          {% if service.step_details and service.step_details|slice:step_index|slice:":1" %}
+            <div style="margin-top:16px 0; padding:16px; background:#f0fdfa; border-radius:8px; border-left:4px solid #0d9488;">
+              {{ service.step_details|slice:step_index|slice:":1"|join:""|safe }}
             </div>
           {% endif %}
-        {% endfor %}
-      {% else %}
-        <div class="step-detail" style="margin-top:16px; color:#666;">
-            <p>Please proceed with this step. No specific instructions provided.</p>
-        </div>
-      {% endif %}
+        {% endwith %}
+      </div>
     </div>
 
+    <!-- Steps List -->
     <div class="svc-block" style="margin-top:32px;">
-      <h2 class="h3" style="margin-bottom:16px;">Application Steps</h2>
-      <ol class="list" style="margin-left:20px;">
+      <h3 style="margin-bottom:16px;">All Steps</h3>
+      <ol style="margin:0; padding-left:24px; background:white; border-radius:10px; border:1px solid #e2e8f0;">
         {% for step in service.steps %}
-          {% if forloop.counter0 == app.step_index %}
-            <li style="margin-bottom:12px; font-weight:600; color:#0d9488;">
-              <span>{{ step }}</span>
-              <span style="display:inline-block; margin-left:8px; padding:4px 12px; background:#d1fae5; color:#065f46; border-radius:4px; font-size:0.75rem; font-weight:500;">You are here</span>
-            </li>
-          {% elif forloop.counter0 < app.step_index %}
-            <li style="margin-bottom:12px; color:#374151;">
-              <span>{{ step }}</span>
-              <span style="display:inline-block; margin-left:8px; padding:4px 12px; background:#d1d5db; color:#374151; border-radius:4px; font-size:0.75rem; font-weight:500;">✓ Completed</span>
-            </li>
-          {% else %}
-            <li style="margin-bottom:12px;">
-              <span>{{ step }}</span>
-            </li>
-          {% endif %}
+          <li style="padding:12px 0; border-bottom:1px solid #f3f4f6; {% if forloop.counter0 == app.step_index %}font-weight:700; color:#0d9488;{% elif forloop.counter0 < app.step_index %}color:#6b7280;{% endif %}">
+            {{ step }}
+            {% if forloop.counter0 == app.step_index %}
+              <span style="float:right; background:#d1fae5; color:#065f46; padding:4px 12px; border-radius:20px; font-size:0.8rem;">Current</span>
+            {% elif forloop.counter0 < app.step_index %}
+              <span style="float:right; background:#e5e7eb; color:#374151; padding:4px 12px; border-radius:20px; font-size:0.8rem;">Completed</span>
+            {% endif %}
+          </li>
         {% endfor %}
       </ol>
     </div>
 
-    <div id="appData" 
-         data-step-index="{{ app.step_index }}" 
-         data-total-steps="{{ service.steps|length }}" 
+    <!-- Action Buttons -->
+    <div style="margin-top:48px; display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      {% if app.document_status != "pending" and app.document_status != "verified" %}
+        {% if app.step_index < service.steps|length|add:"-1" %}
+          <button id="nextStep" style="background:#0d9488; color:white; padding:12px 32px; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+            Next Step →
+          </button>
+        {% else %}
+          <button id="nextStep" style="background:#dc2626; color:white; padding:12px 32px; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+            Complete Application
+          </button>
+        {% endif %}
+      {% endif %}
+      <a href="{% url 'landing_tab' tab='dashboard' %}" style="background:#f1f5f9; color:#0f172a; padding:12px 32px; border-radius:8px; text-decoration:none; font-weight:600;">
+        Back to Dashboard
+      </a>
+    </div>
+
+    <!-- Hidden Data for JS -->
+    <div id="appData"
+         data-step-index="{{ app.step_index }}"
+         data-total-steps="{{ service.steps|length }}"
          data-app-id="{{ app.id }}"
          data-service-id="{{ service.service_id }}"
-         data-document-status="{{ app.document_status }}"
          data-update-url="{% url 'update_service_application' service=service.service_id app_id=app.id %}"
          data-upload-url="{% url 'upload_permit_document' service=service.service_id app_id=app.id %}"
          style="display:none;"></div>
-
-    <div style="margin-top:48px; display:flex; gap:12px; flex-wrap:wrap;">
-      {% if app.step_index < service.steps|length|add:"-1" or app.document_status == 'pending' %}
-      <button id="nextStep" style="min-width:160px; background:#0d9488; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">
-        <span id="nextStepText">
-          {% if app.step_index >= service.steps|length|add:"-1" %}
-            Complete Steps
-          {% else %}
-            Next Step
-          {% endif %}
-        </span>
-      </button>
-      {% endif %}
-      <button type="button" id="backDashboard" data-back-url="{% url 'landing_tab' tab='dashboard' %}" style="min-width:160px; background:#ffffff; color:#0f172a; border:1px solid #e6eef0; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">
-        Back to Dashboard
-      </button>
-    </div>
-
-    <div id="completeModal" aria-hidden="true" style="display:none; position:fixed; inset:0; z-index:10000; align-items:center; justify-content:center; background:rgba(0,0,0,0.45);">
-      <div role="dialog" aria-modal="true" style="width:100%; max-width:520px; margin:16px; background:#fff; border-radius:12px; padding:28px; text-align:center;">
-        <h3 style="margin:0 0 8px; font-size:1.25rem; font-weight:700;">Application Completed</h3>
-        <p style="margin:0 0 18px;">Your application was completed successfully.</p>
-        <button id="closeCompleteAlt" style="background:#fff; border:1px solid #e6eef0; padding:10px 14px; border-radius:8px; cursor:pointer;">Close & Dashboard</button>
-      </div>
-    </div>
-    
   </section>
 </section>
 
 <style>
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-#upload-area:hover {
-  border-color: #0d9488;
-  background: #f0fdfa;
-}
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  #submit-loader::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+  }
+  #upload-area:hover { border-color: #0d9488; background: #f0fdfa; }
 </style>
 
 <script>
-(function () {
-    const appDataEl = document.getElementById('appData');
-    const nextBtn = document.getElementById('nextStep');
-    const nextBtnText = document.getElementById('nextStepText');
-    const backBtn = document.getElementById('backDashboard');
-    const completeModal = document.getElementById('completeModal');
-    const closeCompleteAlt = document.getElementById('closeCompleteAlt');
-    const uploadArea = document.getElementById('upload-area');
-    const fileInput = document.getElementById('document-file');
-    const submitBtn = document.getElementById('submit-document');
-    const submitText = document.getElementById('submit-text');
-    const submitLoader = document.getElementById('submit-loader');
-    const uploadError = document.getElementById('upload-error');
-    
-    if (!appDataEl) return;
+(() => {
+  const dataEl = document.getElementById('appData');
+  if (!dataEl) return;
 
-    const currentIndex = parseInt(appDataEl.dataset.stepIndex || '0', 10);
-    const totalSteps = parseInt(appDataEl.dataset.totalSteps || '0', 10);
-    const updateUrl = appDataEl.dataset.updateUrl;
-    const uploadUrl = appDataEl.dataset.uploadUrl;
-    const appId = appDataEl.dataset.appId;
-    const serviceId = appDataEl.dataset.serviceId;
-    const documentStatus = appDataEl.dataset.documentStatus;
-    const dashboardUrl = "{% url 'landing_tab' tab='dashboard' %}";
+  const currentIndex = parseInt(dataEl.dataset.stepIndex);
+  const totalSteps = parseInt(dataEl.dataset.totalSteps);
+  const updateUrl = dataEl.dataset.updateUrl;
+  const uploadUrl = dataEl.dataset.uploadUrl;
 
-    let selectedFile = null;
+  const nextBtn = document.getElementById('nextStep');
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('document-file');
+  const submitBtn = document.getElementById('submit-document');
+  const submitText = document.getElementById('submit-text');
+  const submitLoader = document.getElementById('submit-loader');
+  const uploadError = document.getElementById('upload-error');
+  const uploadPreview = document.getElementById('upload-preview');
+  const fileNameEl = document.getElementById('file-name');
+  const fileSizeEl = document.getElementById('file-size');
 
-    // Document Upload Handling
-    if (uploadArea && fileInput && submitBtn) {
-        uploadArea.addEventListener('click', () => fileInput.click());
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#0d9488';
-            uploadArea.style.background = '#f0fdfa';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = '#94a3b8';
-            uploadArea.style.background = 'white';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#94a3b8';
-            uploadArea.style.background = 'white';
-            
-            if (e.dataTransfer.files.length) {
-                handleFileSelect(e.dataTransfer.files[0]);
-            }
-        });
-        
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFileSelect(e.target.files[0]);
-            }
-        });
-        
-        submitBtn.addEventListener('click', uploadDocument);
-    }
+  let selectedFile = null;
 
-    function handleFileSelect(file) {
-        // Check file size (10MB max)
-        if (file.size > 10 * 1024 * 1024) {
-            showUploadError('File size must be less than 10MB');
-            return;
+  // === UPLOAD LOGIC ===
+  if (uploadArea && fileInput && submitBtn) {
+    uploadArea.onclick = () => fileInput.click();
+
+    ['dragover', 'dragenter'].forEach(evt => {
+      uploadArea.addEventListener(evt, e => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#0d9488';
+        uploadArea.style.background = '#f0fdfa';
+      });
+    });
+
+    ['dragleave', 'dragend', 'drop'].forEach(evt => {
+      uploadArea.addEventListener(evt, e => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#cbd5e1';
+        uploadArea.style.background = 'white';
+      });
+    });
+
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.onchange = e => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    };
+
+    document.getElementById('remove-file')?.addEventListener('click', () => {
+      selectedFile = null;
+      fileInput.value = '';
+      document.getElementById('upload-placeholder').style.display = 'block';
+      uploadPreview.style.display = 'none';
+      submitBtn.disabled = true;
+    });
+
+    submitBtn.onclick = async () => {
+      if (!selectedFile) return;
+
+      const form = new FormData();
+      form.append('document', selectedFile);
+
+      submitBtn.disabled = true;
+      submitText.textContent = '';
+      submitLoader.style.display = 'inline-block';
+
+      try {
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+          body: form
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          alert('Document uploaded successfully!');
+          location.reload();
+        } else {
+          uploadError.textContent = json.error || 'Upload failed';
+          uploadError.style.display = 'block';
         }
-        
-        // Check file type
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-        if (!validTypes.includes(file.type)) {
-            showUploadError('Invalid file type. Please upload PDF, JPG, PNG, or DOC files.');
-            return;
-        }
-        
-        selectedFile = file;
-        
-        // Show preview
-        document.getElementById('upload-placeholder').style.display = 'none';
-        const preview = document.getElementById('upload-preview');
-        preview.style.display = 'block';
-        
-        document.getElementById('file-name').textContent = file.name;
-        document.getElementById('file-size').textContent = formatFileSize(file.size);
-        
-        // Enable submit button
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '1';
-        
-        // Clear any previous errors
-        uploadError.style.display = 'none';
-    }
-
-    function showUploadError(message) {
-        uploadError.textContent = message;
+      } catch (err) {
+        uploadError.textContent = 'Network error';
         uploadError.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitText.textContent = 'Submit Document';
+        submitLoader.style.display = 'none';
+      }
+    };
+  }
+
+  function handleFile(file) {
+    if (file.size > 15*1024*1024) {
+      uploadError.textContent = 'File too big (max 15MB)';
+      uploadError.style.display = 'block';
+      return;
+    }
+    const allowed = ['application/pdf','image/jpeg','image/jpg','image/png','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowed.includes(file.type)) {
+      uploadError.textContent = 'Invalid file type';
+      uploadError.style.display = 'block';
+      return;
     }
 
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+    selectedFile = file;
+    document.getElementById('upload-placeholder').style.display = 'none';
+    uploadPreview.style.display = 'block';
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor = 'pointer';
+    uploadError.style.display = 'none';
+  }
 
-    async function uploadDocument() {
-        if (!selectedFile) return;
-        
-        const formData = new FormData();
-        formData.append('document', selectedFile);
-        
-        submitBtn.disabled = true;
-        submitText.style.display = 'none';
-        submitLoader.style.display = 'block';
-        
-        try {
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // Show success message and reload
-                alert('Document uploaded successfully! It will be reviewed by our team.');
-                location.reload();
-            } else {
-                showUploadError(result.error || 'Upload failed. Please try again.');
-            }
-        } catch (error) {
-            showUploadError('Network error. Please check your connection.');
-        } finally {
-            submitBtn.disabled = false;
-            submitText.style.display = 'inline';
-            submitLoader.style.display = 'none';
+  // === NEXT / COMPLETE BUTTON ===
+  if (nextBtn) {
+    nextBtn.onclick = async () => {
+      const isLastStep = currentIndex >= totalSteps - 1;
+      const payload = isLastStep ? { mark_completed: true } : { step_index: currentIndex + 1 };
+
+      try {
+        const res = await fetch(updateUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.error || 'Failed');
         }
-    }
-
-    // Remove file button
-    const removeBtn = document.getElementById('remove-file');
-    if (removeBtn) {
-        removeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            selectedFile = null;
-            fileInput.value = '';
-            document.getElementById('upload-placeholder').style.display = 'block';
-            document.getElementById('upload-preview').style.display = 'none';
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.7';
-            uploadError.style.display = 'none';
-        });
-    }
-
-    // Next Step Logic
-    if (nextBtn) {
-        if (currentIndex >= totalSteps - 1 && documentStatus === 'pending') {
-            nextBtnText.textContent = 'Complete Steps';
-        }
-        
-        nextBtn.addEventListener('click', async function () {
-            const next = currentIndex + 1;
-            let payload = {};
-    
-            if (next >= totalSteps) {
-                payload = { step_index: currentIndex, mark_completed: true };
-            } else {
-                payload = { step_index: next };
-            }
-    
-            try {
-                const res = await fetch(updateUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: JSON.stringify(payload)
-                });
-    
-                const data = await res.json();
-    
-                if (data.success) {
-                    if (payload.mark_completed) {
-                        showModal();
-                    } else {
-                        location.reload();
-                    }
-                } else {
-                    alert(data.error || 'Failed to update application');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Network or server error');
-            }
-        });
-    }
-
-    if (backBtn) {
-        backBtn.addEventListener('click', () => {
-            const url = backBtn.dataset.backUrl;
-            if (url) window.location.href = url;
-        });
-    }
-
-    function showModal() {
-        if (!completeModal) return;
-        completeModal.style.display = "flex";
-        completeModal.setAttribute("aria-hidden", "false");
-    }
-
-    function hideModalAndRedirect() {
-        if (!completeModal) return;
-        completeModal.style.display = "none";
-        completeModal.setAttribute("aria-hidden", "true");
-        window.location.href = dashboardUrl;
-    }
-
-    if (closeCompleteAlt) closeCompleteAlt.addEventListener('click', hideModalAndRedirect);
-    if (completeModal) {
-        completeModal.addEventListener('click', (e) => {
-            if (e.target === completeModal) hideModalAndRedirect();
-        });
-    }
+      } catch (e) {
+        alert('Network error');
+      }
+    };
+  }
 })();
 </script>
 {% endblock %}
