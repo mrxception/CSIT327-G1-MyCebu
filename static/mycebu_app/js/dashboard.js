@@ -230,44 +230,6 @@
 
   // renderComplaintsList()
 
-  var form=$('#form-complaint'),success=$('#cmp-success'),btnNew=$('#cmp-new')
-  function required(v){return v&&String(v).trim().length>0}
-  form.addEventListener('submit',function(e){
-    e.preventDefault()
-    var data={
-      category:catSel.value,
-      subcategory:subSel.value,
-      subject:$('#cmp-subject').value,
-      location:$('#cmp-location').value,
-      description:$('#cmp-description').value,
-      name:$('#cmp-name')?$('#cmp-name').value:'',
-      email:$('#cmp-email')?$('#cmp-email').value:'',
-      phone:$('#cmp-phone')?$('#cmp-phone').value:''
-    }
-    if(!required(data.category)||!required(data.subcategory)||!required(data.subject)||!required(data.location)||!required(data.description))return alert('Please fill in all required fields.')
-    var year=(new Date()).getFullYear(),rnd=String(Math.floor(Math.random()*10000)).padStart(4,'0'),id='GOV-'+year+'-'+rnd
-    var now=new Date()
-    var comp={
-      id:id,
-      date:now.toISOString(),
-      status:'Submitted',
-      category:data.category,
-      subcategory:data.subcategory,
-      subject:data.subject,
-      location:data.location,
-      description:data.description,
-      anonymous:anon.checked,
-      name:anon.checked?'':data.name,
-      email:anon.checked?'':data.email,
-      phone:anon.checked?'':data.phone,
-      files:currentFiles.slice()
-    }
-    complaints.unshift(comp)
-    // renderComplaintsList()
-    success.style.display='grid'
-    form.style.display='none'
-  })
-
   btnNew.addEventListener('click',function(){
     form.reset()
     currentFiles=[]
