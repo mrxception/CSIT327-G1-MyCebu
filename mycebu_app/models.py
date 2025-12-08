@@ -44,8 +44,12 @@ class ServiceApplication(models.Model):
     reference_number = models.TextField()
     progress = models.IntegerField(blank=True, null=True)
     step_index = models.IntegerField(blank=True, null=True)
+    document_url = models.TextField(blank=True, null=True) 
+    document_status = models.TextField(default='pending')  
+    admin_notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = "service_applications"

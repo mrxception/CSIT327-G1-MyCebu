@@ -192,18 +192,24 @@ def landing_view(request, tab='landing'):
         services_list = Service.objects.all().order_by('title')
         officials_list = Official.objects.all().order_by('name')
         ordinances_list = Ordinance.objects.all().order_by('-created_at')
+        
+        # NEW: Get all permit applications
+        all_permits = ServiceApplication.objects.all().order_by('-created_at')
+        pending_permits = ServiceApplication.objects.filter(document_status='pending').count()
 
         context.update({
             "admin_stats": {
                 "total_complaints": total_complaints,
                 "pending_complaints": pending_complaints,
-                "total_users": total_users
+                "total_users": total_users,
+                "pending_permits": pending_permits  # NEW
             },
             "admin_complaints": all_complaints,
             "admin_services": services_list, 
             "admin_officials": officials_list,
             "admin_ordinances": ordinances_list,
             "admin_users": all_users,
+            "admin_permits": all_permits,  # NEW
         })
 
     # ==========================
@@ -399,7 +405,7 @@ def admin_action_view(request, action_type):
             # Create directly in DB
             # Note: For JSONField (requirements, steps, etc), pass the Python list directly. 
             # Do NOT use json.dumps() if your model uses models.JSONField.
-            Service.objects.create(
+            service = Service.objects.create(
                 service_id=data['service_id'],
                 icon=data.get('icon', 'file'),
                 title=data['title'],
@@ -412,7 +418,7 @@ def admin_action_view(request, action_type):
                 forms=data.get('forms', []),
                 forms_download=data.get('forms_download', []),
             )
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'new_id': str(service.id)})
 
         elif action_type == 'edit_service':
             data = json.loads(request.body)
@@ -442,7 +448,7 @@ def admin_action_view(request, action_type):
 
         elif action_type == 'add_official':
             data = json.loads(request.body)
-            Official.objects.create(
+            official = Official.objects.create(
                 name=data['name'],
                 position=data['position'],
                 office=data.get('office', ''),
@@ -452,7 +458,7 @@ def admin_action_view(request, action_type):
                 initials=data.get('initials', ''.join([n[0] for n in data['name'].split() if n])[:2].upper()),
                 photo=data.get('photo', '')
             )
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'new_id': str(official.id)})
 
         elif action_type == 'edit_official':
             data = json.loads(request.body)
@@ -480,7 +486,7 @@ def admin_action_view(request, action_type):
             if 'pdf_file' in request.FILES:
                 pdf_url = upload_to_cloudinary(request.FILES['pdf_file'], folder="ordinances")
             
-            Ordinance.objects.create(
+            ordinance = Ordinance.objects.create(
                 category=data.get('category', 'General'),
                 ordinance_number=data.get('ordinance_number', ''),
                 name_or_ordinance=data.get('title', ''),
@@ -489,7 +495,7 @@ def admin_action_view(request, action_type):
                 pdf_file_path=pdf_url,
                 created_at=timezone.now()
             )
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'new_id': str(ordinance.id)})
 
         elif action_type == 'delete_ordinance':
             data = json.loads(request.body)
@@ -521,7 +527,7 @@ def admin_action_view(request, action_type):
             new_status = data['status']
             
             # Optional: Add validation for new statuses
-            VALID_COMPLAINT_STATUSES = ['Submitted', 'In Progress', 'Resolved', 'Cancelled']
+            VALID_COMPLAINT_STATUSES = ['Pending', 'In Progress', 'Resolved', 'Cancelled']
             if new_status not in VALID_COMPLAINT_STATUSES:
                 return JsonResponse({'success': False, 'error': f'Invalid status: {new_status}'}, status=400)
 
@@ -530,6 +536,27 @@ def admin_action_view(request, action_type):
                 updated_at=timezone.now()
             )
             return JsonResponse({'success': True})
+        
+        # NEW: Update Permit Status
+        elif action_type == 'update_permit_status':
+            data = json.loads(request.body)
+            permit_id = data.get('id')
+            new_status = data.get('document_status')
+            admin_notes = data.get('admin_notes', '')
+            
+            try:
+                permit = ServiceApplication.objects.get(id=permit_id)
+                permit.document_status = new_status
+                permit.admin_notes = admin_notes
+                permit.updated_at = timezone.now()
+                
+                if new_status == 'verified':
+                    permit.completed_at = timezone.now()
+                
+                permit.save()
+                return JsonResponse({'success': True})
+            except ServiceApplication.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Permit application not found'}, status=404)
 
         return JsonResponse({'success': False, 'error': 'Invalid action'}, status=400)
 
@@ -537,6 +564,8 @@ def admin_action_view(request, action_type):
         return JsonResponse({'success': False, 'error': 'Service not found'}, status=404)
     except Official.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Official not found'}, status=404)
+    except ServiceApplication.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Permit application not found'}, status=404)
     except Exception as e:
         logger.error(f"Admin Action Error: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
@@ -697,6 +726,9 @@ def start_service_application(request, service: str):
         try:
             existing.progress = 0
             existing.step_index = 0
+            existing.document_status = 'pending'
+            existing.document_url = None
+            existing.admin_notes = None
             existing.reference_number = reference
             existing.updated_at = timezone.now()
             existing.save()
@@ -721,6 +753,7 @@ def start_service_application(request, service: str):
             reference_number=reference,
             progress=0,
             step_index=0,
+            document_status='pending',
             created_at=timezone.now(),
             updated_at=timezone.now()
         )
@@ -760,6 +793,10 @@ def update_service_application(request, service: str, app_id):
         if mark_completed:
             app.step_index = 0
             app.progress = 0
+            app.document_status = 'pending'
+            app.document_url = None
+            app.admin_notes = None
+            app.completed_at = None
             app.updated_at = timezone.now()
             app.save()
             return JsonResponse({"success": True, "progress": 0, "completed": True})
@@ -783,6 +820,57 @@ def update_service_application(request, service: str, app_id):
          return JsonResponse({"success": False, "error": "Application not found"}, status=404)
     except Exception as e:
         logger.error("update_service_application: %s", e)
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+# NEW: Document Upload Endpoint
+@csrf_exempt
+@require_POST
+def upload_permit_document(request, service: str, app_id):
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({"success": False, "error": "Not authenticated"}, status=401)
+
+    try:
+        app = ServiceApplication.objects.get(id=app_id, user_id=user["id"], service_type=service)
+        
+        if 'document' not in request.FILES:
+            return JsonResponse({"success": False, "error": "No file uploaded"}, status=400)
+        
+        document_file = request.FILES['document']
+        
+        # Validate file size (10MB max)
+        if document_file.size > 10 * 1024 * 1024:
+            return JsonResponse({"success": False, "error": "File size must be less than 10MB"}, status=400)
+        
+        # Validate file type
+        allowed_types = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 
+                        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+        if document_file.content_type not in allowed_types:
+            return JsonResponse({"success": False, "error": "Invalid file type. Please upload PDF, JPG, PNG, or DOC files."}, status=400)
+        
+        # Upload to Cloudinary
+        document_url = upload_to_cloudinary(document_file, folder=f"permits/{service}/{app_id}")
+        
+        if not document_url:
+            return JsonResponse({"success": False, "error": "Failed to upload document"}, status=500)
+        
+        # Update application
+        app.document_url = document_url
+        app.document_status = 'pending'
+        app.progress = 100
+        app.updated_at = timezone.now()
+        app.save()
+        
+        return JsonResponse({
+            "success": True,
+            "document_url": document_url,
+            "message": "Document uploaded successfully"
+        })
+        
+    except ServiceApplication.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Application not found"}, status=404)
+    except Exception as e:
+        logger.error(f"upload_permit_document error: {str(e)}")
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 def permit_progress_view(request, service: str, app_id):
@@ -830,6 +918,9 @@ def permit_progress_view(request, service: str, app_id):
                 "reference_number": app_obj.reference_number or "N/A",
                 "progress": progress,
                 "step_index": current_idx,
+                "document_url": app_obj.document_url,
+                "document_status": app_obj.document_status or 'pending',
+                "admin_notes": app_obj.admin_notes,
             },
             "current_tab": "services",
         }
@@ -906,7 +997,7 @@ def submit_complaint_view(request):
             email=email,
             phone=phone,
             attachments=attachments if attachments else None,
-            status="Submitted",
+            status="Pending",
             created_at=timezone.now(),
             updated_at=timezone.now()
         )
@@ -1289,3 +1380,38 @@ def chat_session_detail_view(request, conversation_id):
         return JsonResponse({'success': True, 'messages': data})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
+@require_GET
+def my_applications_api(request):
+    user = get_authed_user(request)
+    if not user:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=401)
+    
+    # Fetch applications for this user
+    apps = ServiceApplication.objects.filter(user_id=user['id']).order_by('-updated_at')
+    
+    data = []
+    for app in apps:
+        # Get service title safely
+        svc_title = "Unknown Service"
+        svc_slug = ""
+        try:
+            svc = Service.objects.get(service_id=app.service_type)
+            svc_title = svc.title
+            svc_slug = svc.service_id
+        except Service.DoesNotExist:
+            svc_title = app.service_type
+
+        data.append({
+            'id': str(app.id),
+            'service_name': svc_title,
+            'service_slug': svc_slug, # Needed for the link
+            'reference_number': app.reference_number,
+            'status': app.document_status or 'pending',
+            'progress': app.progress,
+            'step_index': app.step_index,
+            'admin_notes': app.admin_notes,
+            'created_at': app.created_at,
+        })
+    
+    return JsonResponse({'success': True, 'applications': data})

@@ -20,12 +20,15 @@ urlpatterns = [
     # API Lists
     path('api/services/', views.service_list_api, name='api_service_list'),
     path('api/directory/', views.directory_list_api, name='api_directory_list'),
+
+    path('api/my-applications/', views.my_applications_api, name='my_applications_api'),
     
     # Service Applications
     path("apply/<str:service>/", views.apply_permit_view, name="apply_permit"),
     path("apply/<str:service>/start/", views.start_service_application, name="start_service_application"),
     path("apply/<str:service>/<uuid:app_id>/", views.permit_progress_view, name="permit_progress"),
     path("apply/<str:service>/<uuid:app_id>/update/", views.update_service_application, name="update_service_application"),
+    path('apply/<str:service>/<uuid:app_id>/upload/', views.upload_permit_document, name='upload_permit_document'),
 
     # Complaints
     path("complaints/submit/", views.submit_complaint_view, name="submit_complaint"),

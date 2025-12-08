@@ -1,58 +1,271 @@
 <style>
-  /* CSS for the Spinner */
+  /* Spinner Animation */
   .spinner {
     width: 24px;
     height: 24px;
-    border: 3px solid #e6eef0;
-    border-top-color: #0d9488; /* Teal color to match your theme */
+    border: 3px solid #e2e8f0;
+    border-top-color: #0d9488; /* Teal-600 */
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     display: inline-block;
     vertical-align: middle;
     margin-right: 8px;
   }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Common List Card Styles (Sidebar items) */
+  .list-card {
+    width: 100%; text-align: left; background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; cursor: pointer; transition: 0.15s ease;
+  }
+  .list-card:hover { border-color: #94a3b8; background: #f8fafc; }
+  .list-card.is-active { border-color: #0d9488; background: #f0fdfa; box-shadow: 0 0 0 1px #0d9488; }
+  
+  .list-card-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; color:#0f172a; }
+  .list-card-meta { font-size: 12px; color: #64748b; }
+
+  /* Service Grid Item */
+  .service-item {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; gap: 10px; transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s ease;
+    opacity: 0;
+  }
+  .service-item:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-color: #cbd5e1; }
+  .service-item.visible { opacity: 1; }
+
+  /* Status Badges */
+  .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; letter-spacing: 0.5px; }
+  .badge-status.pending, .badge-status.submitted { background: #f1f5f9; color: #475569; }
+  .badge-status.verified, .badge-status.resolved, .badge-status.completed { background: #d1fae5; color: #047857; }
+  .badge-status.rejected, .badge-status.cancelled { background: #fee2e2; color: #b91c1c; }
+  .badge-status.in.progress { background: #e0f2fe; color: #0369a1; }
+
+  /* Layouts */
+  .services-grid { 
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; width: 100%; 
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .services-grid.visible { opacity: 1; }
+  
+  .split-view { 
+    display: grid; 
+    grid-template-columns: 300px 1fr; 
+    gap: 24px; 
+    min-height: 500px;
+    align-items: start;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) { 
+    .split-view { grid-template-columns: 1fr; } 
+    .split-view > div:first-child { border-right: none; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 20px; }
   }
 </style>
 
 <section class="dash-panel is-active" id="tab-services">
-  <div class="detail-card" style="width:95%; margin:0 auto;"> 
-    <div class="card-head" style="margin-bottom:18px;">
-      <h3 class="card-title">Services</h3>
-      <p class="muted">Search and start an application</p>
-    </div>
+  <nav class="dash-subtabs">
+    <button class="dash-subtab is-active" data-svc-tab="browse">Browse Services</button>
+    <button class="dash-subtab" data-svc-tab="track">My Applications</button>
+  </nav>
 
-    <div id="servicesCardArea" style="display:flex; gap:12px; align-items:center; margin-bottom:18px; width:100%;">
-      <div style="flex:1; position:relative;">
-        <input id="serviceSearch" type="search" placeholder="Search services (click to show all)" 
-               style="width:100%; padding:16px 18px; border-radius:10px; border:1px solid #e6eef0; box-shadow:0 2px 6px rgba(2,6,23,0.04); font-size:1.05rem; height:52px;">
+  <div class="dash-subpanel is-active" id="svc-sub-browse">
+    <div class="detail-card" style="width:95%; margin:0 auto;"> 
+      <div class="card-head" style="margin-bottom:18px;">
+        <h3 class="card-title">Services</h3>
+        <p class="muted">Search and start an application</p>
       </div>
-      <button id="clearSearch" type="button" style="background:#fff; border:1px solid #e6eef0; padding:10px 14px; border-radius:8px; cursor:pointer;">Clear</button>
-    </div>
 
-    <div id="servicesLoading" style="display:none; text-align:center; padding:30px; color:#6b7280;">
-      <div class="spinner"></div> Loading services...
-    </div>
+      <div id="serviceSearchContainer" style="display:flex; gap:12px; align-items:center; margin-bottom:18px; width:100%;">
+        <div style="flex:1; position:relative;">
+          <input id="serviceSearch" type="search" placeholder="Search services..." 
+                 style="width:100%; padding:16px 18px; border-radius:10px; border:1px solid #e6eef0; box-shadow:0 2px 6px rgba(2,6,23,0.04); font-size:1.05rem; height:52px; outline:none; transition:border 0.2s;">
+        </div>
+        <button id="clearSearch" type="button" style="background:#fff; border:1px solid #e6eef0; padding:10px 14px; border-radius:8px; cursor:pointer;">Clear</button>
+      </div>
 
-    <div id="servicesGrid" class="services-grid" style="width:100%; gap:12px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
-    </div>
+      <div id="servicesLoading" style="display:none; text-align:center; padding:30px; color:#6b7280;">
+        <div class="spinner"></div> Loading services...
+      </div>
 
-    <p id="noResults" class="muted" style="display:none; margin-top:12px;">No services found.</p>
+      <div id="servicesGrid" class="services-grid" style="display:none;"></div>
+      
+      <p id="noResults" class="muted" style="display:none; margin-top:12px;">No services found matching your search.</p>
+    </div>
+  </div>
+
+  <div class="dash-subpanel" id="svc-sub-track">
+    <div class="detail-card" style="width:95%; margin:0 auto;">
+      <div class="card-head" style="margin-bottom:18px;">
+        <h3 class="card-title">My Applications</h3>
+        <p class="muted">Track the status of your permits</p>
+      </div>
+      
+      <div class="split-view">
+        <div style="border-right: 1px solid #f1f5f9; padding-right: 16px; height: 100%;">
+          <p class="muted tiny" style="margin-bottom:12px; font-weight:600; text-transform:uppercase;">Recent Applications</p>
+          <div id="permit-list-container" style="max-height: 600px; overflow-y: auto;"></div>
+        </div>
+
+        <div id="permit-detail-container" style="padding-left: 8px;">
+          <div style="text-align:center; padding:60px 20px; color:#94a3b8; border: 2px dashed #e2e8f0; border-radius: 12px;">
+            <svg style="width:48px; height:48px; margin:0 auto 12px; opacity:0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <p class="muted">Select an application from the list to view its status.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dash-panel" id="tab-complaints">
+  <nav class="dash-subtabs">
+    <button class="dash-subtab is-active" data-cmp-tab="submit">Submit Complaint</button>
+    <button class="dash-subtab" data-cmp-tab="track">Track History</button>
+  </nav>
+
+  <div class="dash-subpanel is-active" id="cmp-sub-submit">
+    <div class="detail-card" style="width:95%; margin:0 auto;">
+      <div class="card-head" style="margin-bottom:18px;">
+        <h3 class="card-title">New Complaint</h3>
+        <p class="muted">Report issues to the administration</p>
+      </div>
+      
+      <form id="form-complaint" class="grid" style="max-width: 800px;">
+        <div class="grid">
+          <label class="lbl">Category *</label>
+          <div class="input-wrap">
+             <select id="cmp-category" class="input">
+                <option value="" disabled selected>Select Category</option>
+                <option value="Infrastructure">Infrastructure (Roads, Lights)</option>
+                <option value="Sanitation">Sanitation (Garbage, Drainage)</option>
+                <option value="Security">Security & Safety</option>
+                <option value="Public Officials">Public Officials</option>
+                <option value="Others">Others</option>
+             </select>
+          </div>
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Subject *</label>
+          <input id="cmp-subject" class="input" maxlength="100" placeholder="Brief title of the issue">
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Location *</label>
+          <input id="cmp-location" class="input" placeholder="Where did this happen?">
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Description *</label>
+          <textarea id="cmp-description" class="input ta" rows="4" placeholder="Detailed explanation..."></textarea>
+        </div>
+
+        <div class="grid">
+          <label class="lbl">Attachments (Optional)</label>
+          <div class="dropzone" id="cmp-drop" style="border:2px dashed #cbd5e1; padding:20px; text-align:center; border-radius:8px; cursor:pointer; background: #f8fafc; transition: border-color 0.2s;">
+            <input id="cmp-files" type="file" multiple accept="image/*,.pdf" style="display:none;">
+            <p class="drop-title" style="margin:0; font-weight:500; color:#0d9488;">Click to upload photos or PDF</p>
+            <p class="muted tiny">Max 10MB per file</p>
+          </div>
+          <div id="cmp-filelist" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <label class="chk" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="cmp-anon">
+          <span>Submit Anonymously</span>
+        </label>
+
+        <div id="cmp-ident" class="grid grid-3" style="gap:12px; margin-top:12px;">
+          <div class="grid"><label class="lbl">Name</label><input id="cmp-name" class="input" placeholder="Your Name"></div>
+          <div class="grid"><label class="lbl">Email</label><input id="cmp-email" class="input" type="email" placeholder="Email"></div>
+          <div class="grid"><label class="lbl">Phone</label><input id="cmp-phone" class="input" type="tel" placeholder="Phone"></div>
+        </div>
+
+        <button type="submit" class="btn btn--primary w-full" id="cmp-submit" style="margin-top:20px;">Submit Complaint</button>
+      </form>
+
+      <div id="cmp-success" class="success-card" style="display:none; text-align:center; padding:40px;">
+        <div style="width:60px; height:60px; background:#dcfce7; color:#16a34a; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+            <svg class="i" style="width:32px; height:32px;" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="3"/></svg>
+        </div>
+        <h2 class="h2">Submitted Successfully</h2>
+        <p class="muted">We have received your complaint. You can track it in the History tab.</p>
+        <button class="btn btn--outline" id="cmp-new" style="margin-top:16px;">Submit Another</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-subpanel" id="cmp-sub-track">
+    <div class="detail-card" style="width:95%; margin:0 auto;">
+      <div class="card-head" style="margin-bottom:18px;">
+        <h3 class="card-title">Complaint History</h3>
+        <p class="muted">View status updates on your reports</p>
+      </div>
+      
+      <div class="split-view">
+        <div style="border-right: 1px solid #f1f5f9; padding-right: 16px; height: 100%;">
+          <p class="muted tiny" style="margin-bottom:12px; font-weight:600; text-transform:uppercase;">Reports</p>
+          <div id="cmp-list" style="max-height: 600px; overflow-y: auto;"></div>
+        </div>
+        <div id="cmp-detail" style="padding-left: 8px;">
+          <div style="text-align:center; padding:60px 20px; color:#94a3b8; border: 2px dashed #e2e8f0; border-radius: 12px;">
+            <svg style="width:48px; height:48px; margin:0 auto 12px; opacity:0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <p class="muted">Select a complaint from the list to view details.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <script>
-(function () {
+(function() {
+  // --- CONFIGURATION ---
+  const API_SERVICES = '/api/services/';
+  const API_MY_PERMITS = '/api/my-applications/';
+  const API_COMPLAINTS_LIST = '/complaints/list/';
+  const API_COMPLAINT_SUBMIT = '/complaints/submit/';
+  const API_COMPLAINT_DETAIL = '/complaints/';
+  
+  const CLOUD_NAME = "defkzzqcs";
+  const UPLOAD_PRESET = "complaints_unsigned"; 
+
+  // --- TAB SWITCHER ---
+  function setupTabs(tabId, prefix) {
+    const buttons = document.querySelectorAll(`[data-${prefix}-tab]`);
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Remove active from all btns and panels in this section
+        buttons.forEach(b => b.classList.remove('is-active'));
+        document.querySelectorAll(`#${tabId} .dash-subpanel`).forEach(p => p.classList.remove('is-active'));
+        
+        // Add active to clicked
+        btn.classList.add('is-active');
+        const target = btn.getAttribute(`data-${prefix}-tab`);
+        document.getElementById(`${prefix}-sub-${target}`).classList.add('is-active');
+
+        // Trigger loaders
+        if(target === 'browse' && prefix === 'svc') showGrid();
+        if(target === 'track' && prefix === 'svc') loadPermits();
+        if(target === 'track' && prefix === 'cmp') loadComplaints();
+      });
+    });
+  }
+
+  setupTabs('tab-services', 'svc');
+  setupTabs('tab-complaints', 'cmp');
+
+  // ==========================================
+  // SERVICES MODULE
+  // ==========================================
+  let services = [];
   const searchInput = document.getElementById('serviceSearch');
   const servicesGrid = document.getElementById('servicesGrid');
   const noResults = document.getElementById('noResults');
-  const loadingEl = document.getElementById('servicesLoading'); // New Element
+  const loadingEl = document.getElementById('servicesLoading');
   const clearBtn = document.getElementById('clearSearch');
-  const cardArea = document.getElementById('servicesCardArea');
-
-  let services = [];
-  let hideTimer = null;
   let isFetching = false;
 
   // Helper to toggle loading state
@@ -66,8 +279,8 @@
     }
   }
 
-  async function loadServices() {
-    // If we already have data, don't fetch again, just return it
+  async function fetchServices() {
+    // If we already have data, don't fetch again
     if (services.length > 0) return services;
     
     // Prevent double fetching
@@ -77,7 +290,7 @@
       isFetching = true;
       toggleLoader(true); // Show loader immediately
 
-      const res = await fetch('/api/services/', {cache: "no-cache"});
+      const res = await fetch(API_SERVICES, {cache: "no-cache"});
       const data = await res.json();
       services = data.services || [];
       
@@ -93,29 +306,26 @@
 
   function renderServices(list) {
     servicesGrid.innerHTML = '';
-
-    // If list is empty (and we are not loading)
-    if (!list || list.length === 0) {
+    
+    if(!list || list.length === 0) {
       servicesGrid.classList.remove('visible');
       servicesGrid.style.display = 'none';
-      // Only show "No Results" if we are not currently loading
-      if(!isFetching) noResults.style.display = 'block';
+      if (!isFetching) noResults.style.display = 'block';
       return;
     }
-
+    
     noResults.style.display = 'none';
     servicesGrid.style.display = 'grid';
     // Small delay to allow display:grid to apply before adding class for opacity transition
     requestAnimationFrame(() => servicesGrid.classList.add('visible'));
 
     list.forEach((s, idx) => {
-      const item = document.createElement('div');
-      item.className = 'service-item';
-      
       const title = s.title || 'Untitled Service';
       const desc = s.description || '';
       const serviceId = s.id || ''; 
 
+      const item = document.createElement('div');
+      item.className = 'service-item';
       item.innerHTML = `
         <div>
           <h4 style="margin:0 0 6px 0; font-size:1.05rem; color:#0f172a;">${escapeHtml(title)}</h4>
@@ -160,35 +370,12 @@
     // If services are empty, we need to load them
     if (!services.length) {
       // Load logic handles the loader display
-      await loadServices(); 
+      await fetchServices(); 
       renderServices(services);
     } else {
       // If already loaded, just render immediately
       renderServices(services);
     }
-  }
-
-  function hideGridImmediate() {
-    servicesGrid.classList.remove('visible');
-    // Hide grid after transition
-    setTimeout(() => {
-      servicesGrid.innerHTML = '';
-      servicesGrid.style.display = 'none';
-      noResults.style.display = 'none';
-      loadingEl.style.display = 'none'; // Ensure loader is hidden too
-    }, 340);
-  }
-
-  function scheduleHide(delay = 300) {
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-      const isInputFocused = (document.activeElement === searchInput);
-      const isOverCardArea = cardArea.matches(':hover');
-      const isOverGrid = servicesGrid && servicesGrid.matches(':hover');
-      if (!isInputFocused && !isOverCardArea && !isOverGrid) {
-        hideGridImmediate();
-      }
-    }, delay);
   }
 
   function escapeHtml(str) {
@@ -200,12 +387,6 @@
   function escapeAttr(s){ return escapeHtml(s); }
 
   // --- Event Listeners ---
-
-  searchInput.addEventListener('focus', () => {
-    // Determine if we need to show loader or just grid
-    showGrid();
-  });
-
   searchInput.addEventListener('input', (e) => {
     filterAndRender(e.target.value);
   });
@@ -216,24 +397,263 @@
     searchInput.focus();
   });
 
-  [cardArea, servicesGrid].forEach(el => {
-    if (!el) return;
-    el.addEventListener('mouseenter', () => {
-      clearTimeout(hideTimer);
-    });
-    el.addEventListener('mouseleave', () => {
-      scheduleHide(260);
-    });
-  });
+  // ==========================================
+  // PERMITS (MY APPLICATIONS) MODULE
+  // ==========================================
+  const permitList = document.getElementById('permit-list-container');
+  const permitDetail = document.getElementById('permit-detail-container');
 
-  document.addEventListener('click', (e) => {
-    const within = e.target === searchInput || cardArea.contains(e.target) || (servicesGrid && servicesGrid.contains(e.target));
-    if (!within) scheduleHide(0);
-  });
+  async function loadPermits() {
+    permitList.innerHTML = '<div style="padding:40px; text-align:center;"><div class="spinner"></div></div>';
+    
+    try {
+      const res = await fetch(API_MY_PERMITS, { cache: "no-cache" });
+      const data = await res.json();
+      
+      if(!data.applications || data.applications.length === 0) {
+        permitList.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;"><p>No applications found.</p></div>';
+        return;
+      }
 
-  searchInput.addEventListener('blur', () => {
-    scheduleHide(260);
-  });
+      permitList.innerHTML = '';
+      data.applications.forEach(app => {
+        const item = document.createElement('div');
+        item.className = 'list-card';
+        item.innerHTML = `
+          <div class="list-card-title">${app.service_name}</div>
+          <div class="list-card-meta">
+             Ref: ${app.reference_number || 'N/A'} • <span style="text-transform:capitalize; color:#0d9488; font-weight:500;">${app.status}</span>
+          </div>
+        `;
+        item.onclick = () => {
+          document.querySelectorAll('#permit-list-container .list-card').forEach(c => c.classList.remove('is-active'));
+          item.classList.add('is-active');
+          renderPermitDetail(app);
+        };
+        permitList.appendChild(item);
+      });
+    } catch(e) {
+      permitList.innerHTML = '<p class="muted tiny" style="text-align:center;">Error loading permits.</p>';
+    }
+  }
+
+  function renderPermitDetail(app) {
+    const progress = app.progress || 0;
+    permitDetail.innerHTML = `
+      <div style="border-bottom:1px solid #e2e8f0; padding-bottom:16px; margin-bottom:16px;">
+        <span class="badge-status ${app.status.replace(/ /g, '.')}">${app.status}</span>
+        <h3 style="margin:12px 0 4px; font-size:1.4rem;">${app.service_name}</h3>
+        <p class="muted tiny">Ref: <span style="font-family:monospace; font-size:1.1em;">${app.reference_number}</span></p>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:12px; font-weight:600;">
+           <span>Progress</span><span>${progress}%</span>
+        </div>
+        <div style="width:100%; background:#e2e8f0; height:8px; border-radius:4px; overflow:hidden;">
+           <div style="width:${progress}%; background:#0d9488; height:100%;"></div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+         <div>
+            <p class="muted tiny">Applied Date</p>
+            <p style="font-weight:600;">${new Date(app.created_at).toLocaleDateString()}</p>
+         </div>
+         <div>
+            <p class="muted tiny">Current Step</p>
+            <p style="font-weight:600;">Step ${app.step_index + 1}</p>
+         </div>
+      </div>
+
+      ${app.admin_notes ? `
+      <div style="background:#fff7ed; border:1px solid #ffedd5; padding:16px; border-radius:8px; margin-bottom:24px;">
+         <p style="font-size:12px; font-weight:700; color:#c2410c; margin-bottom:4px; text-transform:uppercase;">Admin Note:</p>
+         <p style="font-size:14px; color:#9a3412; line-height:1.5;">${app.admin_notes}</p>
+      </div>` : ''}
+
+      <div style="text-align:right;">
+         <a href="/apply/${app.service_slug}/${app.id}/" class="btn btn--primary btn--sm">Continue / View Full</a>
+      </div>
+    `;
+  }
+
+  // ==========================================
+  // COMPLAINTS MODULE
+  // ==========================================
+  const cmpList = document.getElementById('cmp-list');
+  const cmpDetail = document.getElementById('cmp-detail');
+  const fileInput = document.getElementById('cmp-files');
+  const fileDrop = document.getElementById('cmp-drop');
+  const fileListDisplay = document.getElementById('cmp-filelist');
+  const cmpForm = document.getElementById('form-complaint');
+  let uploadedFiles = [];
+
+  // File Upload
+  fileDrop.onclick = () => fileInput.click();
+  fileInput.onchange = async () => {
+    const files = Array.from(fileInput.files);
+    if(!files.length) return;
+    
+    const submitBtn = document.getElementById('cmp-submit');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<div class="spinner" style="width:16px; height:16px; border-width:2px;"></div> Uploading...';
+
+    for(const file of files) {
+      if(file.size > 10 * 1024 * 1024) { alert("File too large (>10MB)"); continue; }
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("upload_preset", UPLOAD_PRESET);
+      try {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`, { method: "POST", body: fd });
+        const json = await res.json();
+        if(json.secure_url) {
+           uploadedFiles.push({ name: file.name, url: json.secure_url, size: file.size });
+        }
+      } catch(e) { console.error(e); }
+    }
+    
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit Complaint";
+    renderFileList();
+  };
+
+  function renderFileList() {
+    fileListDisplay.innerHTML = '';
+    uploadedFiles.forEach((f, i) => {
+      const tag = document.createElement('div');
+      tag.style.cssText = "background:#f1f5f9; padding:4px 8px; border-radius:4px; font-size:12px; display:flex; align-items:center; gap:6px;";
+      tag.innerHTML = `<span>${f.name}</span> <span style="color:red; cursor:pointer; font-weight:bold;">&times;</span>`;
+      tag.querySelector('span:last-child').onclick = (e) => {
+        e.stopPropagation();
+        uploadedFiles.splice(i, 1);
+        renderFileList();
+      };
+      fileListDisplay.appendChild(tag);
+    });
+  }
+
+  // Submit Complaint
+  cmpForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('cmp-submit');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:16px; height:16px; border-width:2px;"></div> Submitting...';
+
+    const payload = {
+      category: document.getElementById('cmp-category').value,
+      subject: document.getElementById('cmp-subject').value,
+      location: document.getElementById('cmp-location').value,
+      description: document.getElementById('cmp-description').value,
+      is_anonymous: document.getElementById('cmp-anon').checked,
+      attachments: uploadedFiles
+    };
+
+    if(!payload.is_anonymous) {
+      payload.name = document.getElementById('cmp-name').value;
+      payload.email = document.getElementById('cmp-email').value;
+      payload.phone = document.getElementById('cmp-phone').value;
+    }
+
+    try {
+      const res = await fetch(API_COMPLAINT_SUBMIT, {
+        method: "POST", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(data.success) {
+        cmpForm.reset();
+        uploadedFiles = [];
+        renderFileList();
+        cmpForm.style.display = 'none';
+        document.getElementById('cmp-success').style.display = 'block';
+      } else {
+        alert(data.error || "Submission failed");
+      }
+    } catch(err) { alert("Network Error"); }
+    finally { 
+      btn.disabled = false; 
+      btn.textContent = "Submit Complaint"; 
+    }
+  };
+
+  document.getElementById('cmp-new').onclick = () => {
+    document.getElementById('cmp-success').style.display = 'none';
+    cmpForm.style.display = 'grid';
+  };
+
+  // Track Complaints
+  async function loadComplaints() {
+    cmpList.innerHTML = '<div style="padding:40px; text-align:center;"><div class="spinner"></div></div>';
+    try {
+      const res = await fetch(API_COMPLAINTS_LIST, { cache: "no-cache" });
+      const data = await res.json();
+      
+      if(!data.items || !data.items.length) {
+        cmpList.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;"><p>No complaints filed yet.</p></div>';
+        return;
+      }
+
+      cmpList.innerHTML = '';
+      data.items.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'list-card';
+        item.innerHTML = `
+          <div class="list-card-title">${c.subject}</div>
+          <div class="list-card-meta">
+             <span class="badge-status ${c.status.toLowerCase().replace(' ', '.')}">${c.status}</span> • ${new Date(c.created_at).toLocaleDateString()}
+          </div>
+        `;
+        item.onclick = () => {
+          document.querySelectorAll('#cmp-list .list-card').forEach(el => el.classList.remove('is-active'));
+          item.classList.add('is-active');
+          renderComplaintDetail(c.id);
+        };
+        cmpList.appendChild(item);
+      });
+    } catch(e) {
+      cmpList.innerHTML = '<p class="muted tiny">Error loading history.</p>';
+    }
+  }
+
+  async function renderComplaintDetail(id) {
+    cmpDetail.innerHTML = '<div style="padding:40px; text-align:center;"><div class="spinner"></div></div>';
+    try {
+      const res = await fetch(API_COMPLAINT_DETAIL + id + '/');
+      const data = await res.json();
+      const c = data.complaint;
+      
+      cmpDetail.innerHTML = `
+        <div style="margin-bottom:20px; border-bottom:1px solid #e2e8f0; padding-bottom:16px;">
+           <span class="badge-status ${c.status.toLowerCase().replace(' ', '.')}">${c.status}</span>
+           <h3 style="margin:12px 0 4px; font-size:1.4rem;">${c.subject}</h3>
+           <p class="muted tiny">${c.category} • ${new Date(c.created_at).toLocaleString()}</p>
+        </div>
+        
+        <div style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:20px;">
+           <p style="font-size:14px; line-height:1.6; color:#334155;">${c.description}</p>
+        </div>
+
+        <div style="margin-bottom:20px;">
+           <p class="muted tiny" style="margin-bottom:4px;">Location</p>
+           <p style="font-weight:500; font-size:14px;">${c.location}</p>
+        </div>
+
+        <div style="margin-top:20px;">
+           <p class="muted tiny" style="margin-bottom:8px;">Attachments</p>
+           ${c.attachments && c.attachments.length ? 
+             c.attachments.map(a => `<a href="${a.url}" target="_blank" class="btn btn--outline btn--sm" style="margin-right:8px; margin-bottom:8px; display:inline-block;">${a.name}</a>`).join('') 
+             : '<p class="muted tiny">None</p>'}
+        </div>
+      `;
+    } catch(e) {
+      cmpDetail.innerHTML = '<p class="muted tiny">Failed to load details.</p>';
+    }
+  }
+
+  // Initial load for services
+  showGrid();
 
 })();
 </script>
