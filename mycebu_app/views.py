@@ -159,7 +159,6 @@ def landing_view(request, tab='landing'):
     if tab in ['dashboard', 'admin_dashboard'] and not user:
         return redirect("login")
     
-    # Security Check for Admin Tab
     if tab == 'admin_dashboard':
         if user.get('role') != 'admin':
             return redirect("landing_tab", tab="dashboard")
@@ -179,20 +178,20 @@ def landing_view(request, tab='landing'):
     # ADMIN DASHBOARD TAB
     # ==========================
     if tab == 'admin_dashboard':
-        # 1. Fetch Stats from DB
         total_complaints = Complaint.objects.count()
         pending_complaints = Complaint.objects.filter(status='Submitted').count()
-        total_users = DbUser.objects.count() # Already fetching total users
+        
+        try:
+            total_users = DbUser.objects.count()
+            all_users = DbUser.objects.all().order_by('-created_at')
+        except:
+            total_users = 0
+            all_users = []
 
-        # 2. Fetch Data directly from DB
         all_complaints = Complaint.objects.all().order_by('-created_at')
         services_list = Service.objects.all().order_by('title')
         officials_list = Official.objects.all().order_by('name')
         ordinances_list = Ordinance.objects.all().order_by('-created_at')
-        
-        # <<< NEW: Fetch all users for the new tab >>>
-        # We fetch the custom user model (DbUser) to get role, full name, etc.
-        all_users = DbUser.objects.all().order_by('-created_at')
 
         context.update({
             "admin_stats": {
@@ -204,62 +203,84 @@ def landing_view(request, tab='landing'):
             "admin_services": services_list, 
             "admin_officials": officials_list,
             "admin_ordinances": ordinances_list,
-            "admin_users": all_users,  # <<< NEW CONTEXT DATA >>>
+            "admin_users": all_users,
         })
 
     # ==========================
     # SERVICES TAB (Public)
     # ==========================
     elif tab == 'services':
-        # Fetch services from DB
         services_qs = Service.objects.all().order_by('title')
         
-        # Convert QuerySet to list of dicts to process JSON fields easily
-        # or process them as objects. Here we stick to objects but handle JSON logic.
         services_processed = []
         
+        # --- ROBUST JSON PARSING ---
+        # This function ensures that if the DB returns a String representation of a list/dict, 
+        # it is properly converted to a Python object.
+        def safe_json_load(value, default):
+            if value is None:
+                return default
+            if isinstance(value, str):
+                try:
+                    return json.loads(value)
+                except (json.JSONDecodeError, TypeError):
+                    return default
+            # Already a list or dict
+            return value
+
         for svc in services_qs:
-            # Prepare Steps
-            # Note: JSONField automatically deserializes to Python lists/dicts
-            steps = svc.steps if svc.steps else []
-            step_details = svc.step_details if svc.step_details else []
-            
+            # 1. Parse JSON fields
+            svc.requirements = safe_json_load(svc.requirements, [])
+            svc.steps = safe_json_load(svc.steps, [])
+            svc.step_details = safe_json_load(svc.step_details, [])
+            svc.forms = safe_json_load(svc.forms, [])
+            svc.forms_download = safe_json_load(svc.forms_download, [])
+            svc.additional_info = safe_json_load(svc.additional_info, {})
+
+            # 2. Combine Steps and Details for Display
             combined_steps = []
+            steps = svc.steps
+            step_details = svc.step_details
+            
             for i, step in enumerate(steps):
+                # Ensure we don't go out of bounds if details list is shorter
                 detail = step_details[i] if i < len(step_details) else ""
                 combined_steps.append({"step": step, "detail": detail})
             
-            # Prepare Forms
-            forms = svc.forms if svc.forms else []
-            downloads = svc.forms_download if svc.forms_download else []
-            
+            # 3. Combine Forms and Links
             forms_with_links = []
+            forms = svc.forms
+            downloads = svc.forms_download
+            
             for i, name in enumerate(forms):
                 link = downloads[i] if i < len(downloads) and downloads[i] else None
                 forms_with_links.append({"name": name, "link": link})
 
-            # Create a display object (using __dict__ copy or similar approach)
-            svc_display = svc
-            svc_display.combined_steps = combined_steps
-            svc_display.forms_with_links = forms_with_links
-            services_processed.append(svc_display)
+            # Attach processed data to object for the template
+            svc.combined_steps = combined_steps
+            svc.forms_with_links = forms_with_links
+            
+            services_processed.append(svc)
 
         context['services_data'] = services_processed
         
+        # --- ID MATCHING LOGIC ---
         selected_id = request.GET.get("id")
         if selected_id:
-            context['service_selected'] = next((s for s in services_processed if s.service_id == selected_id), None)
+            # We look for the service where service_id (slug) matches the URL param
+            context['service_selected'] = next(
+                (s for s in services_processed if s.service_id == selected_id), 
+                None
+            )
 
     # ==========================
-    # DIRECTORY TAB (Public)
+    # DIRECTORY TAB
     # ==========================
     elif tab == 'directory':
-        # Fetch from DB
         officials_all = Official.objects.all().order_by('name')
         department_offices = Department.objects.all().order_by('name')
         emergency_contacts = EmergencyContact.objects.all()
         
-        # Get unique values for filters
         positions = sorted(list(set(Official.objects.values_list('position', flat=True))))
         districts = sorted(list(set(Official.objects.exclude(district__isnull=True).exclude(district="").values_list('district', flat=True))))
 
@@ -267,21 +288,12 @@ def landing_view(request, tab='landing'):
         position_filter = request.GET.get("position", "all")
         district_filter = request.GET.get("district", "all")
 
-        # Filtering Logic
         officials_filtered = []
         for o in officials_all:
             name_pos = f"{o.name} {o.position}".lower()
-            
-            # Text search
-            if q and q not in name_pos:
-                continue
-            # Position filter
-            if position_filter != "all" and o.position != position_filter:
-                continue
-            # District filter
-            if district_filter != "all" and o.district != district_filter:
-                continue
-            
+            if q and q not in name_pos: continue
+            if position_filter != "all" and o.position != position_filter: continue
+            if district_filter != "all" and o.district != district_filter: continue
             officials_filtered.append(o)
 
         context.update({
@@ -296,7 +308,7 @@ def landing_view(request, tab='landing'):
         })
 
     # ==========================
-    # ORDINANCES TAB (Public)
+    # ORDINANCES TAB
     # ==========================
     elif tab == 'ordinances':
         query = request.GET.get("q", "").strip()
@@ -305,7 +317,7 @@ def landing_view(request, tab='landing'):
         view_all = request.GET.get("view_all", "").strip()
         page = request.GET.get("page", 1)
 
-        qs = Ordinance.objects.all().order_by('name_or_ordinance')  # Alphabetical order
+        qs = Ordinance.objects.all().order_by('name_or_ordinance')
 
         if query:
             qs = qs.filter(
@@ -321,7 +333,6 @@ def landing_view(request, tab='landing'):
             qs = qs.filter(author=author_filter)
 
         if view_all:
-            # Full view for specific category
             qs = qs.filter(category=view_all)
             sort = request.GET.get("sort", "")
             if sort == 'newest':
@@ -330,7 +341,8 @@ def landing_view(request, tab='landing'):
                 qs = qs.order_by(F('date_of_enactment').asc(nulls_last=True))
             elif sort == 'year':
                 qs = qs.order_by(F('date_of_enactment__year').desc(nulls_last=True), F('date_of_enactment').desc(nulls_last=True))
-            paginator = Paginator(qs, 9)  # 9 per page
+            
+            paginator = Paginator(qs, 9)
             ordinances_page = paginator.get_page(page)
             ordinances_data = list(ordinances_page.object_list.values())
 
@@ -342,7 +354,6 @@ def landing_view(request, tab='landing'):
                 "is_paginated": paginator.num_pages > 1,
             })
         else:
-            # Main view: limit to 3 per category
             all_ordinances = list(qs.values())
             categories = defaultdict(list)
             for ord in all_ordinances:
@@ -484,6 +495,26 @@ def admin_action_view(request, action_type):
             data = json.loads(request.body)
             Ordinance.objects.filter(id=data['id']).delete()
             return JsonResponse({'success': True})
+            
+        elif action_type == 'delete_user':
+            data = json.loads(request.body)
+            user_id = data.get('id')
+            
+            # Find the Custom User
+            try:
+                db_user = DbUser.objects.get(id=user_id)
+                email = db_user.email
+                
+                # If there's an email, try to find and delete the Django Auth User (Login)
+                if email:
+                    DjangoAuthUser.objects.filter(email=email).delete()
+                
+                # Delete the custom profile
+                db_user.delete()
+                
+                return JsonResponse({'success': True})
+            except DbUser.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'User not found'}, status=404)
 
         elif action_type == 'update_complaint':
             data = json.loads(request.body)

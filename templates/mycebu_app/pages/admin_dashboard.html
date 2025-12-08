@@ -12,16 +12,17 @@
         width: 14px;
         height: 14px;
         animation: spin 1s linear infinite;
-        display: inline-block;
         margin-right: 6px;
+        vertical-align: middle;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .tab-btn { transition: all 0.2s ease-in-out; }
 </style>
 
 {% csrf_token %}
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 relative">
 
-  <div id="toast-container" class="fixed top-5 right-5 z-[60] flex flex-col gap-3"></div>
+  <div id="toast-container" class="fixed top-5 right-5 z-[80] flex flex-col gap-3"></div>
 
   <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -49,7 +50,6 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-200">
         <div class="flex items-start justify-between mb-4">
@@ -89,19 +89,27 @@
       </div>
     </div>
 
-    <!-- Tabs -->
     <div class="bg-white border border-slate-200 rounded-t-xl shadow-sm">
       <nav class="flex border-b border-slate-200 overflow-x-auto" aria-label="Tabs">
-        <button onclick="switchTab('users')" id="tab-users" class="tab-btn active flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-blue-600 text-blue-600">Users</button>
-        <button onclick="switchTab('complaints')" id="tab-complaints" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Complaints</button>
-        <button onclick="switchTab('services')" id="tab-services" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Services</button>
-        <button onclick="switchTab('ordinances')" id="tab-ordinances" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Ordinances</button>
-        <button onclick="switchTab('directory')" id="tab-directory" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900">Directory</button>
+        <button onclick="switchTab('users')" id="tab-users" class="tab-btn active flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-blue-600 text-blue-600 bg-blue-50/50">
+            Users
+        </button>
+        <button onclick="switchTab('complaints')" id="tab-complaints" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50">
+            Complaints
+        </button>
+        <button onclick="switchTab('services')" id="tab-services" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50">
+            Services
+        </button>
+        <button onclick="switchTab('ordinances')" id="tab-ordinances" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50">
+            Ordinances
+        </button>
+        <button onclick="switchTab('directory')" id="tab-directory" class="tab-btn flex-shrink-0 flex items-center gap-2 px-6 py-4 font-semibold text-sm border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50">
+            Directory
+        </button>
       </nav>
     </div>
 
-    <!-- Users Panel (Default Open) -->
-    <div id="panel-users" class="panel block bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden">
+    <div id="panel-users" class="panel block bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
       <div class="p-6 border-b border-slate-100">
         <h3 class="font-bold text-slate-900">Registered Users</h3>
       </div>
@@ -113,11 +121,12 @@
               <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Contact</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Role</th>
               <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Joined</th>
+              <th class="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Action</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             {% for u in admin_users %}
-            <tr class="hover:bg-slate-50">
+            <tr class="hover:bg-slate-50" id="user-row-{{ u.id }}">
               <td class="px-6 py-4"><div class="text-sm font-medium text-slate-900">{{ u.first_name }} {{ u.last_name }}</div></td>
               <td class="px-6 py-4 text-sm text-slate-600">
                 <div>{{ u.email }}</div>
@@ -129,17 +138,21 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-sm text-slate-600">{{ u.created_at|date:"M d, Y" }}</td>
+              <td class="px-6 py-4 text-right">
+                <button onclick="deleteItem('user', '{{ u.id }}', this)" class="text-red-600 hover:text-red-800 text-sm font-medium transition flex items-center justify-end gap-1 ml-auto">
+                   Delete
+                </button>
+              </td>
             </tr>
             {% empty %}
-            <tr><td colspan="4" class="p-6 text-center text-slate-500">No users found.</td></tr>
+            <tr><td colspan="5" class="p-6 text-center text-slate-500">No users found.</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Complaints Panel -->
-    <div id="panel-complaints" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden">
+    <div id="panel-complaints" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-slate-50">
@@ -190,8 +203,7 @@
       </div>
     </div>
 
-    <!-- Services Panel -->
-    <div id="panel-services" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
+    <div id="panel-services" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm min-h-[400px]">
       <div class="p-6 flex justify-between items-center border-b border-slate-100">
         <h3 class="font-bold text-slate-900">All Services</h3>
         <button onclick="openServiceModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Add Service</button>
@@ -222,8 +234,7 @@
       </div>
     </div>
 
-    <!-- Ordinances Panel -->
-    <div id="panel-ordinances" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
+    <div id="panel-ordinances" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm min-h-[400px]">
       <div class="p-6 flex justify-between items-center border-b border-slate-100">
         <h3 class="font-bold text-slate-900">Ordinances</h3>
         <button onclick="openOrdinanceModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Upload Ordinance</button>
@@ -256,8 +267,7 @@
       </div>
     </div>
 
-    <!-- Directory Panel -->
-    <div id="panel-directory" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm">
+    <div id="panel-directory" class="panel hidden bg-white rounded-b-xl border border-t-0 border-slate-200 shadow-sm min-h-[400px]">
       <div class="p-6 flex justify-between items-center border-b border-slate-100">
         <h3 class="font-bold text-slate-900">Officials Directory</h3>
         <button onclick="openOfficialModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">+ Add Official</button>
@@ -300,7 +310,24 @@
 
   </main>
 
-  <!-- Modals -->
+  <div id="modal-delete" class="hidden fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
+        <div class="p-6 text-center">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Confirm Deletion</h3>
+            <p class="text-sm text-slate-600 mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal('modal-delete')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition font-medium">Cancel</button>
+                <button onclick="executeDelete()" id="btn-confirm-delete" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium flex items-center justify-center min-w-[100px]">
+                    <span class="loader hidden inline-block"></span><span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+  </div>
+
   <div id="modal-service" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
       <form id="form-service" onsubmit="handleServiceSubmit(event)">
@@ -326,7 +353,7 @@
         <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
           <button type="button" onclick="closeModal('modal-service')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
           <button type="submit" id="btn-save-service" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
-            <span class="loader hidden"></span><span>Save Service</span>
+            <span class="loader hidden inline-block"></span><span>Save Service</span>
           </button>
         </div>
       </form>
@@ -353,7 +380,7 @@
         <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
           <button type="button" onclick="closeModal('modal-official')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
           <button type="submit" id="btn-save-official" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
-            <span class="loader hidden"></span><span>Save Official</span>
+             <span class="loader hidden inline-block"></span><span>Save Official</span>
           </button>
         </div>
       </form>
@@ -386,7 +413,7 @@
         <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
           <button type="button" onclick="closeModal('modal-ordinance')" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition font-medium">Cancel</button>
           <button type="submit" id="btn-save-ordinance" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center">
-            <span class="loader hidden"></span><span>Upload</span>
+            <span class="loader hidden inline-block"></span><span>Upload</span>
           </button>
         </div>
       </form>
@@ -417,7 +444,6 @@
 </div>
 
 <script>
-// COMPLETE SCRIPT - NO REFRESH, WITH LOADING STATES EVERYWHERE
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
 function toggleLoading(btn, loading = true) {
@@ -425,11 +451,18 @@ function toggleLoading(btn, loading = true) {
     const text = btn.querySelector('span:last-child');
     if (loading) {
         btn.disabled = true;
-        if (loader) loader.classList.remove('hidden');
+        if (loader) {
+            loader.classList.remove('hidden');
+            // Ensure display matches CSS expectation
+            loader.style.display = 'inline-block'; 
+        }
         if (text) text.style.opacity = '0.7';
     } else {
         btn.disabled = false;
-        if (loader) loader.classList.add('hidden');
+        if (loader) {
+            loader.classList.add('hidden');
+            loader.style.display = 'none';
+        }
         if (text) text.style.opacity = '1';
     }
 }
@@ -446,15 +479,24 @@ function showToast(msg, type = 'success') {
 
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
+// UPDATED SWITCH TAB FUNCTION
 function switchTab(tab) {
+    // Hide all panels
     document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
     document.getElementById(`panel-${tab}`).classList.remove('hidden');
+    
+    // Reset all tab buttons
     document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('border-blue-600', 'text-blue-600', 'active');
+        b.classList.remove('border-blue-600', 'text-blue-600', 'active', 'bg-blue-50/50');
         b.classList.add('border-transparent', 'text-slate-600');
     });
+    
+    // Activate clicked tab
     const btn = document.getElementById(`tab-${tab}`);
-    if (btn) btn.classList.add('border-blue-600', 'text-blue-600', 'active');
+    if (btn) {
+        btn.classList.remove('border-transparent', 'text-slate-600');
+        btn.classList.add('border-blue-600', 'text-blue-600', 'active', 'bg-blue-50/50');
+    }
 }
 
 // SERVICE - FULLY DYNAMIC
@@ -644,10 +686,35 @@ async function handleOrdinanceSubmit(e) {
     finally { toggleLoading(btn, false); }
 }
 
-// DELETE WITH LOADING
-async function deleteItem(type, id, btn) {
-    if (!confirm("Are you sure you want to delete this item?")) return;
-    if (btn) toggleLoading(btn.parentElement, true);
+// ==========================================
+// NEW DELETE LOGIC (MODAL POP-UP)
+// ==========================================
+
+let deleteTarget = null; // Stores { type, id, btn }
+
+// 1. Triggered by the "Delete" button in the table/card
+function deleteItem(type, id, btn) {
+    deleteTarget = { type, id, btn };
+    document.getElementById('modal-delete').classList.remove('hidden');
+}
+
+// 2. Triggered by "Yes, Delete" in the modal
+async function executeDelete() {
+    if (!deleteTarget) return;
+
+    const { type, id, btn } = deleteTarget;
+    const confirmBtn = document.getElementById('btn-confirm-delete');
+
+    // UI Updates: Modal Button Loading
+    toggleLoading(confirmBtn, true);
+
+    // UI Updates: Row Button "Deleting..." + Disabled
+    if (btn) {
+        btn.innerHTML = `<span class="loader inline-block" style="width: 12px; height: 12px; border-width: 2px;"></span> Deleting...`;
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
     try {
         const res = await fetch(`/admin-action/delete_${type}/`, {
             method: 'POST',
@@ -655,13 +722,46 @@ async function deleteItem(type, id, btn) {
             body: JSON.stringify({ id })
         });
         const result = await res.json();
+
         if (result.success) {
-            showToast('Item deleted!');
-            const el = document.getElementById(`${type === 'ordinance' ? 'ordinance-row' : type + '-card'}-${id}`);
-            if (el) { el.style.transition = 'all 0.3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }
-        } else showToast('Delete failed', 'error');
-    } catch (err) { showToast('Error', 'error'); }
-    finally { if (btn) toggleLoading(btn.parentElement, false); }
+            showToast('Item deleted successfully!');
+            closeModal('modal-delete');
+
+            // Find and remove the DOM element
+            let elId = '';
+            if (type === 'ordinance') elId = `ordinance-row-${id}`;
+            else if (type === 'user') elId = `user-row-${id}`;
+            else if (type === 'complaint') elId = `complaint-row-${id}`;
+            else elId = `${type}-card-${id}`; // Services/Officials use cards
+
+            const el = document.getElementById(elId);
+            if (el) {
+                el.style.transition = 'all 0.3s ease-out';
+                el.style.opacity = '0';
+                el.style.transform = 'scale(0.95)';
+                setTimeout(() => el.remove(), 300);
+            }
+        } else {
+            showToast('Delete failed: ' + (result.error || 'Unknown error'), 'error');
+            // Revert button state if failed
+            if (btn) {
+                btn.innerText = 'Delete';
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    } catch (err) {
+        showToast('Network error occurred.', 'error');
+        // Revert button state if failed
+        if (btn) {
+            btn.innerText = 'Delete';
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    } finally {
+        toggleLoading(confirmBtn, false);
+        deleteTarget = null; // Reset target
+    }
 }
 
 // COMPLAINT

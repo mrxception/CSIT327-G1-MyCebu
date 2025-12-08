@@ -187,7 +187,7 @@
       <h2 class="h2">Available Services</h2>
       <div class="svc-grid" id="grid-services">
         {% for s in services_data %}
-        <a class="svc-card" href="{% url 'landing_tab' 'services' %}?id={{ s.id }}" data-title="{{ s.title|lower }}"
+        <a class="svc-card" href="{% url 'landing_tab' 'services' %}?id={{ s.service_id }}" data-title="{{ s.title|lower }}"
           data-desc="{{ s.description|lower }}">
           <div class="svc-card__icon svc-icon svc-icon--{{ s.color|default:'primary' }}">
             {% if s.icon == "building" %}
