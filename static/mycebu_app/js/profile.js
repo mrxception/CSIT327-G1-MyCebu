@@ -45,11 +45,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Restore saved values on page load
-    const savedCity = document.querySelector('[data-value="{{ user.city|default:\'\' }}"]')?.dataset.value ||
-                     document.querySelector('span[data-value]').dataset.value || // fallback
-                     '{{ user.city|default:"" }}';
+    const cityFormField = document.querySelector('#city').closest('.form-field');
+    const savedCity = cityFormField?.querySelector('span[data-value]')?.dataset.value || '';
 
-    const savedPurok = document.querySelector('span[data-value="{{ user.purok|default:\'\' }}"]')?.dataset.value || '{{ user.purok|default:"" }}';
+    const purokFormField = document.querySelector('#purok').closest('.form-field');
+    const savedPurok = purokFormField?.querySelector('span[data-value]')?.dataset.value || '';
 
     if (citySelect && savedCity) {
         citySelect.value = savedCity;

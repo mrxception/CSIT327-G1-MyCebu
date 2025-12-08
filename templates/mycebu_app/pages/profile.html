@@ -81,8 +81,7 @@
                                         <span class="material-icons">person</span>
                                         First Name
                                     </label>
-                                    <span data-value="{{ user.first_name|default:'' }}" class="profile-view-field">{{
-                                        user.first_name|default:'Not set' }}</span>
+                                    <span data-value="{{ user.first_name|default:'' }}" class="profile-view-field">{{ user.first_name|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <input type="text" id="first_name" name="first_name"
                                             value="{{ user.first_name|default:'' }}" required>
@@ -93,8 +92,7 @@
                                         <span class="material-icons">person</span>
                                         Last Name
                                     </label>
-                                    <span data-value="{{ user.last_name|default:'' }}" class="profile-view-field">{{
-                                        user.last_name|default:'Not set' }}</span>
+                                    <span data-value="{{ user.last_name|default:'' }}" class="profile-view-field">{{ user.last_name|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <input type="text" id="last_name" name="last_name"
                                             value="{{ user.last_name|default:'' }}" required>
@@ -105,8 +103,7 @@
                                         <span class="material-icons">email</span>
                                         Email Address
                                     </label>
-                                    <span data-value="{{ user.email }}" class="profile-view-field">{{ user.email
-                                        }}</span>
+                                    <span data-value="{{ user.email }}" class="profile-view-field">{{ user.email }}</span>
                                     <div class="profile-edit-field">
                                         <input type="email" id="email" name="email" value="{{ user.email }}">
                                     </div>
@@ -116,8 +113,7 @@
                                         <span class="material-icons">phone</span>
                                         Contact Number
                                     </label>
-                                    <span data-value="{{ user.contact_number|default:'' }}"
-                                        class="profile-view-field">{{ user.contact_number|default:'Not set' }}</span>
+                                    <span data-value="{{ user.contact_number|default:'' }}" class="profile-view-field">{{ user.contact_number|default:'Not set' }}</span>
                                     <div class="profile-edit-field contact-input-container">
                                         <span class="contact-prefix">+63</span>
                                         <input type="tel" id="contact_number" name="contact_number"
@@ -130,8 +126,7 @@
                                         <span class="material-icons">cake</span>
                                         Birthday
                                     </label>
-                                    <span data-value="{{ user.birthdate|default:'' }}" class="profile-view-field">{{
-                                        user.birthdate|default:'Not set' }}</span>
+                                    <span data-value="{{ user.birthdate|default:'' }}" class="profile-view-field">{{ user.birthdate|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <input type="date" id="birthdate" name="birthdate"
                                             value="{{ user.birthdate|default:'' }}">
@@ -142,8 +137,7 @@
                                         <span class="material-icons">schedule</span>
                                         Age
                                     </label>
-                                    <span data-value="{{ user.age|default:'' }}" class="profile-view-field">{{
-                                        user.age|default:'Not set' }}</span>
+                                    <span data-value="{{ user.age|default:'' }}" class="profile-view-field">{{ user.age|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <input type="number" id="age" name="age" value="{{ user.age|default:'' }}"
                                             min="0" max="120">
@@ -154,8 +148,7 @@
                                         <span class="material-icons">wc</span>
                                         Gender
                                     </label>
-                                    <span data-value="{{ user.gender|default:'' }}" class="profile-view-field">{{
-                                        user.gender|default:'Not set' }}</span>
+                                    <span data-value="{{ user.gender|default:'' }}" class="profile-view-field">{{ user.gender|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <select id="gender" name="gender">
                                             <option value="" {% if not user.gender %}selected{% endif %}>Select Gender</option>
@@ -177,8 +170,7 @@
                                         <span class="material-icons">favorite</span>
                                         Marital Status
                                     </label>
-                                    <span data-value="{{ user.marital_status|default:'' }}"
-                                        class="profile-view-field">{{ user.marital_status|default:'Not set' }}</span>
+                                    <span data-value="{{ user.marital_status|default:'' }}" class="profile-view-field">{{ user.marital_status|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <select id="marital_status" name="marital_status">
                                             <option value="" {% if not user.marital_status %}selected{% endif %}>Select Status</option>
@@ -194,8 +186,7 @@
                                         <span class="material-icons">church</span>
                                         Religion
                                     </label>
-                                    <span data-value="{{ user.religion|default:'' }}" class="profile-view-field">{{
-                                        user.religion|default:'Not set' }}</span>
+                                    <span data-value="{{ user.religion|default:'' }}" class="profile-view-field">{{ user.religion|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <input type="text" id="religion" name="religion"
                                             value="{{ user.religion|default:'' }}" list="religion-list">
@@ -230,8 +221,7 @@
                                         <span class="material-icons">location_on</span>
                                         Birthplace
                                     </label>
-                                    <span data-value="{{ user.birthplace|default:'' }}" class="profile-view-field">{{
-                                        user.birthplace|default:'Not set' }}</span>
+                                    <span data-value="{{ user.birthplace|default:'' }}" class="profile-view-field">{{ user.birthplace|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <input type="text" id="birthplace" name="birthplace"
                                             value="{{ user.birthplace|default:'' }}">
@@ -242,9 +232,7 @@
                                         <span class="material-icons">location_city</span>
                                         City
                                     </label>
-                                    <!-- FIXED: Use data-value, not data-field -->
-                                    <span data-value="{{ user.city|default:'' }}" class="profile-view-field">{{
-                                        user.city|default:'Not set' }}</span>
+                                    <span data-value="{{ user.city|default:'' }}" class="profile-view-field">{{ user.city|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <select id="city" name="city">
                                             <option value="">Select City</option>
@@ -264,9 +252,7 @@
                                         <span class="material-icons">home</span>
                                         Barangay (Purok/Zone/Sitio)
                                     </label>
-                                    <!-- FIXED: data-value attribute -->
-                                    <span data-value="{{ user.purok|default:'' }}" class="profile-view-field">{{
-                                        user.purok|default:'Not set' }}</span>
+                                    <span data-value="{{ user.purok|default:'' }}" class="profile-view-field">{{ user.purok|default:'Not set' }}</span>
                                     <div class="profile-edit-field">
                                         <select id="purok" name="purok">
                                             <option value="">Select Barangay first</option>
@@ -349,8 +335,11 @@
             }
 
             // 4. INITIALIZATION: Restore saved values
-            const currentCity = document.querySelector('[data-field="city"]')?.dataset.value;
-            const currentPurok = document.querySelector('[data-field="purok"]')?.dataset.value;
+            const cityFormField = document.querySelector('#city').closest('.form-field');
+            const currentCity = cityFormField?.querySelector('span[data-value]')?.dataset.value || '';
+
+            const purokFormField = document.querySelector('#purok').closest('.form-field');
+            const currentPurok = purokFormField?.querySelector('span[data-value]')?.dataset.value || '';
 
             if (currentCity && citySelect) {
                 citySelect.value = currentCity;
