@@ -582,6 +582,8 @@ def profile_view(request):
     if request.method == "GET" and request.headers.get('Accept') == 'application/json':
         return JsonResponse({'user': user_data})
 
+    # Back navigation handled via JavaScript history.back()
+
     if request.method == "POST":
         try:
             # 1. Capture Fields
@@ -661,7 +663,8 @@ def profile_view(request):
 
             db_user.save()
             messages.success(request, "Profile updated successfully.")
-            user_data = get_authed_user(request)
+            # Redirect to avoid adding POST to history (PRG pattern)
+            return redirect('user_profile')
 
         except Exception as e:
             logger.error(f"profile_view: Update error: {str(e)}")

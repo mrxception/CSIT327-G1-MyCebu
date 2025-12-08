@@ -7,18 +7,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const toast = document.getElementById('toast');
     
     
-    const sidebarAvatar = document.getElementById('sidebar-avatar');
     const mainAvatar = document.getElementById('main-avatar');
     const avatarUpload = document.getElementById('avatar-upload');
-    const avatarLabel = document.getElementById('avatar-label');
-    const sidebarName = document.getElementById('sidebar-name');
-    const sidebarEmail = document.getElementById('sidebar-email');
 
     
     const editButton = document.getElementById('edit-button');
     const saveButton = document.getElementById('save-button');
     const cancelButton = document.getElementById('cancel-button');
-    const logoutButton = document.querySelector('.logout-btn');
     
     
     const viewFields = document.querySelectorAll('.profile-view-field');
@@ -27,7 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let originalValues = {};
 
-    
+    // Initialize to view mode (not editing)
+    toggleEditMode(false);
 
     function toggleEditMode(isEditing) {
         viewFields.forEach(field => field.classList.toggle('hidden', isEditing));
@@ -36,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
         editButton.classList.toggle('hidden', isEditing);
         saveButton.classList.toggle('hidden', !isEditing);
         cancelButton.classList.toggle('hidden', !isEditing);
-        avatarLabel.classList.toggle('hidden', !isEditing);
     }
 
     function enterEditMode() {
@@ -111,19 +106,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const lastNameInput = document.querySelector('input[name="last_name"]');
             const emailInput = document.querySelector('input[name="email"]');
             
-            if (fullNameInput && lastNameInput) {
-                sidebarName.textContent = `${fullNameInput.value} ${lastNameInput.value}`.trim();
-            }
-            if (emailInput) {
-                sidebarEmail.textContent = emailInput.value;
-            }
 
             
-            toast.classList.remove('opacity-0', 'translate-y-10');
-            toast.classList.add('opacity-100', 'translate-y-0');
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            toast.classList.add('show');
+            toast.classList.remove('hide');
+
             setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.add('hide');
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
             }, 3000);
         } else {
             
@@ -164,17 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function(e) {
-            console.log('Logout button clicked, submitting form');
-            const form = logoutButton.closest('form');
-            if (form) {
-                form.submit();
-            } else {
-                console.error('Logout form not found');
-            }
-        });
-    }
 
     
     editButton.addEventListener('click', enterEditMode);
@@ -194,7 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const imageUrl = e.target.result;
-                sidebarAvatar.src = imageUrl;
                 mainAvatar.src = imageUrl;
             };
             reader.readAsDataURL(file);
@@ -207,6 +190,110 @@ document.addEventListener('DOMContentLoaded', function() {
             field.dataset.value = text !== 'Not set' ? text : '';
         }
     });
+
+    // Barangay data
+    const barangays = {
+        "Cebu City": [
+            "Adlaon", "Agsungot", "Apas", "Babag", "Bacayan", "Banilad", "Basilica", "Binaliw", "Bonbon", "Budlaan",
+            "Buhisan", "Bulacao", "Busay", "Camputhaw", "Capitol Site", "Carreta", "Central", "Cogon", "Day-as", "Duljo",
+            "Ermita", "Guba", "Hipodromo", "Kalubihan", "Kalunasan", "Kamagayan", "Kasambagan", "Lahug", "Lorega", "Lusaran",
+            "Mabini", "Mabolo", "Malubog", "Mambaling", "Pahina Central", "Pahina San Nicolas", "Pamutan", "Pardo", "Poblacion Pardo", "Pulangbato",
+            "Sambag I", "Sambag II", "San Antonio", "San Jose", "San Nicolas Proper", "San Roque", "Santa Cruz", "Sawang Calero", "Sinsin", "Sirao",
+            "T. Padilla", "Talamban", "Taptap", "Tejero", "Tinago", "Tisa", "Toong", "Zapatera"
+        ],
+        "Mandaue City": [
+            "Alang-alang", "Bakilid", "Banilad", "Basak", "Cabancalan", "Cambaro", "Canduman", "Casuntingan", "Centro", "Cubacub",
+            "Guizo", "Ibabao-Estancia", "Jagobiao", "Labogon", "Looc", "Mabolo", "Mantuyong", "Opao", "Pakna-an", "Pagsabungan",
+            "Subangdaku", "Tabok", "Tawason", "Tingub", "Tipolo", "Umapad"
+        ],
+        "Lapu-Lapu City": [
+            "Agus", "Babag", "Bankal", "Baring", "Basak", "Buaya", "Calawisan", "Canjulao", "Caubian", "Caw-oy",
+            "Cawhagan", "Cañas", "Coong", "Gun-ob", "Ibo", "Looc", "Mactan", "Maribago", "Marigondon", "Pajac",
+            "Pajo", "Pangan-an", "Poblacion", "Punta Engaño", "Pusok", "Sabang", "San Vicente", "Santa Rosa", "Subabasbas", "Talima",
+            "Tingo", "Tungasan"
+        ],
+        "Talisay City": [
+            "Biasong", "Bulacao", "Cadulawan", "Camp 4", "Candulawan", "Cangag", "Dumlog", "Jaclupan", "Lawaan", "Linao",
+            "Maghaway", "Manipis", "Mohon", "Poblacion", "Poog", "San Isidro", "San Roque", "Tabunok", "Tangke", "Tapul"
+        ],
+        "Consolacion": [
+            "Cabangahan", "Cansaga", "Casili", "Danglag", "Garing", "Jugan", "Lamac", "Lanipga", "Nangka", "Panas",
+            "Panoypoy", "Pitogo", "Poblacion Occidental", "Poblacion Oriental", "Pulangbato", "Sacsac", "Tayud"
+        ],
+        "Cordova": [
+            "Alegria", "Bangbang", "Buagsong", "Catarman", "Cogon", "Dapitan", "Day-as", "Gabi", "Gilutongan", "Ibabao",
+            "Pilipog", "Poblacion", "San Miguel"
+        ],
+        "Compostela": [
+            "Bagalnga", "Basak", "Buluang", "Cabadiangan", "Cambayog", "Canamucan", "Cogon", "Dapdap", "Estaca", "Lupa",
+            "Magay", "Mulao", "Panangban", "Poblacion", "Tag-ubi", "Tamiao", "Tandoc"
+        ],
+        "Daanbantayan": [
+            "Agujo", "Bagay", "Bakhawan", "Bateria", "Bitoon", "Calape", "Carnaza", "Daanbantayan", "Guinsay", "Lambug",
+            "Logon", "Malbago", "Malingin", "Maya", "Pajo", "Paypay", "Poblacion", "Suba", "Talisay", "Tapilon",
+            "Tinubdan"
+        ]
+    };
+
+    // City and Barangay functionality
+    const citySelect = document.getElementById('city');
+    const purokSelect = document.getElementById('purok');
+
+    function updateBarangayOptions(selectedCity) {
+        purokSelect.innerHTML = '<option value="">Select Barangay</option>';
+
+        if (selectedCity && barangays[selectedCity]) {
+            barangays[selectedCity].forEach(barangay => {
+                const option = document.createElement('option');
+                option.value = barangay;
+                option.textContent = barangay;
+                purokSelect.appendChild(option);
+            });
+            purokSelect.disabled = false;
+        } else {
+            purokSelect.innerHTML = '<option value="">Select Barangay (Choose city first)</option>';
+            purokSelect.disabled = true;
+        }
+    }
+
+    if (citySelect && purokSelect) {
+        citySelect.addEventListener('change', function() {
+            const selectedCity = this.value;
+            updateBarangayOptions(selectedCity);
+
+            // Reset barangay selection when city changes
+            purokSelect.value = '';
+        });
+
+        // Initialize barangay options based on current city value
+        updateBarangayOptions(citySelect.value);
+    }
+
+    // Contact number validation
+    const contactInput = document.getElementById('contact_number');
+    if (contactInput) {
+        contactInput.addEventListener('input', function(e) {
+            // Remove any non-digit characters
+            let value = this.value.replace(/\D/g, '');
+
+            // Ensure it doesn't start with 0 and limit to 10 digits
+            if (value.startsWith('0')) {
+                value = value.substring(1);
+            }
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+
+            this.value = value;
+        });
+
+        // Prevent entering 0 at the beginning
+        contactInput.addEventListener('keydown', function(e) {
+            if (this.selectionStart === 0 && e.key === '0') {
+                e.preventDefault();
+            }
+        });
+    }
 
     const style = document.createElement('style');
     style.innerHTML = `
