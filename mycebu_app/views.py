@@ -30,6 +30,8 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from collections import defaultdict
 
+from django.contrib.auth.decorators import login_required
+
 # Auth Imports
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User as DjangoAuthUser
@@ -38,11 +40,7 @@ from django.contrib.auth.models import User as DjangoAuthUser
 from .models import Complaint, Ordinance, ServiceApplication, Service, Official, Department, EmergencyContact, Service, ChatHistory
 
 # Try to import the Custom User model from 'accounts' app, fallback to 'mycebu_app' if not found
-try:
-    from accounts.models import User as DbUser
-except ImportError:
-    from mycebu_app.models import User as DbUser
-
+from accounts.models import User as DbUser
 # ==========================================
 # SETUP & LOGGING
 # ==========================================
@@ -599,77 +597,101 @@ def admin_action_view(request, action_type):
 # OTHER VIEWS (Profile, Chat, Permit, etc.)
 # ==========================================
 
+@login_required
 def profile_view(request):
-    user_data = get_authed_user(request)
-    if not user_data:
-        return redirect("login")
-
+    # 1. Handle POST (Saving Data)
     if request.method == "POST":
         try:
-            # Get values safely
+            # A. Get cleaned data from form
             first_name = request.POST.get("first_name", "").strip()
-            middle_name = request.POST.get("middle_name", "").strip()
             last_name = request.POST.get("last_name", "").strip()
             email = request.POST.get("email", "").strip()
-
-            # THESE WERE MISSING OR EMPTY BECAUSE OF DISABLED FIELD
+            
+            # Fields that might be disabled in frontend need fallback
             city = request.POST.get("city", "").strip()
             purok = request.POST.get("purok", "").strip()
 
-            # Get current auth user and db user
+            # B. Update Django Auth User (The login account)
             auth_user = request.user
-            db_user = DbUser.objects.filter(email=auth_user.email).first()
-
-            # Update Django Auth User
             auth_user.first_name = first_name
             auth_user.last_name = last_name
-            auth_user.email = email
+            
+            # careful changing email if it's the username/login key
+            if email: 
+                auth_user.email = email
+            
             auth_user.save()
 
-            # Update Custom DbUser
-            if db_user:
-                db_user.first_name = first_name
-                db_user.middle_name = middle_name
-                db_user.last_name = last_name
-                db_user.email = email
-                db_user.city = city or None
-                db_user.purok = purok or None
+            # C. Update/Create Custom DbUser (The profile data)
+            # We use get_or_create to ensure 'db_user' always exists 
 
-                db_user.contact_number = request.POST.get("contact_number", "").strip()
-                db_user.gender = request.POST.get("gender")
-                db_user.marital_status = request.POST.get("marital_status")
-                db_user.religion = request.POST.get("religion", "").strip()
-                db_user.birthplace = request.POST.get("birthplace", "").strip()
 
-                age = request.POST.get("age")
-                if age and age.isdigit():
-                    db_user.age = int(age)
-                else:
-                    db_user.age = None
+            db_user, created = DbUser.objects.get_or_create(
+                email=request.user.email,
+                defaults={
+                    'first_name': first_name,
+                    'last_name': last_name
+                }
+            )
 
-                bday = request.POST.get("birthdate")
-                if bday:
-                    try:
-                        db_user.birthdate = datetime.strptime(bday, '%Y-%m-%d').date()
-                    except:
-                        pass
+            # Map form data to model fields
+            db_user.first_name = first_name
+            db_user.last_name = last_name
+            db_user.email = email
+            
+            # Only update city/purok if they were actually sent (not empty)
+            if city: 
+                db_user.city = city
+            if purok:
+                db_user.purok = purok
 
-                # Avatar upload
-                if "avatar" in request.FILES:
-                    file = request.FILES["avatar"]
-                    url = upload_to_cloudinary(file, folder=f"profiles/{auth_user.id}")
-                    if url:
-                        db_user.avatar_url = url
+            db_user.contact_number = request.POST.get("contact_number", "").strip()
+            db_user.gender = request.POST.get("gender")
+            db_user.marital_status = request.POST.get("marital_status")
+            db_user.religion = request.POST.get("religion", "").strip()
+            db_user.birthplace = request.POST.get("birthplace", "").strip()
 
-                db_user.save()
+            # Handle Age Safely
+            age = request.POST.get("age")
+            if age and age.isdigit():
+                db_user.age = int(age)
+
+            # Handle Birthdate Safely
+            bday = request.POST.get("birthdate")
+            if bday:
+                try:
+                    db_user.birthdate = datetime.strptime(bday, '%Y-%m-%d').date()
+                except ValueError:
+                    pass # Keep old date if format is wrong
+
+            # Handle Avatar Upload
+            if "avatar" in request.FILES:
+                file = request.FILES["avatar"]
+                # Assuming upload_to_cloudinary is imported
+                url = upload_to_cloudinary(file, folder=f"profiles/{auth_user.id}")
+                if url:
+                    db_user.avatar_url = url
+
+            # D. SAVE TO DATABASE
+            db_user.save()
 
             messages.success(request, "Profile updated successfully!")
-            # Force refresh user data
-            user_data = get_authed_user(request)
+            
+            # E. CRITICAL: Redirect to self to force a reload with FRESH data
+            return redirect("profile_view") 
 
         except Exception as e:
             logger.error(f"Profile update failed: {e}")
             messages.error(request, f"Update failed: {e}")
+
+    # 2. Handle GET (Rendering Page)
+    # Fetch data FRESH from database (via your helper or direct query)
+    user_data = get_authed_user(request) 
+    
+    if not user_data:
+        # Fallback if helper fails, create a dummy dict from request.user
+        # This prevents the page from crashing if DbUser is missing
+        user_data = request.user 
 
     return render(request, "mycebu_app/pages/profile.html", {"user": user_data})
 

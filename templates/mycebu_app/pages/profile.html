@@ -310,6 +310,18 @@
             const avatarUpload = document.getElementById('avatar-upload');
             const mainAvatar = document.getElementById('main-avatar');
 
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    // Force enable fields immediately before submit
+                    if (citySelect) citySelect.disabled = false;
+                    if (purokSelect) purokSelect.disabled = false;
+
+                    // Double check inputs have values
+                    console.log("Submitting City:", citySelect.value);
+                    console.log("Submitting Purok:", purokSelect.value);
+                });
+            }
+
             // 3. LOGIC: Populate Barangays
             function populateBarangays(selectedCity, selectedPurok = null) {
                 purokSelect.innerHTML = '<option value="">Select Barangay</option>';
