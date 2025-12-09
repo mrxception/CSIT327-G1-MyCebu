@@ -678,7 +678,7 @@ def profile_view(request):
             messages.success(request, "Profile updated successfully!")
             
             # E. CRITICAL: Redirect to self to force a reload with FRESH data
-            return redirect("profile_view") 
+            return redirect("user_profile") 
 
         except Exception as e:
             logger.error(f"Profile update failed: {e}")
