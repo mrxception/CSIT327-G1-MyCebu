@@ -61,34 +61,31 @@
       </div>
     </div>
 
-    <!-- UPLOAD BOX — ONLY SHOW IF PROGRESS < 100 -->
-    {% if app.progress < 100 and app.step_index >= service.steps|length|add:"-1" %}
+    <!-- UPLOAD BOX — ONLY SHOW IF AT LAST STEP -->
+    {% if app.step_index >= service.steps|length|add:"-1" %}
     <div class="svc-block" style="background:#f8fafc; padding:48px; border:4px dashed #94a3b8; border-radius:20px; text-align:center;">
-      <h3 style="margin:0 0 24px; color:#1e293b; font-size:1.8rem; font-weight:800;">Upload Final Document</h3>
-      <p style="color:#64748b; margin-bottom:40px; font-size:1.2rem;">PDF, JPG, PNG, DOC/DOCX • Max 15MB</p>
+      <h3 style="margin:0 0 24px; color:#1e293b; font-size:1.8rem; font-weight:800;">Upload Documents for Review</h3>
+      <p style="color:#64748b; margin-bottom:40px; font-size:1.2rem;">Images or documents for admin review • PDF, JPG, PNG, DOC/DOCX • Max 15MB</p>
 
       <div id="upload-area" style="border:4px dashed #cbd5e1; border-radius:20px; padding:80px; background:white; cursor:pointer; transition:all 0.4s;">
         <div id="upload-placeholder">
-          <svg style="width:100px; height:100px; color:#94a3b8; margin:0 auto 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5.5 5.5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-          </svg>
-          <p style="margin:0; font-weight:800; color:#475569; font-size:1.5rem;">Click to upload or drag & drop</p>
+          <svg style="width:80px; height:80px; color:#94a3b8; margin:0 auto 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+          <p style="margin:0; color:#64748b; font-size:1.1rem;">Drag & drop or click to upload</p>
         </div>
         <div id="upload-preview" style="display:none;">
-          <p id="file-name" style="font-weight:800; margin:24px 0; font-size:1.5rem;"></p>
-          <p id="file-size" style="color:#64748b; font-size:1.1rem;"></p>
-          <button type="button" id="remove-file" style="margin-top:20px; color:#dc2626; background:none; border:none; cursor:pointer; font-weight:700; font-size:1.1rem;">Remove file</button>
+          <div style="margin-bottom:24px;"><span id="file-name" style="font-weight:600; color:#1e293b;"></span> • <span id="file-size" style="color:#64748b;"></span></div>
+          <button id="remove-file" style="background:#f1f5f9; color:#0f172a; padding:8px 24px; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Remove</button>
         </div>
       </div>
 
       <input type="file" id="document-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;">
 
       <div style="margin-top:40px;">
-        <button id="submit-document" disabled style="background:#0d9488; color:white; padding:20px 80px; border:none; border-radius:16px; font-weight:800; font-size:1.4rem; cursor:not-allowed; opacity:0.7;">
+        <button id="submit-document" disabled style="background:#0d9488; color:white; padding:8px 16px; border:none; border-radius:8px; font-weight:600; cursor:not-allowed; opacity:0.7; min-width:140px; transition:all 0.3s;">
           <span id="submit-text">Submit Document</span>
-          <span id="submit-loader" style="display:none;">Loading...</span>
+          <span id="submit-loader" style="display:none;"></span>
         </button>
-        <p id="upload-error" style="color:#dc2626; margin-top:20px; font-size:1.2rem; display:none;"></p>
+        <p id="upload-error" style="color:#dc2626; margin-top:20px; font-size:1rem; display:none;"></p>
       </div>
     </div>
     {% endif %}
@@ -118,34 +115,35 @@
     <!-- Steps List -->
     <div class="svc-block" style="margin-top:40px;">
       <h3 style="margin-bottom:20px; font-size:1.4rem;">All Steps</h3>
-      <ol style="margin:0; padding-left:32px; background:white; border-radius:16px; border:2px solid #e2e8f0;">
+      <ol style="margin:0; padding-left:32px; background:white; border-radius:16px; border:2px solid #e2e8f0; list-style-position:inside;">
         {% for step in service.steps %}
-          <li style="padding:16px 0; border-bottom:2px solid #f3f4f6; font-size:1.1rem; {% if forloop.counter0 == app.step_index %}font-weight:700; color:#0d9488;{% elif forloop.counter0 < app.step_index %}color:#6b7280;{% endif %}">
-            {{ step }}
+          <li style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:2px solid #f3f4f6; font-size:1.1rem; {% if forloop.counter0 == app.step_index %}font-weight:700; color:#0d9488;{% elif forloop.counter0 < app.step_index %}color:#6b7280;{% endif %}">
+            <span>{{ step }}</span>
             {% if forloop.counter0 == app.step_index %}
-              <span style="float:right; background:#d1fae5; color:#065f46; padding:8px 16px; border-radius:999px; font-size:0.9rem; font-weight:700;">Current</span>
+              <span style="background:#d1fae5; color:#065f46; padding:8px 16px; border-radius:999px; font-size:0.9rem; font-weight:700; white-space:nowrap; margin-left:12px;">Current</span>
             {% elif forloop.counter0 < app.step_index %}
-              <span style="float:right; background:#e5e7eb; color:#374151; padding:8px 16px; border-radius:999px; font-size:0.9rem; font-weight:700;">Completed</span>
+              <span style="background:#e5e7eb; color:#374151; padding:8px 16px; border-radius:999px; font-size:0.9rem; font-weight:700; white-space:nowrap; margin-left:12px;">Completed</span>
             {% endif %}
           </li>
         {% endfor %}
       </ol>
     </div>
 
-    <!-- Action Buttons — ONLY SHOW IF PROGRESS < 100 -->
-    <div style="margin-top:60px; display:flex; gap:24px; justify-content:center; flex-wrap:wrap;">
+    <!-- Action Buttons -->
+    <div style="margin-top:60px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
       {% if app.progress < 100 %}
         {% if app.step_index < service.steps|length|add:"-1" %}
-          <button id="nextStep" style="background:#0d9488; color:white; padding:20px 80px; border:none; border-radius:16px; font-weight:800; font-size:1.4rem; cursor:pointer; box-shadow:0 4px 16px rgba(13,148,136,0.2);">
+          <button id="nextStep" style="min-width:160px; background:#0d9488; color:white; padding:10px 18px; border:none; border-radius:8px; font-weight:600; box-shadow:0 2px 8px rgba(13,148,136,0.12); cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='#0c7f78'; this.style.boxShadow='0 4px 12px rgba(13,148,136,0.2)';" onmouseout="this.style.background='#0d9488'; this.style.boxShadow='0 2px 8px rgba(13,148,136,0.12)';">
             Next Step
           </button>
         {% else %}
-          <button id="nextStep" style="background:#dc2626; color:white; padding:20px 80px; border:none; border-radius:16px; font-weight:800; font-size:1.4rem; cursor:pointer; box-shadow:0 4px 16px rgba(220,38,38,0.2);">
-            Complete Application
+          <button id="completeStep" style="min-width:160px; background:#059669; color:white; padding:10px 18px; border:none; border-radius:8px; font-weight:600; box-shadow:0 2px 8px rgba(5,150,105,0.12); cursor:pointer; transition:all 0.3s;" onmouseover="this.style.background='#047857'; this.style.boxShadow='0 4px 12px rgba(5,150,105,0.2)';" onmouseout="this.style.background='#059669'; this.style.boxShadow='0 2px 8px rgba(5,150,105,0.12)';">
+            <span id="complete-text">Complete Step</span>
+            <span id="complete-loader" style="display:none;"></span>
           </button>
         {% endif %}
       {% endif %}
-      <a href="{% url 'landing_tab' tab='dashboard' %}" style="background:#f1f5f9; color:#0f172a; padding:20px 80px; border-radius:16px; text-decoration:none; font-weight:800; font-size:1.4rem;">
+      <a href="{% url 'landing_tab' tab='dashboard' %}" style="min-width:160px; background:#ffffff; color:#0f172a; border:1px solid #e6eef0; padding:10px 18px; border-radius:8px; font-weight:600; text-decoration:none; text-align:center; transition:all 0.3s;" onmouseover="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1';" onmouseout="this.style.background='#ffffff'; this.style.borderColor='#e6eef0';">
         Back to Dashboard
       </a>
     </div>
@@ -164,6 +162,7 @@
 <style>
   @keyframes spin { to { transform: rotate(360deg); } }
   #submit-loader::after { content: ''; display: inline-block; width: 18px; height: 18px; border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-left: 12px; }
+  #complete-loader::after { content: ''; display: inline-block; width: 18px; height: 18px; border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin-left: 12px; }
   #upload-area:hover { border-color: #0d9488; background: #f0fdfa; }
 </style>
 
@@ -178,11 +177,14 @@
   const uploadUrl = dataEl.dataset.uploadUrl;
 
   const nextBtn = document.getElementById('nextStep');
+  const completeBtn = document.getElementById('completeStep');
   const uploadArea = document.getElementById('upload-area');
   const fileInput = document.getElementById('document-file');
   const submitBtn = document.getElementById('submit-document');
   const submitText = document.getElementById('submit-text');
   const submitLoader = document.getElementById('submit-loader');
+  const completeText = document.getElementById('complete-text');
+  const completeLoader = document.getElementById('complete-loader');
   const uploadError = document.getElementById('upload-error');
   const uploadPreview = document.getElementById('upload-preview');
   const fileNameEl = document.getElementById('file-name');
@@ -201,14 +203,14 @@
     submitBtn.onclick = async () => {
       if (!selectedFile) return;
       const form = new FormData(); form.append('document', selectedFile);
-      submitBtn.disabled = true; submitText.textContent = ''; submitLoader.style.display = 'inline-block';
+      submitBtn.disabled = true; submitBtn.style.opacity = '0.7'; submitBtn.style.cursor = 'not-allowed'; submitText.textContent = ''; submitLoader.style.display = 'inline-block';
       try {
         const res = await fetch(uploadUrl, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' }, body: form });
         const json = await res.json();
         if (json.success) { alert('Document uploaded successfully!'); location.reload(); }
         else { uploadError.textContent = json.error || 'Upload failed'; uploadError.style.display = 'block'; }
       } catch { uploadError.textContent = 'Network error'; uploadError.style.display = 'block'; }
-      finally { submitBtn.disabled = false; submitText.textContent = 'Submit Document'; submitLoader.style.display = 'none'; }
+      finally { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.style.cursor = 'pointer'; submitText.textContent = 'Submit Document'; submitLoader.style.display = 'none'; }
     };
   }
 
@@ -229,14 +231,50 @@
 
   if (nextBtn) {
     nextBtn.onclick = async () => {
-      const isLastStep = currentIndex >= totalSteps - 1;
-      const payload = isLastStep ? { mark_completed: true } : { step_index: currentIndex + 1 };
+      const payload = { step_index: currentIndex + 1 };
       try {
         const res = await fetch(updateUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }, body: JSON.stringify(payload) });
         const data = await res.json();
         if (data.success) location.reload();
         else alert(data.error || 'Failed');
       } catch { alert('Network error'); }
+    };
+  }
+
+  if (completeBtn) {
+    completeBtn.onclick = async () => {
+      if (!selectedFile) {
+        alert('Please upload a document before completing this step.');
+        return;
+      }
+      completeBtn.disabled = true;
+      completeText.textContent = '';
+      completeLoader.style.display = 'inline-block';
+      
+      try {
+        const form = new FormData();
+        form.append('document', selectedFile);
+        const res = await fetch(uploadUrl, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' }, body: form });
+        const json = await res.json();
+        if (json.success) {
+          const completeRes = await fetch(updateUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }, body: JSON.stringify({ mark_completed: true }) });
+          const completeData = await completeRes.json();
+          if (completeData.success) {
+            alert('Step completed successfully!');
+            location.reload();
+          } else {
+            alert(completeData.error || 'Failed to complete step');
+          }
+        } else {
+          alert(json.error || 'Document upload failed');
+        }
+      } catch (err) {
+        alert('Network error: ' + err.message);
+      } finally {
+        completeBtn.disabled = false;
+        completeText.textContent = 'Complete Step';
+        completeLoader.style.display = 'none';
+      }
     };
   }
 })();
